@@ -75,5 +75,4 @@ crashlytics-build.properties
 
 #Ignore assets from the asset store
 [Aa]ssets/[Aa]ssetStore/*
-![Aa]ssets/[Aa]ssetStore/*.unitypackage
-![Aa]ssets/[Aa]ssetStore/asset_store_import.pdf
+![Aa]ssets/[Aa]ssetStore/filler
