@@ -1,0 +1,10 @@
+for me python 3.9 worked
+open cmd in the root folder of the project
+
+python3 -m venv MachineLearning\venv_name		//create virtual environment
+MachineLearning\venv_name\Scripts\activate		//start up virtual environment
+python3 -m pip install --upgrade pip
+pip install mlagents
+pip3 install torch torchvision torchaudio
+pip install protobuf==3.20.3				//mlagents-learn only runs with a few protobuf versions
+pip install packaging
