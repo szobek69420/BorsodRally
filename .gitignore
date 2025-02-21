@@ -74,7 +74,8 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
 #Ignore assets from the asset store
-/[Aa]ssets/[Aa]ssetStore/*
-!/[Aa]ssets/[Aa]ssetStore/*.meta
-!/[Aa]ssets/[Aa]ssetStore/**/*.meta
-!/[Aa]ssets/AssetStore/filler
+[Aa]ssets/[Aa]ssetStore/*.*
+[Aa]ssets/[Aa]ssetStore/**/*.*
+![Aa]ssets/[Aa]ssetStore/*.meta
+![Aa]ssets/[Aa]ssetStore/**/*.meta
+![Aa]ssets/AssetStore/filler
