@@ -11,7 +11,20 @@ public class FullGripCar : Car
 
     [SerializeField] private Transform[] frontWheels;
 
+    [SerializeField] private Transform raycastOrigin;
+
     private Rigidbody rb;
+
+    private const float RAYCAST_MAX_DISTANCE = 100.0f;
+    private Vector2[] raycastDirections = new Vector2[5]
+    {
+        new(Mathf.Sin(-0.5f*Mathf.PI), Mathf.Cos(-0.5f*Mathf.PI)),
+        new(Mathf.Sin(-0.15f*Mathf.PI), Mathf.Cos(-0.15f*Mathf.PI)),
+        new(Mathf.Sin(0), Mathf.Cos(0)),
+        new(Mathf.Sin(0.15f*Mathf.PI), Mathf.Cos(0.15f*Mathf.PI)),
+        new(Mathf.Sin(0.5f*Mathf.PI), Mathf.Cos(0.5f*Mathf.PI))
+    };
+    public float[] distanceFromWall = new float[5];
 
     // Start is called before the first frame update
     void Start()
@@ -26,6 +39,9 @@ public class FullGripCar : Car
         Accelerate();
 
         UpdateWheelPosition();
+
+        Gaycast();
+        VisualizeGaycast();
     }
 
     private void Steer()
@@ -76,6 +92,48 @@ public class FullGripCar : Car
         foreach(Transform wheel in frontWheels)
         {
             wheel.localRotation = Quaternion.Euler(0,MAX_STEER_ANGLE * SteerAngle, 0);
+        }
+    }
+
+    void Gaycast()
+    {
+        int mask = LayerMask.GetMask("Track");
+
+        for (int i = 0; i < raycastDirections.Length; i++)
+        {
+            Vector3 raycastDirection =
+                raycastDirections[i].x * transform.right +
+                raycastDirections[i].y * transform.forward;
+            RaycastHit hit;
+            if(Physics.Raycast(
+                raycastOrigin.position, 
+                raycastDirection, 
+                out hit, 
+                RAYCAST_MAX_DISTANCE, 
+                mask))
+            {
+                distanceFromWall[i] = hit.distance;
+            }
+            else
+            {
+                distanceFromWall[i] = RAYCAST_MAX_DISTANCE;
+            }
+        }
+    }
+
+    void VisualizeGaycast()
+    {
+        for (int i = 0; i < raycastDirections.Length; i++)
+        {
+            Vector3 raycastDirection =
+                raycastDirections[i].x * transform.right +
+                raycastDirections[i].y * transform.forward;
+
+            Debug.DrawLine(
+                raycastOrigin.position,
+                raycastOrigin.position + distanceFromWall[i] * raycastDirection,
+                new Color(0.0f, 1.0f, 1.0f),
+                Time.fixedDeltaTime);
         }
     }
 }
