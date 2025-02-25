@@ -22,12 +22,13 @@ public class GameController : MonoBehaviour
             ResetGame();
     }
 
-    void ResetGame()
+    public void ResetGame()
     {
         if(playerInstance != null)
             GameObject.Destroy(playerInstance);
 
         playerInstance = GameObject.Instantiate(playerPrefab, transform);
+
         trackManager.ResetTrack(playerInstance.transform);
         trackManager.StartGenerate();
     }

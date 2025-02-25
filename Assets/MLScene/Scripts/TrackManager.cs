@@ -8,6 +8,8 @@ public class TrackManager : MonoBehaviour
     [SerializeField] private MeshFilter mf;
     [SerializeField] private MeshCollider mc;
 
+    [SerializeField] private GameObject checkpointPrefab;
+
     private const int MAX_SEGMENT_COUNT = 50;
     private const float SEGMENT_UNLOAD_DISTANCE = 50.0f;
     private const float SEGMENT_LENGTH = 5.0f;
@@ -19,6 +21,7 @@ public class TrackManager : MonoBehaviour
     private Vector3[] segmentVertices;
     private int[] segmentIndices;
     private Vector2[] segmentUVs;
+    private GameObject[] checkpoints=null;
     private int firstSegment;
     private int loadedSegments;
     private Mesh trackMesh;
@@ -64,6 +67,24 @@ public class TrackManager : MonoBehaviour
         loadedSegments = 0;
 
         trackMesh = new Mesh();
+
+        if(checkpoints!=null)
+        {
+            for (int i = 0; i < MAX_SEGMENT_COUNT; i++)
+                checkpoints[i].transform.localPosition = new Vector3(0, 1000, 0);
+        }
+        else
+        {
+            checkpoints = new GameObject[MAX_SEGMENT_COUNT];
+            for (int i = 0; i < MAX_SEGMENT_COUNT; i++)
+            {
+                checkpoints[i] = GameObject.Instantiate(
+                    checkpointPrefab,
+                    transform
+                    );
+                checkpoints[i].transform.localPosition = new Vector3(0, 1000, 0);
+            }
+        }
 
         for (int i = 0; i < MAX_SEGMENT_COUNT; i++)
             GenerateNewSegment();
@@ -151,6 +172,11 @@ public class TrackManager : MonoBehaviour
         segmentUVs[SEGMENT_VERTEX_COUNT * nextSegmentIndex + 5] = new Vector2(0.1875f, 1.0f);
         segmentUVs[SEGMENT_VERTEX_COUNT * nextSegmentIndex + 6] = new Vector2(0.8125f, 1.0f);
         segmentUVs[SEGMENT_VERTEX_COUNT * nextSegmentIndex + 7] = new Vector2(1.0f, 1.0f);
+
+        //set the position of the checkpoint
+        checkpoints[nextSegmentIndex].transform.localPosition = segmentPositions[nextSegmentIndex];
+        checkpoints[nextSegmentIndex].transform.localRotation = Quaternion.Euler(0, currentTrackYaw, 0);
+        checkpoints[nextSegmentIndex].SetActive(true);
 
         loadedSegments++;
 

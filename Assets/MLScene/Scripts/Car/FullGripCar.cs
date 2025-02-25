@@ -15,7 +15,7 @@ public class FullGripCar : Car
 
     private Rigidbody rb;
 
-    private const float RAYCAST_MAX_DISTANCE = 100.0f;
+    public const float RAYCAST_MAX_DISTANCE = 100.0f;
     private Vector2[] raycastDirections = new Vector2[5]
     {
         new(Mathf.Sin(-0.5f*Mathf.PI), Mathf.Cos(-0.5f*Mathf.PI)),
@@ -134,6 +134,13 @@ public class FullGripCar : Car
                 raycastOrigin.position + distanceFromWall[i] * raycastDirection,
                 new Color(0.0f, 1.0f, 1.0f),
                 Time.fixedDeltaTime);
+
+            DebugExtension.DebugPoint(
+                raycastOrigin.position + distanceFromWall[i] * raycastDirection,
+                5,
+                Time.fixedDeltaTime,
+                true
+                );
         }
     }
 }
