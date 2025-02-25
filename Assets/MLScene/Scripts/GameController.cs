@@ -5,9 +5,7 @@ using UnityEngine;
 public class GameController : MonoBehaviour
 {
     [SerializeField] private TrackManager trackManager;
-    [SerializeField] private GameObject playerPrefab;
-
-    private GameObject playerInstance = null;
+    [SerializeField] private GameObject playerInstance;
 
     // Start is called before the first frame update
     void Start()
@@ -24,10 +22,12 @@ public class GameController : MonoBehaviour
 
     public void ResetGame()
     {
-        if(playerInstance != null)
-            GameObject.Destroy(playerInstance);
-
-        playerInstance = GameObject.Instantiate(playerPrefab, transform);
+        Rigidbody playerRB;
+        if(playerInstance.TryGetComponent<Rigidbody>(out playerRB))
+        {
+            playerRB.velocity= Vector3.zero;
+            playerRB.angularVelocity= Vector3.zero;
+        }
 
         trackManager.ResetTrack(playerInstance.transform);
         trackManager.StartGenerate();

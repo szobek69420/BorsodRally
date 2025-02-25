@@ -7,6 +7,7 @@ using Unity.MLAgents.Actuators;
 
 public class CarAgentFullGrip : Agent
 {
+    
     private FullGripCar car;
     private GameController controller;
 
@@ -21,13 +22,13 @@ public class CarAgentFullGrip : Agent
         controller = GetComponentInParent<GameController>();
         controller.ResetGame();
     }
-
+    
     public override void CollectObservations(VectorSensor sensor)
     {
         for(int i=0;i<car.distanceFromWall.Length;i++)
             sensor.AddObservation(car.distanceFromWall[i]/FullGripCar.RAYCAST_MAX_DISTANCE);
     }
-
+    
     public override void OnActionReceived(ActionBuffers actions)
     {
         car.SteerAngle = actions.ContinuousActions[0];
@@ -42,8 +43,10 @@ public class CarAgentFullGrip : Agent
             car.Throttle = 0.0f;
             car.Brake = -actions.ContinuousActions[1];
         }
-    }
 
+        //Debug.Log(actions.ContinuousActions[0] + " " + actions.ContinuousActions[1]);
+    }
+   
     public override void Heuristic(in ActionBuffers actionsOut)
     {
         ActionSegment<float> actions = actionsOut.ContinuousActions;
@@ -61,6 +64,7 @@ public class CarAgentFullGrip : Agent
         else if (other.gameObject.CompareTag("Checkpoint"))
         {
             AddReward(1.0f);
+            other.gameObject.SetActive(false);
         }
     }
 }

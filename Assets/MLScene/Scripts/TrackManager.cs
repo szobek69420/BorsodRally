@@ -38,7 +38,7 @@ public class TrackManager : MonoBehaviour
 
     void Update()
     {
-        if (isGenerating&&GenerateNewSegment())
+        while (isGenerating&&GenerateNewSegment())
             UpdateGPUAndColliderData();
     }
 
