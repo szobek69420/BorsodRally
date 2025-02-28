@@ -79,3 +79,6 @@ crashlytics-build.properties
 /results/*
 /[Aa]ssets/ML-Agents/*
 
+#Exclude TMP
+/[Aa]ssets/TextMesh Pro/*
+

@@ -8,7 +8,7 @@ public class Follower : MonoBehaviour
     [SerializeField] private Vector3 offset;
     [SerializeField] private bool lookAtFollowee;
 
-    private void FixedUpdate()
+    private void Update()
     {
         transform.position =
             followee.transform.position+
