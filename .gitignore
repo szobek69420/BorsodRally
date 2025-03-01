@@ -76,6 +76,7 @@ crashlytics-build.properties
 #Ignore machine learning things
 /MachineLearning/*
 !/MachineLearning/setup.txt
+!/MachineLearning/configuration.yaml
 /results/*
 /[Aa]ssets/ML-Agents/*
 

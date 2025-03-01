@@ -79,11 +79,14 @@ public class TrackManager : MonoBehaviour
     private int firstSegment;
     private int loadedSegments;
 
+    private int nextCheckpointIndex;
+
     private Mesh trackMesh;
     private Mesh colliderMesh;
     private Mesh terrainMesh;
 
     private float currentTrackYaw = 50.0f;
+    private float[] seed = new float[2];
 
     private bool isGenerating = false;
 
@@ -126,6 +129,8 @@ public class TrackManager : MonoBehaviour
         this.player = player;
 
         currentTrackYaw = Random.Range(-180.0f, 180.0f);
+        seed[0] = Random.Range(0.0f, 10.0f);
+        seed[1] = Random.Range(0.0f, 10.0f);
         this.player.localRotation = Quaternion.Euler(0.0f, currentTrackYaw, 0.0f);
 
         segmentPositions = new Vector3[MAX_SEGMENT_COUNT];
@@ -143,6 +148,7 @@ public class TrackManager : MonoBehaviour
 
         firstSegment = 0;
         loadedSegments = 0;
+        nextCheckpointIndex = 0;
 
         trackMesh = new Mesh();
         colliderMesh= new Mesh();
@@ -268,8 +274,8 @@ public class TrackManager : MonoBehaviour
         }
 
         currentTrackYaw += 15.0f * Mathf.PerlinNoise(
-            0.0047f * segmentPositions[lastSegmentIndex].x,
-            0.007f * segmentPositions[lastSegmentIndex].z
+            seed[0] +0.0047f * segmentPositions[lastSegmentIndex].x,
+            seed[1] +0.007f * segmentPositions[lastSegmentIndex].z
             ) - 7.5f;
 
 
@@ -358,5 +364,27 @@ public class TrackManager : MonoBehaviour
         terrainMesh.RecalculateBounds();
         terrainMesh.RecalculateNormals();
         mf_terrain.mesh = terrainMesh;
+    }
+
+    //an way for the player to notify the trackmanager about a reached checkpoint
+    public void CheckpointReached(GameObject checkpoint)
+    {
+        for(int i=0;i<MAX_SEGMENT_COUNT;i++)
+        {
+            if (checkpoint == checkpoints[i])
+            {
+                checkpoints[i].SetActive(false);
+                nextCheckpointIndex = i + 1;
+                if (nextCheckpointIndex >= MAX_SEGMENT_COUNT)
+                    nextCheckpointIndex = 0;
+                break;
+            }
+        }
+    }
+
+    //it returns localPositions so that more tracks can be simulated simultaneously
+    public Vector3 NextCheckpointPosition()
+    {
+        return checkpoints[nextCheckpointIndex].transform.localPosition;
     }
 }

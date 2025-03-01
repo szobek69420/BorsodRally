@@ -287,6 +287,18 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 6525920240404415516}
     m_Modifications:
+    - target: {fileID: 1119388189393356541, guid: e8375d40c0559fd428e5d7d00d6b05c4, type: 3}
+      propertyPath: brakeForce
+      value: 40000
+      objectReference: {fileID: 0}
+    - target: {fileID: 1119388189393356541, guid: e8375d40c0559fd428e5d7d00d6b05c4, type: 3}
+      propertyPath: MAX_VELOCITY
+      value: 150
+      objectReference: {fileID: 0}
+    - target: {fileID: 1119388189393356541, guid: e8375d40c0559fd428e5d7d00d6b05c4, type: 3}
+      propertyPath: accelerationForce
+      value: 30000
+      objectReference: {fileID: 0}
     - target: {fileID: 3973006590010799777, guid: e8375d40c0559fd428e5d7d00d6b05c4, type: 3}
       propertyPath: m_Enabled
       value: 0
@@ -342,6 +354,10 @@ PrefabInstance:
     - target: {fileID: 7106669687410605424, guid: e8375d40c0559fd428e5d7d00d6b05c4, type: 3}
       propertyPath: m_Enabled
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7299459016980496569, guid: e8375d40c0559fd428e5d7d00d6b05c4, type: 3}
+      propertyPath: m_BrainParameters.VectorObservationSize
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e8375d40c0559fd428e5d7d00d6b05c4, type: 3}

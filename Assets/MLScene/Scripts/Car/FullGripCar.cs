@@ -132,9 +132,9 @@ public class FullGripCar : Car
             Debug.DrawLine(
                 raycastOrigin.position,
                 raycastOrigin.position + distanceFromWall[i] * raycastDirection,
-                new Color(0.0f, 1.0f, 1.0f),
+                new Color(0.0f, 1.0f, 0.5f),
                 Time.fixedDeltaTime);
-
+            
             DebugExtension.DebugPoint(
                 raycastOrigin.position + distanceFromWall[i] * raycastDirection,
                 5,
