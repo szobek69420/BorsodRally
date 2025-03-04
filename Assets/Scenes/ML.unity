@@ -132,7 +132,7 @@ PrefabInstance:
     - target: {fileID: 748471496613588653, guid: d99c11cbb8cc2584482c20affe1765e7, type: 3}
       propertyPath: m_Model
       value: 
-      objectReference: {fileID: 5022602860645237092, guid: bd832b84602244e40a8f948ed350dbdb, type: 3}
+      objectReference: {fileID: 5022602860645237092, guid: b5bb2a9dbf704014ca1ff5aa632791f0, type: 3}
     - target: {fileID: 748471496613588653, guid: d99c11cbb8cc2584482c20affe1765e7, type: 3}
       propertyPath: m_BehaviorType
       value: 2
@@ -194,12 +194,16 @@ PrefabInstance:
       value: GameManager
       objectReference: {fileID: 0}
     - target: {fileID: 6964575145063246057, guid: d99c11cbb8cc2584482c20affe1765e7, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6964575145063246057, guid: d99c11cbb8cc2584482c20affe1765e7, type: 3}
       propertyPath: MAX_VELOCITY
-      value: 200
+      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 6964575145063246057, guid: d99c11cbb8cc2584482c20affe1765e7, type: 3}
       propertyPath: MAX_STEER_ANGLE
-      value: 10
+      value: 20
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d99c11cbb8cc2584482c20affe1765e7, type: 3}

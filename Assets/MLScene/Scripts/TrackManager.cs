@@ -12,6 +12,7 @@ public class TrackManager : MonoBehaviour
     [SerializeField] private GameObject checkpointPrefab;
     [SerializeField] private GameObject palmPrefab;
 
+    private static float SEGMENT_ADVANCE = 10.0f;
 
     private static int SEGMENT_VERTEX_COUNT = 16;
     private static int SEGMENT_INDEX_COUNT = 30;
@@ -57,7 +58,6 @@ public class TrackManager : MonoBehaviour
 
     private const int MAX_SEGMENT_COUNT = 50;
     private const float SEGMENT_UNLOAD_DISTANCE = 50.0f;
-    private const float SEGMENT_LENGTH = 5.0f;
 
 
     private Vector3[] segmentPositions;
@@ -285,7 +285,7 @@ public class TrackManager : MonoBehaviour
             Mathf.Cos(currentTrackYaw * Mathf.Deg2Rad));
         right = Vector3.Cross(Vector3.up, forward);
 
-        segmentPositions[nextSegmentIndex] = segmentPositions[lastSegmentIndex] + SEGMENT_LENGTH * forward;
+        segmentPositions[nextSegmentIndex] = segmentPositions[lastSegmentIndex] + SEGMENT_ADVANCE * forward;
 
         for (int i = SEGMENT_VERTEX_COUNT/2, j=0; i < SEGMENT_VERTEX_COUNT; i++, j++)
         {
@@ -383,8 +383,21 @@ public class TrackManager : MonoBehaviour
     }
 
     //it returns localPositions so that more tracks can be simulated simultaneously
-    public Vector3 NextCheckpointPosition()
+    //the closest point of the checkpoint will be returned
+    public Vector3 NextCheckpointPosition(Vector3 carWorldPosition)
     {
-        return checkpoints[nextCheckpointIndex].transform.localPosition;
+        Vector3 checkpointLeft = checkpoints[nextCheckpointIndex].GetComponent<Checkpoint>().leftEnd.position;
+        Vector3 checkpointRight = checkpoints[nextCheckpointIndex].GetComponent<Checkpoint>().rightEnd.position;
+        Vector3 checkpointLineDir = Vector3.Normalize(checkpointRight - checkpointLeft);
+
+        //is beyond checkpointLeft?
+        if (Vector3.Dot(checkpointLineDir, carWorldPosition - checkpointLeft) < 0)
+            return transform.worldToLocalMatrix*checkpointLeft;
+
+        //is beyond checkpointRight
+        if (Vector3.Dot(checkpointLineDir, carWorldPosition - checkpointRight) > 0)
+            return transform.worldToLocalMatrix * checkpointRight;
+
+        return transform.worldToLocalMatrix * (Vector3.Dot(checkpointLineDir, carWorldPosition - checkpointLeft)*checkpointLineDir+checkpointLeft);
     }
 }

@@ -35,8 +35,14 @@ public class CarAgentFullGrip : Agent
 
         //alignment to the next checkpoint
 
-        float alignment = Vector3.Dot(Vector3.Normalize(trackManager.NextCheckpointPosition() - transform.localPosition), transform.right);
-        sensor.AddObservation(0.5f*alignment+0.5f);
+        float alignment = Mathf.Atan2(
+            Vector3.Dot(Vector3.Normalize(trackManager.NextCheckpointPosition(car.gameObject.transform.localPosition) - transform.localPosition), transform.right),
+            Vector3.Dot(Vector3.Normalize(trackManager.NextCheckpointPosition(car.gameObject.transform.localPosition) - transform.localPosition), transform.forward)
+            );
+        sensor.AddObservation(alignment/Mathf.PI);
+
+        //velocity
+        sensor.AddObservation(0.002f*car.gameObject.GetComponent<Rigidbody>().velocity.magnitude);
 
         //reward car if it doesn't have a seizure
         if (Mathf.Abs(alignment) <0.04f)

@@ -13,6 +13,10 @@ public class FullGripCar : Car
 
     [SerializeField] private Transform raycastOrigin;
 
+    [SerializeField] private MeshRenderer chassisRenderer;
+    [SerializeField] private Material normalMaterial;
+    [SerializeField] private Material brakingMaterial;
+
     private Rigidbody rb;
 
     public const float RAYCAST_MAX_DISTANCE = 100.0f;
@@ -32,6 +36,12 @@ public class FullGripCar : Car
         rb=GetComponent<Rigidbody>();
     }
 
+    private void Update()
+    {
+        SetMaterial();
+        VisualizeGaycast();
+    }
+
     // Update is called once per frame
     void FixedUpdate()
     {
@@ -41,7 +51,6 @@ public class FullGripCar : Car
         UpdateWheelPosition();
 
         Gaycast();
-        VisualizeGaycast();
     }
 
     private void Steer()
@@ -133,14 +142,27 @@ public class FullGripCar : Car
                 raycastOrigin.position,
                 raycastOrigin.position + distanceFromWall[i] * raycastDirection,
                 new Color(0.0f, 1.0f, 0.5f),
-                Time.fixedDeltaTime);
+                0);
             
             DebugExtension.DebugPoint(
                 raycastOrigin.position + distanceFromWall[i] * raycastDirection,
                 5,
-                Time.fixedDeltaTime,
+                0,
                 true
                 );
         }
+
+        Debug.DrawLine(transform.position, GetComponentInParent<TrackManager>().NextCheckpointPosition(transform.position), Color.red, 0);
+    }
+
+    private void SetMaterial()
+    {
+        if (chassisRenderer == null)
+            return;
+
+        if (Brake > 0.001f)
+            chassisRenderer.material = brakingMaterial;
+        else
+            chassisRenderer.material = normalMaterial;
     }
 }
