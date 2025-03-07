@@ -19,14 +19,14 @@ public abstract class Car : MonoBehaviour
         }
     }
 
-    //Throttle is a value in [0;1]
+    //Throttle is a value in [-1;1]
     private float throttle = 0.0f;
     public float Throttle
     {
         get { return throttle; }
         set
         {
-            if (value < 0 || value > 1)
+            if (value < -1 || value > 1)
                 throw new System.Exception("Car::Throttle must be a value between 0 and 1");
             throttle = value;
         }

@@ -2,16 +2,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FullGripCar : Car
+public class RealisticCar : Car
 {
-    [SerializeField] private float wheelBase = 3.0f;  //necessary for calculating the turning rate
-    [SerializeField] private float brakeForce = 10000.0f;
-    [SerializeField] private float accelerationForce = 2500.0f;
+    [SerializeField] private float maxBrakeTorque = 10000.0f;
+    [SerializeField] private float maxMotorTorque = 2500.0f;
     [SerializeField] private float MAX_VELOCITY = 70.0f;
 
+
+    [SerializeField] private WheelCollider[] frontWheelColliders;
+    [SerializeField] private WheelCollider[] rearWheelColliders;
+
     [SerializeField] private Transform[] frontWheels;
+    [SerializeField] private Transform[] rearWheels;
+
 
     [SerializeField] private Transform raycastOrigin;
+    [SerializeField] private Transform centerOfMass;
 
     [SerializeField] private MeshRenderer chassisRenderer;
     [SerializeField] private Material normalMaterial;
@@ -31,18 +37,20 @@ public class FullGripCar : Car
     public float[] distanceFromWall = new float[5];
 
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        rb=GetComponent<Rigidbody>();
+        rb = GetComponent<Rigidbody>();
+        rb.centerOfMass = centerOfMass.localPosition;
     }
 
+    // Update is called once per frame
     private void Update()
     {
         SetMaterial();
         VisualizeGaycast();
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
         Steer();
         Accelerate();
@@ -54,52 +62,45 @@ public class FullGripCar : Car
 
     private void Steer()
     {
-        if (Mathf.Abs(SteerAngle) < 0.00001f)//kein turning
-            return;
-
-        float forwardVelocity = Vector3.Dot(transform.forward, rb.velocity);
-        float turningRadius = wheelBase / Mathf.Sin(Mathf.Deg2Rad * MAX_STEER_ANGLE*SteerAngle);
-        float turningRate = Mathf.Rad2Deg*forwardVelocity / turningRadius;
-
-        transform.localRotation = Quaternion.Euler(
-            0,
-            transform.localRotation.eulerAngles.y + Time.fixedDeltaTime * turningRate,
-            0);
-
-        rb.velocity = forwardVelocity * transform.forward;
+        foreach (WheelCollider wc in frontWheelColliders)
+            wc.steerAngle=MAX_STEER_ANGLE* SteerAngle;
     }
 
     private void Accelerate()
     {
         //throttle
-        rb.AddRelativeForce(
-            Time.fixedDeltaTime * Throttle * accelerationForce * Vector3.forward, 
-            ForceMode.Impulse
-            );
+        float motorTorque = Throttle * maxMotorTorque;
+        if(motorTorque > 0&&rb.velocity.magnitude>MAX_VELOCITY)
+            motorTorque = 0;
+        foreach (WheelCollider wc in frontWheelColliders)
+            wc.motorTorque = motorTorque;
+        foreach (WheelCollider wc in rearWheelColliders)
+            wc.motorTorque = motorTorque;
 
-        if(Vector3.Dot(transform.forward, rb.velocity) > MAX_VELOCITY)
-            rb.velocity*=MAX_VELOCITY/rb.velocity.magnitude;
-        
         //brake
-        if(Vector3.Dot(transform.forward, rb.velocity)>0.0f)
-            rb.AddRelativeForce(
-                -Time.fixedDeltaTime * Brake * brakeForce * Vector3.forward,
-                ForceMode.Impulse
-                );
-        else
-        {
-            rb.AddRelativeForce(
-                0.25f*Time.fixedDeltaTime * Throttle * accelerationForce * Vector3.forward,
-                ForceMode.Impulse
-                );
-        }
+        foreach (WheelCollider wc in frontWheelColliders)
+            wc.brakeTorque = Brake * maxBrakeTorque;
+        foreach (WheelCollider wc in rearWheelColliders)
+            wc.brakeTorque = Brake * maxBrakeTorque;
     }
 
     private void UpdateWheelPosition()
     {
-        foreach(Transform wheel in frontWheels)
+        Vector3 wheelPosition;
+        Quaternion wheelRotation;
+
+        for (int i = 0; i < frontWheelColliders.Length; i++)
         {
-            wheel.localRotation = Quaternion.Euler(0,MAX_STEER_ANGLE * SteerAngle, 0);
+            frontWheelColliders[i].GetWorldPose(out wheelPosition, out wheelRotation);
+            frontWheels[i].position = wheelPosition;
+            frontWheels[i].rotation = wheelRotation;
+        }
+
+        for (int i = 0; i < rearWheelColliders.Length; i++)
+        {
+            rearWheelColliders[i].GetWorldPose(out wheelPosition, out wheelRotation);
+            rearWheels[i].position = wheelPosition;
+            rearWheels[i].rotation = wheelRotation;
         }
     }
 
@@ -113,11 +114,11 @@ public class FullGripCar : Car
                 raycastDirections[i].x * transform.right +
                 raycastDirections[i].y * transform.forward;
             RaycastHit hit;
-            if(Physics.Raycast(
-                raycastOrigin.position, 
-                raycastDirection, 
-                out hit, 
-                RAYCAST_MAX_DISTANCE, 
+            if (Physics.Raycast(
+                raycastOrigin.position,
+                raycastDirection,
+                out hit,
+                RAYCAST_MAX_DISTANCE,
                 mask))
             {
                 distanceFromWall[i] = hit.distance;
@@ -142,7 +143,7 @@ public class FullGripCar : Car
                 raycastOrigin.position + distanceFromWall[i] * raycastDirection,
                 new Color(0.0f, 1.0f, 0.5f),
                 0);
-            
+
             DebugExtension.DebugPoint(
                 raycastOrigin.position + distanceFromWall[i] * raycastDirection,
                 5,

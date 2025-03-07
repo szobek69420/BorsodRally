@@ -82,7 +82,7 @@ public class CarAgentFullGrip : Agent
         else if (other.gameObject.CompareTag("Checkpoint"))
         {
             AddReward(1.0f);
-            trackManager.CheckpointReached(other.gameObject);
+            trackManager?.CheckpointReached(other.gameObject);
         }
     }
 }
