@@ -1,0 +1,167 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class FullGripCar : Car
+{
+    [SerializeField] private float wheelBase = 3.0f;  //necessary for calculating the turning rate
+    [SerializeField] private float brakeForce = 10000.0f;
+    [SerializeField] private float accelerationForce = 2500.0f;
+    [SerializeField] private float MAX_VELOCITY = 70.0f;
+
+    [SerializeField] private Transform[] frontWheels;
+
+    [SerializeField] private Transform raycastOrigin;
+
+    [SerializeField] private MeshRenderer chassisRenderer;
+    [SerializeField] private Material normalMaterial;
+    [SerializeField] private Material brakingMaterial;
+
+    private Rigidbody rb;
+
+    public const float RAYCAST_MAX_DISTANCE = 100.0f;
+    private Vector2[] raycastDirections = new Vector2[5]
+    {
+        new(Mathf.Sin(-0.5f*Mathf.PI), Mathf.Cos(-0.5f*Mathf.PI)),
+        new(Mathf.Sin(-0.15f*Mathf.PI), Mathf.Cos(-0.15f*Mathf.PI)),
+        new(Mathf.Sin(0), Mathf.Cos(0)),
+        new(Mathf.Sin(0.15f*Mathf.PI), Mathf.Cos(0.15f*Mathf.PI)),
+        new(Mathf.Sin(0.5f*Mathf.PI), Mathf.Cos(0.5f*Mathf.PI))
+    };
+    public float[] distanceFromWall = new float[5];
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        rb=GetComponent<Rigidbody>();
+    }
+
+    private void Update()
+    {
+        SetMaterial();
+        VisualizeGaycast();
+    }
+
+    void FixedUpdate()
+    {
+        Steer();
+        Accelerate();
+
+        UpdateWheelPosition();
+
+        Gaycast();
+    }
+
+    private void Steer()
+    {
+        if (Mathf.Abs(SteerAngle) < 0.00001f)//kein turning
+            return;
+
+        float forwardVelocity = Vector3.Dot(transform.forward, rb.velocity);
+        float turningRadius = wheelBase / Mathf.Sin(Mathf.Deg2Rad * MAX_STEER_ANGLE*SteerAngle);
+        float turningRate = Mathf.Rad2Deg*forwardVelocity / turningRadius;
+
+        transform.localRotation = Quaternion.Euler(
+            0,
+            transform.localRotation.eulerAngles.y + Time.fixedDeltaTime * turningRate,
+            0);
+
+        rb.velocity = forwardVelocity * transform.forward;
+    }
+
+    private void Accelerate()
+    {
+        //throttle
+        rb.AddRelativeForce(
+            Time.fixedDeltaTime * Throttle * accelerationForce * Vector3.forward, 
+            ForceMode.Impulse
+            );
+
+        if(Vector3.Dot(transform.forward, rb.velocity) > MAX_VELOCITY)
+            rb.velocity*=MAX_VELOCITY/rb.velocity.magnitude;
+        
+        //brake
+        if(Vector3.Dot(transform.forward, rb.velocity)>0.0f)
+            rb.AddRelativeForce(
+                -Time.fixedDeltaTime * Brake * brakeForce * Vector3.forward,
+                ForceMode.Impulse
+                );
+        else
+        {
+            rb.AddRelativeForce(
+                0.25f*Time.fixedDeltaTime * Throttle * accelerationForce * Vector3.forward,
+                ForceMode.Impulse
+                );
+        }
+    }
+
+    private void UpdateWheelPosition()
+    {
+        foreach(Transform wheel in frontWheels)
+        {
+            wheel.localRotation = Quaternion.Euler(0,MAX_STEER_ANGLE * SteerAngle, 0);
+        }
+    }
+
+    void Gaycast()
+    {
+        int mask = LayerMask.GetMask("Track");
+
+        for (int i = 0; i < raycastDirections.Length; i++)
+        {
+            Vector3 raycastDirection =
+                raycastDirections[i].x * transform.right +
+                raycastDirections[i].y * transform.forward;
+            RaycastHit hit;
+            if(Physics.Raycast(
+                raycastOrigin.position, 
+                raycastDirection, 
+                out hit, 
+                RAYCAST_MAX_DISTANCE, 
+                mask))
+            {
+                distanceFromWall[i] = hit.distance;
+            }
+            else
+            {
+                distanceFromWall[i] = RAYCAST_MAX_DISTANCE;
+            }
+        }
+    }
+
+    void VisualizeGaycast()
+    {
+        for (int i = 0; i < raycastDirections.Length; i++)
+        {
+            Vector3 raycastDirection =
+                raycastDirections[i].x * transform.right +
+                raycastDirections[i].y * transform.forward;
+
+            Debug.DrawLine(
+                raycastOrigin.position,
+                raycastOrigin.position + distanceFromWall[i] * raycastDirection,
+                new Color(0.0f, 1.0f, 0.5f),
+                0);
+            
+            DebugExtension.DebugPoint(
+                raycastOrigin.position + distanceFromWall[i] * raycastDirection,
+                5,
+                0,
+                true
+                );
+        }
+
+        Debug.DrawLine(transform.position, GetComponentInParent<TrackManager>().NextCheckpointPosition(transform.position), Color.red, 0);
+    }
+
+    private void SetMaterial()
+    {
+        if (chassisRenderer == null)
+            return;
+
+        if (Brake > 0.001f)
+            chassisRenderer.material = brakingMaterial;
+        else
+            chassisRenderer.material = normalMaterial;
+    }
+}
