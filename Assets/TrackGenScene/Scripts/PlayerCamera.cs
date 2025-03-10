@@ -7,6 +7,7 @@ public class PlayerCamera : MonoBehaviour
 
     public Transform playerTransform;
     public Vector3 offset;
+    public Vector3 rotOffset;
 
     // Start is called before the first frame update
     void Start()
@@ -18,5 +19,6 @@ public class PlayerCamera : MonoBehaviour
     void Update()
     {
         transform.position = playerTransform.position + offset;
+        transform.eulerAngles = playerTransform.eulerAngles + rotOffset;
     }
 }

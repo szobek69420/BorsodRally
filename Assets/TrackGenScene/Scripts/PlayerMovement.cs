@@ -18,11 +18,11 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         if (Input.GetKey("w")) {
-            rb.AddRelativeForce(-5000 * Time.deltaTime,0,0);
+            rb.AddRelativeForce(2000 * Time.deltaTime,0,0);
         }
         if (Input.GetKey("s"))
         {
-            rb.AddRelativeForce(5000 * Time.deltaTime, 0, 0);
+            rb.AddRelativeForce(-2000 * Time.deltaTime, 0, 0);
         }
         if (Input.GetKey("a"))
         {

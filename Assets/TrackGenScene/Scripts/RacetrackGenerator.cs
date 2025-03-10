@@ -2,16 +2,14 @@ using UnityEngine;
 using System.Collections.Generic;
 using System;
 using Unity.VisualScripting;
+using UnityEngine.XR;
 
 public class RacetrackGenerator : MonoBehaviour
 {
     public int trackLength = 100;        // Number of track segments
     public float trackWidth = 5f;        // Width of the track
-    public float perlinScaleXZ = 0.1f;  // Scale for the Perlin noise in XZ plane
-    public float perlinScaleY = 0.1f;   // Scale for the Perlin noise in Y-axis
-    public float perlinSpeedXZ = 0.1f;  // Speed of the Perlin noise for XZ directions over time
-    public float perlinSpeedY = 0.1f;   // Speed of the Perlin noise for Y elevation over time
-    public float smoothFactor = 0.05f;   // Amount of smoothing between track points
+    public float perlinScaleZ = 1f;  // Scale for the Perlin noise in Z-axis
+    public float perlinScaleY = 0.1f;   // Scale for the Perlin noise in Y-axis 
     public int seed = 42;               // Seed for the Perlin Noise generation
     public Material trackMaterial;      // Material to apply to the track surface
 
@@ -19,12 +17,13 @@ public class RacetrackGenerator : MonoBehaviour
     private List<Vector3> trackPath = new List<Vector3>();     // Final smooth path for the track
     private MeshFilter meshFilter;   // MeshFilter to apply the mesh to the object
     private MeshRenderer meshRenderer; // MeshRenderer to apply the material
-    private MeshCollider trackCollider;
 
     void Start()
     {
         meshFilter = gameObject.AddComponent<MeshFilter>();  // Add a MeshFilter to the object
         meshRenderer = gameObject.AddComponent<MeshRenderer>();  // Add a MeshRenderer to the object
+
+        UnityEngine.Random.InitState(seed);
 
         // Apply the provided material to the track surface
         if (trackMaterial != null)
@@ -32,22 +31,25 @@ public class RacetrackGenerator : MonoBehaviour
             meshRenderer.material = trackMaterial;
         }
 
-        // Set the random seed for consistency
-        UnityEngine.Random.InitState(seed);
+        GenerateSprintTrack();
 
-        GenerateTrack();
+        // Smooth the Y-axis elevation using Catmull-Rom spline
+        trackPath = CatmullRomSpline(trackPoints);
+
+        // Create the mesh for the track surface
+        meshFilter.mesh = CreateRacetrackMesh(trackPath);
+        gameObject.AddComponent<MeshCollider>();
     }
 
     void Update()
     {
-        // Optionally update the track if you want dynamic generation
+        
     }
 
-    void GenerateTrack()
+    void GenerateSprintTrack()
     {
         trackPoints.Clear();
 
-        // Start the track at (0, 0, 0)
         float currentX = 0f;
         float currentY = 0f;
         float currentZ = 0f;
@@ -56,33 +58,26 @@ public class RacetrackGenerator : MonoBehaviour
 
         for (int i = 1; i < trackLength; i++) // Start from 1 since the first point is already added
         {
-            // Generate the XZ direction using Perlin noise
-            float perlinX = Mathf.PerlinNoise(i * perlinScaleXZ, currentX * perlinSpeedXZ + seed); // Seeded noise
-            float perlinZ = Mathf.PerlinNoise(i * perlinScaleXZ, currentZ * perlinSpeedXZ + seed); // Seeded noise for Z direction
+            // Generate the XZ direction using Perlin noise 
+            float perlinZ = Mathf.PerlinNoise(i * seed + currentZ, seed + currentZ); 
 
             // Use the Perlin noise to determine the direction of movement
-            float moveX = Mathf.Cos(perlinX * Mathf.PI * 2f) * trackWidth; // smooth direction on X
-            float moveZ = Mathf.Sin(perlinZ * Mathf.PI * 2f) * trackWidth; // smooth direction on Z
+            //float moveX = Mathf.Cos(((trackLength / i) + seed) * Mathf.PI * 2f) * trackWidth;
+            float moveX = Mathf.Cos(currentX * Mathf.PI * 2f) * trackWidth * 3;
+            float moveZ = Mathf.Sin(perlinZ * Mathf.PI * 2f) * trackWidth * perlinScaleZ;  
 
             // Move the current position in the XZ plane based on Perlin noise
             currentX += moveX;
             currentZ += moveZ;
 
             // Calculate the Y value using Perlin noise for elevation and smoothness
-            currentY = Mathf.PerlinNoise(currentX * perlinScaleY, currentY * perlinSpeedY + seed) * 5f; // Y elevation using Perlin noise
+            currentY = Mathf.PerlinNoise(currentX * perlinScaleY, 0.01f * currentY + seed) * 5f; // Y elevation using Perlin noise
             currentY += Mathf.Sin(currentX * 0.1f) * 2f; // Add some sinusoidal variation to the height
-            //currentY = 0;
+            currentY = 0;
 
             // Add the new point to the track
             trackPoints.Add(new Vector3(currentX, currentY, currentZ));
         }
-
-        // Smooth the Y-axis elevation using Catmull-Rom spline
-        trackPath = CatmullRomSpline(trackPoints, smoothFactor);
-
-        // Create the mesh for the track surface
-        meshFilter.mesh = CreateRacetrackMesh(trackPath);
-        gameObject.AddComponent<MeshCollider>();
     }
 
     Mesh CreateRacetrackMesh(List<Vector3> points) 
@@ -118,6 +113,8 @@ public class RacetrackGenerator : MonoBehaviour
                 triangles.Add(vertexIndex + 1);
                 triangles.Add(vertexIndex + 2);
                 triangles.Add(vertexIndex + 3);
+
+                Debug.DrawLine(points[i], points[i + 1], new Color(1, 0, 0), 1000);
             }
             vertexIndex += 2;
         }
@@ -132,7 +129,7 @@ public class RacetrackGenerator : MonoBehaviour
     }
 
     // Catmull-Rom Spline function to smooth the path
-    List<Vector3> CatmullRomSpline(List<Vector3> points, float smoothFactor)
+    List<Vector3> CatmullRomSpline(List<Vector3> points)
     {
         List<Vector3> smoothPath = new List<Vector3>();
 
@@ -155,7 +152,7 @@ public class RacetrackGenerator : MonoBehaviour
             Vector3 p3 = points[i + 2];
 
             // Generate points between p1 and p2 using the Catmull-Rom interpolation formula
-            for (float t = 0f; t <= 1f; t += smoothFactor)
+            for (float t = 0f; t <= 1f; t += 0.05f)
             {
                 Vector3 smoothPoint = CatmullRom(p0, p1, p2, p3, t);
                 smoothPath.Add(smoothPoint);
