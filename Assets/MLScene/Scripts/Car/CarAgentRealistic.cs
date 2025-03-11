@@ -43,6 +43,9 @@ public class CarAgentRealistic : Agent
 
         //velocity
         sensor.AddObservation(0.002f * car.gameObject.GetComponent<Rigidbody>().velocity.magnitude);
+
+        //tilt
+        sensor.AddObservation(car.tiltNormalized);
     }
 
     public override void OnActionReceived(ActionBuffers actions)
@@ -72,7 +75,10 @@ public class CarAgentRealistic : Agent
     {
         if (other.gameObject.CompareTag("Track"))
         {
-            AddReward(-5.0f);
+            //punish the agent if the car is very fast on collision
+            float currentReward = GetCumulativeReward();
+            float markiplier = 1-(0.02f * car.gameObject.GetComponent<Rigidbody>().velocity.magnitude);
+            SetReward(currentReward * markiplier);
             EndEpisode();
         }
         else if (other.gameObject.CompareTag("Checkpoint"))

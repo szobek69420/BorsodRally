@@ -36,7 +36,16 @@ public class BasedWheelCollider : MonoBehaviour
 		set { _maxSuspensionDistance = Mathf.Clamp(value, 0.0f, SuspensionTarget); }
 	}
 
-	[Tooltip("The spring force of the shock absorbers [0;infinity)")]
+	[Tooltip("The offset of the point on which the forces will be applied [-infinity, infinity]")]
+    [SerializeField]
+    private float _forcePoint = 0.1f;
+    public float ForcePoint
+    {
+        get { return _forcePoint; }
+        set { _forcePoint = value; }
+    }
+
+    [Tooltip("The spring force of the shock absorbers [0;infinity)")]
 	[SerializeField]
 	private float _springForce = 30000.0f;
 	public float SpringForce
@@ -94,6 +103,7 @@ public class BasedWheelCollider : MonoBehaviour
 
 	private Rigidbody rb=null;
 
+	private Vector3 wheelForcePosition;
 	private Vector3 wheelPosition;
 	private Vector3 wheelVelocity;
 	private Vector3 wheelForward;
@@ -188,7 +198,10 @@ public class BasedWheelCollider : MonoBehaviour
 			wheelRight = Mathf.Sin(steerAngleInRads + 0.5f * Mathf.PI) * transform.right + Mathf.Cos(steerAngleInRads + 0.5f * Mathf.PI) * transform.forward;
 			wheelUp = transform.up;
 		}
-	}
+
+		//calculate wheel force position
+		wheelForcePosition = transform.position - ForcePoint * wheelUp;
+    }
 
 	private void GetCurrentSuspensionDistance()
 	{
@@ -243,7 +256,7 @@ public class BasedWheelCollider : MonoBehaviour
 
 			currentSuspensionForce = Mathf.Max(0.0f, springForce + dampingForce);
 
-			rb.AddForceAtPosition(Time.fixedDeltaTime * currentSuspensionForce * Vector3.up, transform.position, ForceMode.Impulse);
+			rb.AddForceAtPosition(Time.fixedDeltaTime * currentSuspensionForce * Vector3.up, wheelForcePosition, ForceMode.Impulse);
 		}
 		else
 			currentSuspensionForce = 0.0f;
@@ -254,7 +267,7 @@ public class BasedWheelCollider : MonoBehaviour
 		float maxPossibleForce = LongitudinalStiffness*FrictionCoefficient.Evaluate(0.0f) * currentSuspensionForce;
 		float appliedForce = Mathf.Clamp(AcceleratingForce, -maxPossibleForce, maxPossibleForce);
 		Vector3 forceVector = appliedForce * wheelForward;
-		rb.AddForceAtPosition(Time.fixedDeltaTime * forceVector, transform.position, ForceMode.Impulse);
+		rb.AddForceAtPosition(Time.fixedDeltaTime * forceVector, wheelForcePosition, ForceMode.Impulse);
 	}
 
 	//return value is true if the car is slipping
@@ -275,7 +288,7 @@ public class BasedWheelCollider : MonoBehaviour
 
 		Vector3 forceVector = appliedForce * wheelForward;
 
-		rb.AddForceAtPosition(Time.fixedDeltaTime * forceVector, transform.position, ForceMode.Impulse);
+		rb.AddForceAtPosition(Time.fixedDeltaTime * forceVector, wheelForcePosition, ForceMode.Impulse);
 
 		return isSlipping;
 	}
@@ -287,9 +300,9 @@ public class BasedWheelCollider : MonoBehaviour
 
 		//steer
 		if(Slip<0.0f)
-			rb.AddForceAtPosition(Mathf.Pow(Mathf.Abs(Slip),0.5f)*Time.fixedDeltaTime * maxPossibleForce * wheelRight, transform.position, ForceMode.Impulse);
+			rb.AddForceAtPosition(Mathf.Pow(Mathf.Abs(Slip),0.5f)*Time.fixedDeltaTime * maxPossibleForce * wheelRight, wheelForcePosition, ForceMode.Impulse);
 		else
-			rb.AddForceAtPosition(-Mathf.Pow(Mathf.Abs(Slip), 0.5f) * Time.fixedDeltaTime * maxPossibleForce * wheelRight, transform.position, ForceMode.Impulse);
+			rb.AddForceAtPosition(-Mathf.Pow(Mathf.Abs(Slip), 0.5f) * Time.fixedDeltaTime * maxPossibleForce * wheelRight, wheelForcePosition, ForceMode.Impulse);
 	}
 
 	private void CalculateWheelRotation(bool isSlipping)
@@ -322,9 +335,6 @@ public class BasedWheelCollider : MonoBehaviour
 
 
 		//draw the wheel
-		Gizmos.color = Color.white;
-		Gizmos.DrawWireSphere(wheelPosition, 0.02f);
-
 		Gizmos.color = Color.red;
 		for (int i = 0; i < 16; i++)
 		{
@@ -337,7 +347,11 @@ public class BasedWheelCollider : MonoBehaviour
 
 			Gizmos.DrawLine(startPosition, endPosition);
 		}
-	}
+
+        //draw the force position
+        Gizmos.color = Color.white;
+        Gizmos.DrawWireSphere(wheelForcePosition, 0.02f);
+    }
 
 	public void GetWorldPose(out Vector3 position, out Quaternion rotation)
 	{

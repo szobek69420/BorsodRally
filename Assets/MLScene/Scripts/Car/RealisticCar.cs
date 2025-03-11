@@ -9,8 +9,8 @@ public class RealisticCar : Car
     [SerializeField] private float MAX_VELOCITY = 70.0f;
 
 
-    [SerializeField] private WheelCollider[] frontWheelColliders;
-    [SerializeField] private WheelCollider[] rearWheelColliders;
+    [SerializeField] private BasedWheelCollider[] frontWheelColliders;
+    [SerializeField] private BasedWheelCollider[] rearWheelColliders;
 
     [SerializeField] private Transform[] frontWheels;
     [SerializeField] private Transform[] rearWheels;
@@ -36,6 +36,8 @@ public class RealisticCar : Car
     };
     public float[] distanceFromWall = new float[5];
 
+    public float tiltNormalized = 0.0f;//the angle between the velocity vector and the forward direction
+
     // Start is called before the first frame update
     private void Start()
     {
@@ -58,12 +60,13 @@ public class RealisticCar : Car
         UpdateWheelPosition();
 
         Gaycast();
+        CalculateTilt();
     }
 
     private void Steer()
     {
-        foreach (WheelCollider wc in frontWheelColliders)
-            wc.steerAngle=MAX_STEER_ANGLE* SteerAngle;
+        foreach (BasedWheelCollider wc in frontWheelColliders)
+            wc.SteerAngle=MAX_STEER_ANGLE* SteerAngle;
     }
 
     private void Accelerate()
@@ -72,16 +75,16 @@ public class RealisticCar : Car
         float motorTorque = Throttle * maxMotorTorque;
         if(motorTorque > 0&&rb.velocity.magnitude>MAX_VELOCITY)
             motorTorque = 0;
-        foreach (WheelCollider wc in frontWheelColliders)
-            wc.motorTorque = motorTorque;
-        foreach (WheelCollider wc in rearWheelColliders)
-            wc.motorTorque = motorTorque;
+        foreach (BasedWheelCollider wc in frontWheelColliders)
+            wc.AcceleratingForce = motorTorque;
+        foreach (BasedWheelCollider wc in rearWheelColliders)
+            wc.AcceleratingForce = motorTorque;
 
         //brake
-        foreach (WheelCollider wc in frontWheelColliders)
-            wc.brakeTorque = Brake * maxBrakeTorque;
-        foreach (WheelCollider wc in rearWheelColliders)
-            wc.brakeTorque = Brake * maxBrakeTorque;
+        foreach (BasedWheelCollider wc in frontWheelColliders)
+            wc.BrakeForce = Brake * maxBrakeTorque;
+        foreach (BasedWheelCollider wc in rearWheelColliders)
+            wc.BrakeForce = Brake * maxBrakeTorque;
     }
 
     private void UpdateWheelPosition()
@@ -108,11 +111,16 @@ public class RealisticCar : Car
     {
         int mask = LayerMask.GetMask("Track");
 
+        Vector3 forward = transform.forward;
+        if (Mathf.Pow(rb.velocity.x, 2.0f) + Mathf.Pow(rb.velocity.z, 2.0f) > 1.0f)
+            forward = rb.velocity.normalized;
+        Vector3 right = Vector3.Normalize(Vector3.Cross(Vector3.up, forward));
+
         for (int i = 0; i < raycastDirections.Length; i++)
         {
             Vector3 raycastDirection =
-                raycastDirections[i].x * transform.right +
-                raycastDirections[i].y * transform.forward;
+                raycastDirections[i].x * right +
+                raycastDirections[i].y * forward;
             RaycastHit hit;
             if (Physics.Raycast(
                 raycastOrigin.position,
@@ -130,13 +138,30 @@ public class RealisticCar : Car
         }
     }
 
+    //calculates the normalized tilt
+    void CalculateTilt()
+    {
+        float tempTiltNormalized = Mathf.Acos(Vector3.Dot(transform.forward, rb.velocity.normalized));
+        if (Vector3.Dot(rb.velocity, transform.right) < 0.0f)
+            tempTiltNormalized *= -1;
+        tempTiltNormalized /= 0.5f * Mathf.PI;
+        tempTiltNormalized = Mathf.Clamp(tempTiltNormalized, - 1.0f, 1.0f);
+
+        tiltNormalized = 0.5f*tempTiltNormalized+0.5f;
+    }
+
     void VisualizeGaycast()
     {
+        Vector3 forward = transform.forward;
+        if (Mathf.Pow(rb.velocity.x, 2.0f) + Mathf.Pow(rb.velocity.z, 2.0f) > 1.0f)
+            forward = rb.velocity.normalized;
+        Vector3 right = Vector3.Normalize(Vector3.Cross(Vector3.up, forward));
+
         for (int i = 0; i < raycastDirections.Length; i++)
         {
             Vector3 raycastDirection =
-                raycastDirections[i].x * transform.right +
-                raycastDirections[i].y * transform.forward;
+                raycastDirections[i].x * right +
+                raycastDirections[i].y * forward;
 
             Debug.DrawLine(
                 raycastOrigin.position,
