@@ -132,6 +132,7 @@ public class TrackManager : MonoBehaviour
         seed[0] = Random.Range(0.0f, 10.0f);
         seed[1] = Random.Range(0.0f, 10.0f);
         this.player.localRotation = Quaternion.Euler(0.0f, currentTrackYaw, 0.0f);
+        this.player.GetComponent<Rigidbody>().velocity = 10.0f * this.player.transform.forward;
 
         segmentPositions = new Vector3[MAX_SEGMENT_COUNT];
 

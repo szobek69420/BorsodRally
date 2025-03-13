@@ -29,6 +29,8 @@ public class CarAgentRealistic : Agent
     //if the local basis is rotated, it might not work
     public override void CollectObservations(VectorSensor sensor)
     {
+        float speed = car.gameObject.GetComponent<Rigidbody>().velocity.magnitude;
+
         //wall distances
         for (int i = 0; i < car.distanceFromWall.Length; i++)
             sensor.AddObservation(car.distanceFromWall[i] / RealisticCar.RAYCAST_MAX_DISTANCE);
@@ -42,10 +44,17 @@ public class CarAgentRealistic : Agent
         sensor.AddObservation(alignment / Mathf.PI);
 
         //velocity
-        sensor.AddObservation(0.002f * car.gameObject.GetComponent<Rigidbody>().velocity.magnitude);
+        sensor.AddObservation(0.002f * speed);
 
         //tilt
         sensor.AddObservation(car.tiltNormalized);
+
+        //add reward for distance from wall based on distance from wall while facing the right direction
+        AddReward(0.01f*Mathf.Abs(car.tiltNormalized-0.5f)*car.distanceFromWall[0] * car.distanceFromWall[car.distanceFromWall.Length-1]);
+
+        //punish slow driving
+        if (speed < 30.0f)
+            AddReward(0.02f*(speed-30.0f));
     }
 
     public override void OnActionReceived(ActionBuffers actions)
@@ -83,7 +92,7 @@ public class CarAgentRealistic : Agent
         }
         else if (other.gameObject.CompareTag("Checkpoint"))
         {
-            AddReward(1.0f);
+            AddReward(100.0f);
             trackManager?.CheckpointReached(other.gameObject);
         }
     }
