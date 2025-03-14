@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 0
+  GlobalObjectIdHash: 3364303600
   InScenePlacedSourceGlobalObjectIdHash: 0
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -66,3 +66,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca6cbd4fff985394680da5c439bb2508, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hostCarPrefab: {fileID: 4454029777458862814, guid: 8b32596b6a07f5f4199f2b8c88da97b9, type: 3}
+  clientCarPrefab: {fileID: 4735735941777425081, guid: fff21cd164e86b440992e65d4756569c, type: 3}
