@@ -147,7 +147,7 @@ public class TrackManager : MonoBehaviour
         currentTrackYaw = Random.Range(-180.0f, 180.0f);
         seed[0] = Random.Range(0.0f, 10.0f);
         seed[1] = Random.Range(0.0f, 10.0f);
-        this.player.localRotation = Quaternion.Euler(0.0f, currentTrackYaw, 0.0f);
+        this.player.localRotation = Quaternion.Euler(0.0f, currentTrackYaw+Random.Range(-45.0f, 45.0f), 0.0f);
         this.player.GetComponent<Rigidbody>().velocity = 10.0f * this.player.transform.forward;
 
         segmentPositions = new SegmentOrientation[MAX_SEGMENT_COUNT];
@@ -230,7 +230,11 @@ public class TrackManager : MonoBehaviour
             GenerateNewSegment();
         UpdateGPUAndColliderData();
 
-        this.player.localPosition = segmentPositions[1].position + 2.0f*Vector3.up;
+        this.player.localPosition = 
+            segmentPositions[1].position + 
+            2.0f*Vector3.up +
+            Random.Range(-5.0f, 5.0f)*Vector3.Normalize(Vector3.Cross(Vector3.up,segmentPositions[1].position))
+            ;
     }
 
     bool GenerateNewSegment() //returns true if the data has been modified

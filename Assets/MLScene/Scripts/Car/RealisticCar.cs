@@ -25,7 +25,7 @@ public class RealisticCar : Car
 
     private Rigidbody rb;
 
-    public const float RAYCAST_MAX_DISTANCE = 100.0f;
+    public const float RAYCAST_MAX_DISTANCE = 150.0f;
     private Vector2[] raycastDirections = new Vector2[5]
     {
         new(Mathf.Sin(-0.5f*Mathf.PI), Mathf.Cos(-0.5f*Mathf.PI)),
@@ -141,6 +141,12 @@ public class RealisticCar : Car
     //calculates the normalized tilt
     void CalculateTilt()
     {
+        if (rb.velocity.magnitude < 0.01f)
+        {
+            tiltNormalized = 0.5f;
+            return;
+        }
+
         float tempTiltNormalized = Mathf.Acos(Vector3.Dot(transform.forward, rb.velocity.normalized));
         if (Vector3.Dot(rb.velocity, transform.right) < 0.0f)
             tempTiltNormalized *= -1;

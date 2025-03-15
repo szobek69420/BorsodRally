@@ -172,8 +172,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  _longitudinalStiffness: 2
-  _lateralStiffness: 2
+  _longitudinalStiffness: 2.5
+  _lateralStiffness: 2.5
 --- !u!1 &2273034090998861506
 GameObject:
   m_ObjectHideFlags: 0
@@ -341,8 +341,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  _longitudinalStiffness: 2
-  _lateralStiffness: 2
+  _longitudinalStiffness: 2.5
+  _lateralStiffness: 2.5
 --- !u!1 &3038334198152297150
 GameObject:
   m_ObjectHideFlags: 0
@@ -483,8 +483,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  _longitudinalStiffness: 2
-  _lateralStiffness: 1.9
+  _longitudinalStiffness: 2.5
+  _lateralStiffness: 2.4
 --- !u!1 &5149642014294865472
 GameObject:
   m_ObjectHideFlags: 0
@@ -590,8 +590,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  _longitudinalStiffness: 2
-  _lateralStiffness: 1.9
+  _longitudinalStiffness: 2.5
+  _lateralStiffness: 2.4
 --- !u!1 &5416910994669527024
 GameObject:
   m_ObjectHideFlags: 0
@@ -757,7 +757,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d6ccfa139f4c9740911449846e7f297, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MAX_STEER_ANGLE: 20
+  MAX_STEER_ANGLE: 30
   maxBrakeTorque: 5000
   maxMotorTorque: 1500
   MAX_VELOCITY: 70
@@ -815,8 +815,8 @@ MonoBehaviour:
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 2
-      BranchSizes: 
-    VectorActionSize: 02000000
+      BranchSizes: 06000000
+    VectorActionSize: 
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
