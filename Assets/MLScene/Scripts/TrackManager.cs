@@ -4,6 +4,19 @@ using UnityEngine;
 
 public class TrackManager : MonoBehaviour
 {
+    private class SegmentOrientation
+    {
+        public Vector3 position;
+        public float pitch, yaw;
+        
+        public SegmentOrientation(Vector3 position, float pitch, float yaw)
+        {
+            this.position = position;
+            this.pitch = pitch;
+            this.yaw = yaw;
+        }
+    }
+
     private Transform player;
     [SerializeField] private MeshFilter mf;
     [SerializeField] private MeshFilter mf_terrain;
@@ -11,6 +24,7 @@ public class TrackManager : MonoBehaviour
 
     [SerializeField] private GameObject checkpointPrefab;
     [SerializeField] private GameObject palmPrefab;
+    [SerializeField] private GameObject trackEndPrefab;
 
     private static float SEGMENT_ADVANCE = 10.0f;
 
@@ -60,7 +74,7 @@ public class TrackManager : MonoBehaviour
     private const float SEGMENT_UNLOAD_DISTANCE = 50.0f;
 
 
-    private Vector3[] segmentPositions;
+    private SegmentOrientation[] segmentPositions;
 
 
     private Vector3[] segmentVertices;
@@ -102,6 +116,8 @@ public class TrackManager : MonoBehaviour
     }
     private Queue<PalmInstance> palmInstances = new Queue<PalmInstance>();
 
+    private GameObject trackEnd = null;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -134,7 +150,8 @@ public class TrackManager : MonoBehaviour
         this.player.localRotation = Quaternion.Euler(0.0f, currentTrackYaw, 0.0f);
         this.player.GetComponent<Rigidbody>().velocity = 10.0f * this.player.transform.forward;
 
-        segmentPositions = new Vector3[MAX_SEGMENT_COUNT];
+        segmentPositions = new SegmentOrientation[MAX_SEGMENT_COUNT];
+        segmentPositions[MAX_SEGMENT_COUNT - 1] = new SegmentOrientation(Vector3.zero, 0.0f, 0.0f);//because GenerateNewSegment doesn't check whether there is an existing SegmentOrientation at lastSegmentIndex
 
         segmentVertices = new Vector3[SEGMENT_VERTEX_COUNT * MAX_SEGMENT_COUNT];
         segmentIndices = new int[SEGMENT_INDEX_COUNT * MAX_SEGMENT_COUNT];
@@ -203,11 +220,17 @@ public class TrackManager : MonoBehaviour
             }
         }
 
+        //instantiate track end if necessary
+        if (trackEnd == null)
+            trackEnd = Instantiate(trackEndPrefab, transform);
+
+
+
         for (int i = 0; i < MAX_SEGMENT_COUNT; i++)
             GenerateNewSegment();
         UpdateGPUAndColliderData();
 
-        this.player.localPosition = segmentPositions[1] + 2.0f*Vector3.up;
+        this.player.localPosition = segmentPositions[1].position + 2.0f*Vector3.up;
     }
 
     bool GenerateNewSegment() //returns true if the data has been modified
@@ -215,7 +238,7 @@ public class TrackManager : MonoBehaviour
         //check if one segment should be unloaded
         if (loadedSegments == MAX_SEGMENT_COUNT)
         {
-            float distanceFromFirstSegment = (player.localPosition - segmentPositions[firstSegment]).magnitude;
+            float distanceFromFirstSegment = (player.localPosition - segmentPositions[firstSegment].position).magnitude;
 
             if (distanceFromFirstSegment < SEGMENT_UNLOAD_DISTANCE)//load is unnecessary
                 return false;
@@ -248,7 +271,7 @@ public class TrackManager : MonoBehaviour
         for(int i=0;i<SEGMENT_VERTEX_COUNT/2;i++)
         {
             segmentVertices[SEGMENT_VERTEX_COUNT * nextSegmentIndex + i] =
-                segmentPositions[lastSegmentIndex] +
+                segmentPositions[lastSegmentIndex].position +
                 SEGMENT_VERTEX_POSITIONS[i].x * right +
                 SEGMENT_VERTEX_POSITIONS[i].y*Vector3.up;
 
@@ -258,16 +281,16 @@ public class TrackManager : MonoBehaviour
         for (int i = 0; i < SEGMENT_COLLIDER_VERTEX_COUNT / 2; i++)
         {
             segmentColliderVertices[SEGMENT_COLLIDER_VERTEX_COUNT * nextSegmentIndex + i] =
-                segmentPositions[lastSegmentIndex] +
+                segmentPositions[lastSegmentIndex].position +
                 SEGMENT_COLLIDER_VERTEX_POSITIONS[i].x * right +
                 SEGMENT_COLLIDER_VERTEX_POSITIONS[i].y * Vector3.up;
         }
 
-        Random.InitState((int)(segmentPositions[lastSegmentIndex].x + segmentPositions[lastSegmentIndex].y));
+        Random.InitState((int)(segmentPositions[lastSegmentIndex].position.x + segmentPositions[lastSegmentIndex].position.y));
         for (int i = 0; i < SEGMENT_TERRAIN_VERTEX_COUNT / 2; i++)
         {
             segmentTerrainVertices[SEGMENT_TERRAIN_VERTEX_COUNT * nextSegmentIndex + i] =
-                segmentPositions[lastSegmentIndex] +
+                segmentPositions[lastSegmentIndex].position +
                 SEGMENT_TERRAIN_VERTEX_POSITIONS[i].x * right +
                 Random.Range(0.5f, 1.0f)*SEGMENT_TERRAIN_VERTEX_POSITIONS[i].y * Vector3.up;
 
@@ -275,8 +298,8 @@ public class TrackManager : MonoBehaviour
         }
 
         currentTrackYaw += 15.0f * Mathf.PerlinNoise(
-            seed[0] +0.0047f * segmentPositions[lastSegmentIndex].x,
-            seed[1] +0.007f * segmentPositions[lastSegmentIndex].z
+            seed[0] +0.0047f * segmentPositions[lastSegmentIndex].position.x,
+            seed[1] +0.007f * segmentPositions[lastSegmentIndex].position.z
             ) - 7.5f;
 
 
@@ -286,12 +309,16 @@ public class TrackManager : MonoBehaviour
             Mathf.Cos(currentTrackYaw * Mathf.Deg2Rad));
         right = Vector3.Cross(Vector3.up, forward);
 
-        segmentPositions[nextSegmentIndex] = segmentPositions[lastSegmentIndex] + SEGMENT_ADVANCE * forward;
+        segmentPositions[nextSegmentIndex] = new SegmentOrientation(
+            segmentPositions[lastSegmentIndex].position + SEGMENT_ADVANCE * forward,
+            0.0f,
+            currentTrackYaw
+            );
 
         for (int i = SEGMENT_VERTEX_COUNT/2, j=0; i < SEGMENT_VERTEX_COUNT; i++, j++)
         {
             segmentVertices[SEGMENT_VERTEX_COUNT * nextSegmentIndex + i] =
-                segmentPositions[nextSegmentIndex] +
+                segmentPositions[nextSegmentIndex].position +
                 SEGMENT_VERTEX_POSITIONS[j].x * right +
                 SEGMENT_VERTEX_POSITIONS[j].y * Vector3.up;
 
@@ -301,16 +328,16 @@ public class TrackManager : MonoBehaviour
         for (int i = SEGMENT_COLLIDER_VERTEX_COUNT/2, j=0; i < SEGMENT_COLLIDER_VERTEX_COUNT; i++, j++)
         {
             segmentColliderVertices[SEGMENT_COLLIDER_VERTEX_COUNT * nextSegmentIndex + i] =
-                segmentPositions[nextSegmentIndex] +
+                segmentPositions[nextSegmentIndex].position +
                 SEGMENT_COLLIDER_VERTEX_POSITIONS[j].x * right +
                 SEGMENT_COLLIDER_VERTEX_POSITIONS[j].y * Vector3.up;
         }
 
-        Random.InitState((int)(segmentPositions[nextSegmentIndex].x + segmentPositions[nextSegmentIndex].y));
+        Random.InitState((int)(segmentPositions[nextSegmentIndex].position.x + segmentPositions[nextSegmentIndex].position.y));
         for (int i = SEGMENT_TERRAIN_VERTEX_COUNT / 2, j = 0; i < SEGMENT_TERRAIN_VERTEX_COUNT; i++, j++)
         {
             segmentTerrainVertices[SEGMENT_TERRAIN_VERTEX_COUNT * nextSegmentIndex + i] =
-                segmentPositions[nextSegmentIndex] +
+                segmentPositions[nextSegmentIndex].position +
                 SEGMENT_TERRAIN_VERTEX_POSITIONS[j].x * right +
                 Random.Range(0.5f, 1.0f)*SEGMENT_TERRAIN_VERTEX_POSITIONS[j].y * Vector3.up;
 
@@ -318,7 +345,7 @@ public class TrackManager : MonoBehaviour
         }
 
         //set the position of the checkpoint
-        checkpoints[nextSegmentIndex].transform.localPosition = segmentPositions[nextSegmentIndex];
+        checkpoints[nextSegmentIndex].transform.localPosition = segmentPositions[nextSegmentIndex].position;
         checkpoints[nextSegmentIndex].transform.localRotation = Quaternion.Euler(0, currentTrackYaw, 0);
         checkpoints[nextSegmentIndex].SetActive(true);
 
@@ -326,17 +353,21 @@ public class TrackManager : MonoBehaviour
         if (Random.Range(0.0f, 1.0f) < PALM_PROBABLITY)//left side of the track
         {
             GameObject palm = GameObject.Instantiate(palmPrefab, transform);
-            palm.transform.localPosition = segmentPositions[nextSegmentIndex] + Random.Range(-POSSIBLE_PALM_POSITION_X[1], -POSSIBLE_PALM_POSITION_X[0]) * right;
+            palm.transform.localPosition = segmentPositions[nextSegmentIndex].position + Random.Range(-POSSIBLE_PALM_POSITION_X[1], -POSSIBLE_PALM_POSITION_X[0]) * right;
             palm.transform.localRotation = Quaternion.Euler(0.0f, Random.Range(-180.0f, 180.0f), 0.0f);
             palmInstances.Enqueue(new PalmInstance(palm, nextSegmentIndex));
         }
         if (Random.Range(0.0f, 1.0f)<PALM_PROBABLITY)//right side of the track
         {
             GameObject palm = GameObject.Instantiate(palmPrefab, transform);
-            palm.transform.localPosition = segmentPositions[nextSegmentIndex] + Random.Range(POSSIBLE_PALM_POSITION_X[0], POSSIBLE_PALM_POSITION_X[1]) * right;
+            palm.transform.localPosition = segmentPositions[nextSegmentIndex].position + Random.Range(POSSIBLE_PALM_POSITION_X[0], POSSIBLE_PALM_POSITION_X[1]) * right;
             palm.transform.localRotation = Quaternion.Euler(0.0f, Random.Range(-180.0f, 180.0f), 0.0f);
             palmInstances.Enqueue(new PalmInstance(palm, nextSegmentIndex));
-        }    
+        }
+
+        //move track end
+        trackEnd.transform.localPosition = segmentPositions[firstSegment].position;
+        trackEnd.transform.localRotation = Quaternion.Euler(segmentPositions[firstSegment].pitch, segmentPositions[firstSegment].yaw, 0.0f);
 
         loadedSegments++;
 

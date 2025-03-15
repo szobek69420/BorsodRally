@@ -151,6 +151,7 @@ MonoBehaviour:
   mc: {fileID: 3199609632724716083}
   checkpointPrefab: {fileID: 4602647077844694569, guid: ec6768403668597489017f81fef29531, type: 3}
   palmPrefab: {fileID: 356387117125710236, guid: 54f643d7941978c4f852c09ab2677a15, type: 3}
+  trackEndPrefab: {fileID: 1710211708564396336, guid: b53b8335a05c36e40ac89f65eb9ab06f, type: 3}
 --- !u!1 &7292704242556617968
 GameObject:
   m_ObjectHideFlags: 0

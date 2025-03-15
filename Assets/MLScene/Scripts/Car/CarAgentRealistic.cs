@@ -50,7 +50,7 @@ public class CarAgentRealistic : Agent
         sensor.AddObservation(car.tiltNormalized);
 
         //add reward for distance from wall based on distance from wall while facing the right direction
-        AddReward(0.01f*Mathf.Abs(car.tiltNormalized-0.5f)*car.distanceFromWall[0] * car.distanceFromWall[car.distanceFromWall.Length-1]);
+        AddReward(0.001f*speed*(0.5f-Mathf.Abs(car.tiltNormalized-0.5f))*car.distanceFromWall[0] * car.distanceFromWall[car.distanceFromWall.Length-1]);
 
         //punish slow driving
         if (speed < 30.0f)
