@@ -699,8 +699,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 2.12, y: 0.4420482, z: 4.5931044}
-  m_Center: {x: 0, y: 0.5321205, z: 0.04003811}
+  m_Size: {x: 2.12, y: 0.91738296, z: 4.5931044}
+  m_Center: {x: 0, y: 0.7697879, z: 0.04003811}
 --- !u!1 &6273057123135412911
 GameObject:
   m_ObjectHideFlags: 0
@@ -757,7 +757,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d6ccfa139f4c9740911449846e7f297, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MAX_STEER_ANGLE: 30
+  MAX_STEER_ANGLE: 20
   maxBrakeTorque: 5000
   maxMotorTorque: 1500
   MAX_VELOCITY: 70
@@ -844,7 +844,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 50000
+  MaxStep: 20000
 --- !u!114 &6067761077548205004
 MonoBehaviour:
   m_ObjectHideFlags: 0

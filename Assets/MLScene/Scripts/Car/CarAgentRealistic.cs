@@ -74,8 +74,23 @@ public class CarAgentRealistic : Agent
 
         car.Brake = 0.2f * actions.DiscreteActions[0];
 
-        //AddReward(car.Brake);
+        AddReward(-car.Brake);
     }
+
+    /*float lastBrakeForce = 0.0f;
+    public override void Heuristic(in ActionBuffers actionsOut)
+    {
+        ActionSegment<float> actions = actionsOut.ContinuousActions;
+        actions[0] = Input.GetAxis("Horizontal");
+        actions[1] = Input.GetAxis("Vertical");
+
+        if (Input.GetKey(KeyCode.Space))
+            lastBrakeForce = Mathf.Lerp(lastBrakeForce, 1.0f, 0.1f);
+        else
+            lastBrakeForce = Mathf.Lerp(lastBrakeForce, 0.0f, 0.1f);
+        ActionSegment<int> discreteActions = actionsOut.DiscreteActions;
+        discreteActions[0] = (int)(6 * lastBrakeForce);
+    }*/
 
     private void OnTriggerEnter(Collider other)
     {
