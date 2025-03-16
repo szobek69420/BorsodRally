@@ -172,8 +172,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  _longitudinalStiffness: 2.5
-  _lateralStiffness: 2.5
+  _longitudinalStiffness: 3
+  _lateralStiffness: 3
 --- !u!1 &2273034090998861506
 GameObject:
   m_ObjectHideFlags: 0
@@ -341,8 +341,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  _longitudinalStiffness: 2.5
-  _lateralStiffness: 2.5
+  _longitudinalStiffness: 3
+  _lateralStiffness: 3
 --- !u!1 &3038334198152297150
 GameObject:
   m_ObjectHideFlags: 0
@@ -483,8 +483,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  _longitudinalStiffness: 2.5
-  _lateralStiffness: 2.4
+  _longitudinalStiffness: 3
+  _lateralStiffness: 2.9
 --- !u!1 &5149642014294865472
 GameObject:
   m_ObjectHideFlags: 0
@@ -590,8 +590,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  _longitudinalStiffness: 2.5
-  _lateralStiffness: 2.4
+  _longitudinalStiffness: 3
+  _lateralStiffness: 2.9
 --- !u!1 &5416910994669527024
 GameObject:
   m_ObjectHideFlags: 0
