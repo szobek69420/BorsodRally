@@ -2,51 +2,67 @@ using UnityEngine;
 using System.Collections.Generic;
 using System;
 using Unity.VisualScripting;
-using UnityEngine.XR;
+
 
 public class RacetrackGenerator : MonoBehaviour
 {
-    public int trackLength = 100;        // Number of track segments
-    public float trackWidth = 5f;        // Width of the track
-    public float perlinScaleZ = 1f;  // Scale for the Perlin noise in Z-axis
+    public int trackLength = 100;       // Number of track segments
+    public float trackWidth = 5f;       // Width of the track
+    public float perlinScaleZ = 1f;     // Scale for the Perlin noise in Z-axis
     public float perlinScaleY = 0.1f;   // Scale for the Perlin noise in Y-axis 
     public int seed = 42;               // Seed for the Perlin Noise generation
     public Material trackMaterial;      // Material to apply to the track surface
 
-    private List<Vector3> trackPoints = new List<Vector3>();   // List to hold track points
-    private List<Vector3> trackPath = new List<Vector3>();     // Final smooth path for the track
-    private MeshFilter meshFilter;   // MeshFilter to apply the mesh to the object
-    private MeshRenderer meshRenderer; // MeshRenderer to apply the material
+    private List<Vector3> trackPoints = new List<Vector3>();    // List to hold track points
+    private MeshFilter meshFilter;                              // MeshFilter to apply the mesh to the object
+    private MeshRenderer meshRenderer;                          // MeshRenderer to apply the material
 
     void Start()
     {
-        meshFilter = gameObject.AddComponent<MeshFilter>();  // Add a MeshFilter to the object
-        meshRenderer = gameObject.AddComponent<MeshRenderer>();  // Add a MeshRenderer to the object
+        StartGen();
+    }
+
+    void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.R)) { ResetGen(); }
+    }
+
+    void StartGen()
+    {
+        meshFilter = gameObject.AddComponent<MeshFilter>();
+        meshRenderer = gameObject.AddComponent<MeshRenderer>();
 
         UnityEngine.Random.InitState(seed);
 
-        // Apply the provided material to the track surface
         if (trackMaterial != null)
         {
             meshRenderer.material = trackMaterial;
         }
 
-        GenerateSprintTrack();
+        GenerateSprintTrackPoints();
+        //GenerateCircuitTrackPoints();
 
-        // Smooth the Y-axis elevation using Catmull-Rom spline
-        trackPath = CatmullRomSpline(trackPoints);
+        // Smooth the track using Catmull-Rom spline
+        trackPoints = CatmullRomSpline();
 
         // Create the mesh for the track surface
-        meshFilter.mesh = CreateRacetrackMesh(trackPath);
+        meshFilter.mesh = CreateRacetrackMesh(trackPoints);
         gameObject.AddComponent<MeshCollider>();
     }
 
-    void Update()
+    void ResetGen()
     {
-        
+        Debug.Log("Reset");
+        DestroyImmediate(gameObject.GetComponent<MeshFilter>());
+        DestroyImmediate(gameObject.GetComponent<MeshRenderer>());
+
+        meshFilter = null;
+        meshRenderer = null;
+
+        StartGen();
     }
 
-    void GenerateSprintTrack()
+    void GenerateSprintTrackPoints()
     {
         trackPoints.Clear();
 
@@ -56,33 +72,54 @@ public class RacetrackGenerator : MonoBehaviour
 
         trackPoints.Add(new Vector3(currentX, currentY, currentZ)); // Add the starting point (0, 0, 0)
 
-        for (int i = 1; i < trackLength; i++) // Start from 1 since the first point is already added
+        for (int i = 1; i < trackLength; i++)
         {
-            // Generate the XZ direction using Perlin noise 
-            float perlinZ = Mathf.PerlinNoise(i * seed + currentZ, seed + currentZ); 
+            // Generate the directions using Perlin noise 
+            //currentX = Mathf.PerlinNoise(i * seed + currentX, seed + currentX);
+            currentZ = Mathf.PerlinNoise(i * seed + currentZ, seed + currentZ);
+            currentY = Mathf.PerlinNoise(seed * currentY, 0.01f * currentY + seed) * 5f;
 
-            // Use the Perlin noise to determine the direction of movement
-            //float moveX = Mathf.Cos(((trackLength / i) + seed) * Mathf.PI * 2f) * trackWidth;
-            float moveX = Mathf.Cos(currentX * Mathf.PI * 2f) * trackWidth * 3;
-            float moveZ = Mathf.Sin(perlinZ * Mathf.PI * 2f) * trackWidth * perlinScaleZ;  
+            currentX += Mathf.Cos(currentX * Mathf.PI * 2f) * trackWidth * 3;
+            currentZ += Mathf.Sin(currentZ * Mathf.PI * 2f) * trackWidth * perlinScaleZ;
+            currentY += Mathf.Sin(currentX * 0.1f) * 20f * perlinScaleY;
 
-            // Move the current position in the XZ plane based on Perlin noise
-            currentX += moveX;
-            currentZ += moveZ;
+            trackPoints.Add(new Vector3(currentX, currentY, currentZ));
+            //trackPoints.Add(new Vector3(currentX, 0, currentZ));
 
-            // Calculate the Y value using Perlin noise for elevation and smoothness
-            currentY = Mathf.PerlinNoise(currentX * perlinScaleY, 0.01f * currentY + seed) * 5f; // Y elevation using Perlin noise
-            currentY += Mathf.Sin(currentX * 0.1f) * 2f; // Add some sinusoidal variation to the height
-            currentY = 0;
+            /*currentX = UnityEngine.Random.Range(-1f, 1f);
+            currentZ = UnityEngine.Random.Range(-1f, 1f);
+
+            currentY = Mathf.PerlinNoise(seed * currentY, 0.01f * currentY + seed) * 5f;
+            currentY += Mathf.Sin(currentX * 0.1f) * 20f * perlinScaleY;
+
+            Vector3 p = new Vector3(currentX, 0, currentZ);
+
+            p *= (20f/p.magnitude);
+            p += trackPoints[i - 1];
+            //p.y = currentY;
 
             // Add the new point to the track
-            trackPoints.Add(new Vector3(currentX, currentY, currentZ));
+            trackPoints.Add(p);*/
         }
     }
 
-    Mesh CreateRacetrackMesh(List<Vector3> points) 
+    void GenerateCircuitTrackPoints()
+    {
+        trackPoints.Clear();
+
+        float currentX = 0f;
+        float currentY = 0f;
+        float currentZ = 0f;
+
+        trackPoints.Add(new Vector3(currentX, currentY, currentZ)); // Add the starting point (0, 0, 0)
+
+
+    }
+
+    Mesh CreateRacetrackMesh(List<Vector3> points)
     {
         List<Vector3> vertices = new List<Vector3>();
+        List<Vector2> uvs = new List<Vector2>();
         List<int> triangles = new List<int>();
         int vertexIndex = 0;
 
@@ -95,7 +132,7 @@ public class RacetrackGenerator : MonoBehaviour
             }
             if (i > 0)
             {
-                forward += points[i] - points[i-1];
+                forward += points[i] - points[i - 1];
             }
             forward.Normalize();
 
@@ -104,24 +141,63 @@ public class RacetrackGenerator : MonoBehaviour
             vertices.Add(points[i] + left * trackWidth * 0.5f);
             vertices.Add(points[i] - left * trackWidth * 0.5f);
 
+            Vector3 a = vertices[vertices.Count - 2];
+            a.y += 3f;
+            Vector3 b = vertices[vertices.Count - 1];
+            b.y += 3f;
+
+            vertices.Add(a);
+            vertices.Add(b);
+    
+            if(i%2 == 0)
+            {
+                uvs.Add(new Vector2((90 / 780), 0));
+                uvs.Add(new Vector2((690 / 780), 0));
+                uvs.Add(Vector2.zero);
+                uvs.Add(Vector2.right);
+
+                uvs.Add(new Vector2((90 / 780), 1));
+                uvs.Add(new Vector2((690 / 780), 1));
+                uvs.Add(Vector2.up);
+                uvs.Add(Vector2.one);
+
+            }
+            
             if (i < points.Count - 1)
             {
                 triangles.Add(vertexIndex);
-                triangles.Add(vertexIndex + 2);
+                triangles.Add(vertexIndex + 4);
                 triangles.Add(vertexIndex + 1);
 
                 triangles.Add(vertexIndex + 1);
+                triangles.Add(vertexIndex + 4);
+                triangles.Add(vertexIndex + 5);
+
+                triangles.Add(vertexIndex);
                 triangles.Add(vertexIndex + 2);
+                triangles.Add(vertexIndex + 4);
+
+                triangles.Add(vertexIndex + 2);
+                triangles.Add(vertexIndex + 6);
+                triangles.Add(vertexIndex + 4);
+
                 triangles.Add(vertexIndex + 3);
+                triangles.Add(vertexIndex + 1);
+                triangles.Add(vertexIndex + 5);
 
-                Debug.DrawLine(points[i], points[i + 1], new Color(1, 0, 0), 1000);
+                triangles.Add(vertexIndex + 3);
+                triangles.Add(vertexIndex + 5);
+                triangles.Add(vertexIndex + 7);
+
+                Debug.DrawLine(points[i], points[i + 1], new UnityEngine.Color(1, 0, 0), 1000);
             }
-            vertexIndex += 2;
+            vertexIndex += 4;
         }
 
         Mesh mesh = new Mesh();
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();
+        mesh.uv = uvs.ToArray();
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
 
@@ -129,13 +205,13 @@ public class RacetrackGenerator : MonoBehaviour
     }
 
     // Catmull-Rom Spline function to smooth the path
-    List<Vector3> CatmullRomSpline(List<Vector3> points)
+    List<Vector3> CatmullRomSpline()
     {
         List<Vector3> smoothPath = new List<Vector3>();
 
-        for (int i = 0; i < points.Count - 2; i++)
+        for (int i = 0; i < trackPoints.Count - 2; i++)
         {
-            Vector3 p0 = points[i];
+            Vector3 p0 = trackPoints[i];
 
             if (i == 0)
             {
@@ -145,13 +221,12 @@ public class RacetrackGenerator : MonoBehaviour
             }
             else
             {
-                p0 = points[i - 1];
+                p0 = trackPoints[i - 1];
             }
-            Vector3 p1 = points[i];
-            Vector3 p2 = points[i + 1];
-            Vector3 p3 = points[i + 2];
+            Vector3 p1 = trackPoints[i];
+            Vector3 p2 = trackPoints[i + 1];
+            Vector3 p3 = trackPoints[i + 2];
 
-            // Generate points between p1 and p2 using the Catmull-Rom interpolation formula
             for (float t = 0f; t <= 1f; t += 0.05f)
             {
                 Vector3 smoothPoint = CatmullRom(p0, p1, p2, p3, t);
@@ -162,7 +237,6 @@ public class RacetrackGenerator : MonoBehaviour
         return smoothPath;
     }
 
-    // Catmull-Rom interpolation formula
     Vector3 CatmullRom(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
     {
         float t2 = t * t;
@@ -185,4 +259,5 @@ public class RacetrackGenerator : MonoBehaviour
 
         return new Vector3(x, y, z);
     }
+
 }

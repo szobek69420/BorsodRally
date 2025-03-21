@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 public class PlayerCamera : MonoBehaviour
 {
@@ -18,7 +19,7 @@ public class PlayerCamera : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.position = playerTransform.position + offset;
-        transform.eulerAngles = playerTransform.eulerAngles + rotOffset;
+        //transform.position = playerTransform.localPosition + offset.x*playerTransform.right + offset.y*playerTransform.up + offset.z*playerTransform.forward;
+        //transform.rotation = Quaternion.LookRotation(playerTransform.position - transform.position, playerTransform.up);
     }
 }
