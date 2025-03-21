@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,7 +14,10 @@ public class GamemodeMenuController : MenuController
     // Start is called before the first frame update
     void Start()
     {
-        button_goBack.onClick.AddListener(() => { GoBackButtonFunction(); });
+        button_goBack.onClick.AddListener(() => { GoBackButtonFunction(); PlayClickSound(); });
+
+        button_singleplayer.onClick.AddListener(() => { PlayClickSound(); });
+        button_multiplayer.onClick.AddListener(() => { PlayClickSound(); });
     }
 
 
@@ -29,7 +33,7 @@ public class GamemodeMenuController : MenuController
 
     public void GoBackButtonFunction()
     {
-        GameObject.Find("PositionManager").GetComponent<MenuCameraPositions>().MainMenu();
+        GameObject.Find("MenuManager").GetComponent<MenuCameraPositions>().MainMenu();
 
         MenuController mc = GameObject.Find("MainMenuController").GetComponent<MenuController>();
 

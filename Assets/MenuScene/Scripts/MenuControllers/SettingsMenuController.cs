@@ -13,7 +13,7 @@ public class SettingsMenuController : MenuController
     // Start is called before the first frame update
     void Start()
     {
-        button_goBack.onClick.AddListener(() => { GoBackButtonFunction(); });
+        button_goBack.onClick.AddListener(() => { GoBackButtonFunction(); PlayClickSound(); });
     }
 
     public override void Show()
@@ -39,7 +39,7 @@ public class SettingsMenuController : MenuController
 
     public void GoBackButtonFunction()
     {
-        GameObject.Find("PositionManager").GetComponent<MenuCameraPositions>().MainMenu();
+        GameObject.Find("MenuManager").GetComponent<MenuCameraPositions>().MainMenu();
 
         MenuController mc = GameObject.Find("MainMenuController").GetComponent<MenuController>();
 

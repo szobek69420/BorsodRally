@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
+using UnityEngine.UI;
 
 public class MenuController : MonoBehaviour
 {
@@ -9,12 +11,17 @@ public class MenuController : MonoBehaviour
     public virtual void Show()
     {
         foreach (Canvas c in canvases)
-            c.gameObject.SetActive(true);
+            c.enabled = true;
     }
 
     public virtual void Hide()
     {
         foreach (Canvas c in canvases)
-            c.gameObject.SetActive(false);
+            c.enabled = false;
+    }
+
+    protected void PlayClickSound()
+    {
+        GameObject.Find("audio_click")?.GetComponent<AudioSource>()?.Play();
     }
 }

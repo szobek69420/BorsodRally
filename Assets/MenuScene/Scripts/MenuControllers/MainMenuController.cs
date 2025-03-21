@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class MainMenuController : MenuController
 {
@@ -13,9 +14,10 @@ public class MainMenuController : MenuController
     // Start is called before the first frame update
     void Start()
     {
-        button_start.onClick.AddListener(() => { StartButtonFunction(); });
-        button_settings.onClick.AddListener(() => { SettingsButtonFunction(); });
-        button_exit.onClick.AddListener(() => { ExitButtonFunction(); });
+        button_start.onClick.AddListener(() => { StartButtonFunction(); PlayClickSound(); });
+
+        button_settings.onClick.AddListener(() => { SettingsButtonFunction(); PlayClickSound(); });
+        button_exit.onClick.AddListener(() => { ExitButtonFunction(); PlayClickSound(); });
     }
 
     public override void Show()
@@ -30,7 +32,7 @@ public class MainMenuController : MenuController
 
     public void StartButtonFunction()
     {
-        GameObject.Find("PositionManager").GetComponent<MenuCameraPositions>().Gamemode();
+        GameObject.Find("MenuManager").GetComponent<MenuCameraPositions>().Gamemode();
 
         MenuController mc = GameObject.Find("GamemodeMenuController").GetComponent<MenuController>();
 
@@ -40,7 +42,7 @@ public class MainMenuController : MenuController
 
     public void SettingsButtonFunction()
     {
-        GameObject.Find("PositionManager").GetComponent<MenuCameraPositions>().Settings();
+        GameObject.Find("MenuManager").GetComponent<MenuCameraPositions>().Settings();
 
         MenuController mc = GameObject.Find("SettingsMenuController").GetComponent<MenuController>();
 
