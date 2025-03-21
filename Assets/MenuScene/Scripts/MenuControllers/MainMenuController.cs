@@ -18,12 +18,6 @@ public class MainMenuController : MenuController
         button_exit.onClick.AddListener(() => { ExitButtonFunction(); });
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public override void Show()
     {
         base.Show();
@@ -36,7 +30,12 @@ public class MainMenuController : MenuController
 
     public void StartButtonFunction()
     {
+        GameObject.Find("PositionManager").GetComponent<MenuCameraPositions>().Gamemode();
 
+        MenuController mc = GameObject.Find("GamemodeMenuController").GetComponent<MenuController>();
+
+        this.Hide();
+        mc.Show();
     }
 
     public void SettingsButtonFunction()

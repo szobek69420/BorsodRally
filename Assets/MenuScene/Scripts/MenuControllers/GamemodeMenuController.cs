@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SettingsMenuController : MenuController
+public class GamemodeMenuController : MenuController
 {
     [SerializeField] private Button button_goBack;
 
-    [SerializeField] private Slider slider_volume;
-    [SerializeField] private Slider slider_sensitivity;
+    [SerializeField] private Button button_singleplayer;
+    [SerializeField] private Button button_multiplayer;
 
     // Start is called before the first frame update
     void Start()
@@ -16,19 +16,9 @@ public class SettingsMenuController : MenuController
         button_goBack.onClick.AddListener(() => { GoBackButtonFunction(); });
     }
 
+
     public override void Show()
     {
-        if (!PlayerPrefs.HasKey("volume"))
-            PlayerPrefs.SetFloat("volume", 1.0f);
-        if (!PlayerPrefs.HasKey("sensitivity"))
-            PlayerPrefs.SetFloat("sensitivity", 1.0f);
-
-        float volume = PlayerPrefs.GetFloat("volume");
-        float sensitivity = PlayerPrefs.GetFloat("sensitivity");
-
-        slider_volume.value = volume;
-        slider_sensitivity.value = sensitivity;
-
         base.Show();
     }
 
