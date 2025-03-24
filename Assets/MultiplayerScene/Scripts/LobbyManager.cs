@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using UnityEngine;
 using Unity.VisualScripting;
+using TMPro;
 
 public class LobbyManager : MonoBehaviour
 {
@@ -13,6 +14,8 @@ public class LobbyManager : MonoBehaviour
     private Thread lobbyResponderThread = null;
 
     private IPAddress localAddress = null;
+
+    [SerializeField] private TMP_Text text_debug;
 
     // Start is called before the first frame update
     void Start()
@@ -64,10 +67,22 @@ public class LobbyManager : MonoBehaviour
     {
         using (UdpClient client = new UdpClient())//so that the socket is yeeted automatically
         {
-            IPEndPoint localEP = new IPEndPoint(localAddress, 42666);
-            client.Client.Bind(localEP);
-            client.Client.ReceiveTimeout = 100;
-
+            int port = 42666;
+            IPEndPoint localEP = null;
+            while (true)//try as long as we find a free port
+            {
+                try
+                {
+                    localEP = new IPEndPoint(IPAddress.Any, port);
+                    client.Client.Bind(localEP);
+                    break;
+                }
+                catch (SocketException se)
+                {
+                    port++;
+                }
+            }
+            
             while (true)
             {
                 IPEndPoint remoteEP = new IPEndPoint(IPAddress.Any, 0);
@@ -80,8 +95,8 @@ public class LobbyManager : MonoBehaviour
                     if(requestString.Equals("yo i wanna join"))//it is a request from a searcher thread
                     {
                         AvailableLobby replyData = new AvailableLobby(
-                            new IPEndPoint(localAddress, 42666),
-                            "robloxman",
+                            new IPEndPoint(localAddress, port),
+                            "Water Weight",
                             1,
                             4
                             );
