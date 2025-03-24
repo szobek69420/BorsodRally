@@ -78,7 +78,7 @@ public class GamemodeMenuController : MenuController
 
         base.Show();
 
-        switchCanvas(ActiveCanvas.GAMEMODE);
+        SwitchCanvas(ActiveCanvas.GAMEMODE);
     }
 
     public override void Hide()
@@ -88,7 +88,7 @@ public class GamemodeMenuController : MenuController
         base.Hide();
     }
 
-    private void switchCanvas(ActiveCanvas canvas)
+    private void SwitchCanvas(ActiveCanvas canvas)
     {
         Hide();
 
@@ -118,14 +118,14 @@ public class GamemodeMenuController : MenuController
 
     public void SingleplayerButtonFunction()
     {
-        switchCanvas(ActiveCanvas.SINGLE);
+        SwitchCanvas(ActiveCanvas.SINGLE);
         
         GameObject.Find("MenuManager").GetComponent<MenuCameraPositions>().Singleplayer();
     }
 
     public void MultiplayerButtonFunction()
     {
-        switchCanvas(ActiveCanvas.MULTI);
+        SwitchCanvas(ActiveCanvas.MULTI);
 
         //are lobbies already searched?
         if (lobbySearcherThread != null && lobbySearcherThread.IsAlive)
@@ -141,7 +141,7 @@ public class GamemodeMenuController : MenuController
 
     public void GoBackFromSingleButtonFunction()
     {
-        switchCanvas(ActiveCanvas.GAMEMODE);
+        SwitchCanvas(ActiveCanvas.GAMEMODE);
 
         GameObject.Find("MenuManager").GetComponent<MenuCameraPositions>().Gamemode();
     }
@@ -179,25 +179,8 @@ public class GamemodeMenuController : MenuController
                 {
                     byte[] reply=client.Receive(ref remoteEP);
 
-                    //expects a 5-long string array
-                    //replyMsg[0]: ip address
-                    //replyMsg[1]: port
-                    //replyMsg[2]: owner name
-                    //replyMsg[3]: current player count
-                    //replyMsg[4]: max player count
-                    string[] replyMsg = Encoding.ASCII.GetString(reply).Split("||");
-
-                    IPEndPoint serverEP=new IPEndPoint(long.Parse(replyMsg[0]),int.Parse(replyMsg[1]));
-                    string ownerName = replyMsg[2];
-                    int playerCount=int.Parse(replyMsg[3]);
-                    int maxPlayerCount=int.Parse(replyMsg[4]);
-
-                    availableLobbies.Add(new AvailableLobby(
-                            serverEP,
-                            ownerName,
-                            playerCount,
-                            maxPlayerCount
-                        ));
+                    string replyMsg = Encoding.ASCII.GetString(reply);
+                    availableLobbies.Add(AvailableLobby.ParseString(replyMsg));
                 }
                 catch(SocketException se)
                 {
