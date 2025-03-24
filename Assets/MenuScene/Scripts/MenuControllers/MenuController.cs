@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class MenuController : MonoBehaviour
 {
-    [SerializeField] private Canvas[] canvases;
+    [SerializeField] protected Canvas[] canvases;
 
     public virtual void Show()
     {
