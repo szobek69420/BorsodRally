@@ -6,6 +6,9 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using TMPro;
+using TreeEditor;
+using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -188,6 +191,8 @@ public class GamemodeMenuController : MenuController
 
     public void StartMultiplayerHostButtonFunction()
     {
+        KillLobbySearcherThread();
+
         PlayerPrefs.SetInt("length", (int)slider_lengthHost.value);
 
         int seed;
@@ -209,8 +214,23 @@ public class GamemodeMenuController : MenuController
 
     private void SearchForAvailableLobbies()
     {
-        using (UdpClient client = new UdpClient(42069))//so that the socket is yeeted automatically
+        using (UdpClient client = new UdpClient())//so that the socket is yeeted automatically
         {
+            int port = 42069;
+            IPEndPoint localEP = null;
+            while(true)//try as long as we find a free port
+            {
+                try
+                {
+                    localEP = new IPEndPoint(IPAddress.Any, port);
+                    client.Client.Bind(localEP);
+                    break;
+                }
+                catch (SocketException se)
+                {
+                    port++;
+                }
+            }
             client.Client.ReceiveTimeout = 100;
 
             //TODO: send a request in every for example 5 seconds to get up-to-date lobby info
@@ -219,7 +239,7 @@ public class GamemodeMenuController : MenuController
 
             while (true)
             {
-                IPEndPoint remoteEP = new IPEndPoint(IPAddress.Any, 0);
+                IPEndPoint remoteEP=null;
 
                 try
                 {
@@ -227,6 +247,8 @@ public class GamemodeMenuController : MenuController
 
                     string replyMsg = Encoding.ASCII.GetString(reply);
                     availableLobbies.Add(AvailableLobby.ParseString(replyMsg));
+
+                    Debug.Log(replyMsg);
                 }
                 catch(SocketException se)
                 {

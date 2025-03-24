@@ -12,6 +12,8 @@ public class LobbyManager : MonoBehaviour
     //this is the thread that is responsibly for responding to the lobby searcher thread in the menu
     private Thread lobbyResponderThread = null;
 
+    private IPAddress localAddress = null;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -28,6 +30,21 @@ public class LobbyManager : MonoBehaviour
     {
         if (lobbyResponderThread != null && lobbyResponderThread.IsAlive)
             return;
+
+        //get ip address (connect to a dns server)
+        try
+        {
+            UdpClient addressObtainer = new UdpClient(42042);
+            addressObtainer.Connect(new IPEndPoint(IPAddress.Parse("4.2.2.2"), 60000));
+            IPEndPoint localEndpoint = addressObtainer.Client.LocalEndPoint as IPEndPoint;
+            localAddress = localEndpoint.Address;
+            addressObtainer.Close();
+        }
+        catch(SocketException se)
+        {
+            localAddress = IPAddress.Any;
+        }
+
 
         lobbyResponderThread= new Thread(LobbyResponderThread);
         lobbyResponderThread.IsBackground=true;
@@ -47,7 +64,7 @@ public class LobbyManager : MonoBehaviour
     {
         using (UdpClient client = new UdpClient())//so that the socket is yeeted automatically
         {
-            IPEndPoint localEP = new IPEndPoint(IPAddress.Any, 42666);
+            IPEndPoint localEP = new IPEndPoint(localAddress, 42666);
             client.Client.Bind(localEP);
             client.Client.ReceiveTimeout = 100;
 
@@ -63,7 +80,7 @@ public class LobbyManager : MonoBehaviour
                     if(requestString.Equals("yo i wanna join"))//it is a request from a searcher thread
                     {
                         AvailableLobby replyData = new AvailableLobby(
-                            client.Client.LocalEndPoint as IPEndPoint,
+                            new IPEndPoint(localAddress, 42666),
                             "robloxman",
                             1,
                             4
