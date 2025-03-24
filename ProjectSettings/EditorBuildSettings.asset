@@ -11,4 +11,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/TrackGen.unity
     guid: 80702a2774e2122499ec6b68ffd93faa
+  - enabled: 1
+    path: Assets/Scenes/Multiplayer.unity
+    guid: 1fbc1f8ba6e966846bd695f455dffb95
   m_configObjects: {}

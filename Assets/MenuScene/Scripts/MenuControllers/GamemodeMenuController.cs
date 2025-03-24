@@ -12,22 +12,37 @@ using UnityEngine.UI;
 
 public class GamemodeMenuController : MenuController
 {
+    private enum ActiveCanvas
+    {
+        GAMEMODE, SINGLEPLAYER, MULTIPLAYER
+    };
+
     [SerializeField] private Button button_goBack;
     [SerializeField] private Button button_goBackFromSingle;
+    [SerializeField] private Button button_goBackFromMulti;
 
     [SerializeField] private Button button_singleplayer;
     [SerializeField] private Button button_multiplayer;
 
-    [SerializeField] private Button button_start;
+    [SerializeField] private Button button_multiplayerHost;
+
+    [SerializeField] private Button button_launchSingle;
+    [SerializeField] private Button button_launchMultiHost;
 
     [SerializeField] private Slider slider_length;
     [SerializeField] private Slider slider_curviness;
     [SerializeField] private Slider slider_difficulty;
 
+    [SerializeField] private Slider slider_lengthHost;
+    [SerializeField] private Slider slider_curvinessHost;
+    [SerializeField] private Slider slider_difficultyHost;
+
     [SerializeField] private TMP_InputField inputField_seed;
+    [SerializeField] private TMP_InputField inputField_seedHost;
 
     [SerializeField] private Canvas canvas_singlePlayer;
-    [SerializeField] private Canvas canvas_multiPlayer;
+    [SerializeField] private Canvas canvas_multiPlayerParent;
+    [SerializeField] private Canvas canvas_multiPlayerHost;
     [SerializeField] private Canvas canvas_gameMode;
 
     private ConcurrentList<AvailableLobby> availableLobbies=new ConcurrentList<AvailableLobby>();
@@ -39,11 +54,15 @@ public class GamemodeMenuController : MenuController
     {
         button_goBack.onClick.AddListener(() => { GoBackButtonFunction(); PlayClickSound(); });
         button_goBackFromSingle.onClick.AddListener(() => { GoBackFromSingleButtonFunction(); PlayClickSound(); });
+        button_goBackFromMulti.onClick.AddListener(() => { GoBackFromMultiButtonFunction(); PlayClickSound(); });
 
         button_singleplayer.onClick.AddListener(() => { SingleplayerButtonFunction(); PlayClickSound(); });
-        button_multiplayer.onClick.AddListener(() => { PlayClickSound(); });
+        button_multiplayer.onClick.AddListener(() => { MultiplayerButtonFunction();  PlayClickSound(); });
 
-        button_start.onClick.AddListener(() => { PlayClickSound(); StartButtonFunction(); });
+        button_multiplayerHost.onClick.AddListener(() => { HostButtonFunction(); PlayClickSound(); });
+
+        button_launchSingle.onClick.AddListener(() => { PlayClickSound(); StartSingleplayerButtonFunction(); });
+        button_launchMultiHost.onClick.AddListener(() => { PlayClickSound(); StartMultiplayerHostButtonFunction(); });
     }
 
 
@@ -66,9 +85,60 @@ public class GamemodeMenuController : MenuController
         slider_curviness.value = curviness;
         slider_difficulty.value = diffficulty;
 
-        inputField_seed.ActivateInputField();
+        slider_lengthHost.value = length;
+        slider_curvinessHost.value = curviness;
+        slider_difficultyHost.value = diffficulty;
 
-        canvas_gameMode.enabled = true;
+        inputField_seed.ActivateInputField();
+        inputField_seedHost.ActivateInputField();
+
+        SwitchCanvas(ActiveCanvas.GAMEMODE);
+    }
+
+    public override void Hide()
+    {
+        canvas_gameMode.enabled = false;
+        canvas_singlePlayer.enabled=false;
+        canvas_multiPlayerParent.enabled=false;
+        canvas_multiPlayerHost.enabled=false;
+
+        KillLobbySearcherThread();
+        base.Hide();
+    }
+
+    private void SwitchCanvas(ActiveCanvas choice)
+    {
+        Hide();
+
+        switch(choice)
+        {
+            case ActiveCanvas.GAMEMODE:
+                canvas_gameMode.enabled = true;
+                GameObject.Find("MenuManager").GetComponent<MenuCameraPositions>().Gamemode();
+                break;
+
+            case ActiveCanvas.SINGLEPLAYER:
+                canvas_singlePlayer.enabled = true;
+                GameObject.Find("MenuManager").GetComponent<MenuCameraPositions>().Singleplayer();
+                break;
+
+            case ActiveCanvas.MULTIPLAYER:
+                canvas_multiPlayerParent.enabled = true;
+
+                GameObject.Find("MenuManager").GetComponent<MenuCameraPositions>().Multiplayer();
+
+                //are lobbies already searched?
+                if (lobbySearcherThread != null && lobbySearcherThread.IsAlive)
+                    break;
+
+                availableLobbies.Clear();
+
+                //start a lobby searcher thread
+                lobbySearcherThread = new Thread(SearchForAvailableLobbies);
+                lobbySearcherThread.IsBackground = true;
+                lobbySearcherThread.Start();
+                break;
+        }
     }
 
     public void GoBackButtonFunction()
@@ -83,38 +153,25 @@ public class GamemodeMenuController : MenuController
 
     public void SingleplayerButtonFunction()
     {
-        canvas_gameMode.enabled = false;
-        canvas_singlePlayer.enabled = true;
-        
-        GameObject.Find("MenuManager").GetComponent<MenuCameraPositions>().Singleplayer();
+        SwitchCanvas(ActiveCanvas.SINGLEPLAYER);
     }
 
     public void MultiplayerButtonFunction()
     {
-        canvas_gameMode.enabled = false;
-        canvas_multiPlayer.enabled = true;
-
-        //are lobbies already searched?
-        if (lobbySearcherThread != null && lobbySearcherThread.IsAlive)
-            return;
-
-        availableLobbies.Clear();
-
-        //start a lobby searcher thread
-        lobbySearcherThread = new Thread(SearchForAvailableLobbies);
-        lobbySearcherThread.IsBackground = true;
-        lobbySearcherThread.Start();
+        SwitchCanvas(ActiveCanvas.MULTIPLAYER);
     }
 
     public void GoBackFromSingleButtonFunction()
     {
-        canvas_singlePlayer.enabled = false;
-        canvas_gameMode.enabled = true;
-
-        GameObject.Find("MenuManager").GetComponent<MenuCameraPositions>().Gamemode();
+        SwitchCanvas(ActiveCanvas.GAMEMODE);
     }
 
-    public void StartButtonFunction()
+    public void GoBackFromMultiButtonFunction()
+    {
+        SwitchCanvas(ActiveCanvas.GAMEMODE);
+    }
+
+    public void StartSingleplayerButtonFunction()
     {
         PlayerPrefs.SetInt("length", (int)slider_length.value);
 
@@ -127,6 +184,27 @@ public class GamemodeMenuController : MenuController
         PlayerPrefs.SetInt("difficulty", (int)slider_difficulty.value);
         
         SceneManager.LoadSceneAsync("TrackGen");
+    }
+
+    public void StartMultiplayerHostButtonFunction()
+    {
+        PlayerPrefs.SetInt("length", (int)slider_lengthHost.value);
+
+        int seed;
+        if (int.TryParse(inputField_seedHost.text, out seed))
+        {
+            PlayerPrefs.SetInt("seed", seed);
+        }
+
+        PlayerPrefs.SetFloat("curviness", slider_curvinessHost.value);
+        PlayerPrefs.SetInt("difficulty", (int)slider_difficultyHost.value);
+
+        SceneManager.LoadSceneAsync("Multiplayer");
+    }
+
+    public void HostButtonFunction()
+    {
+        canvas_multiPlayerHost.enabled = true;
     }
 
     private void SearchForAvailableLobbies()
@@ -147,25 +225,8 @@ public class GamemodeMenuController : MenuController
                 {
                     byte[] reply=client.Receive(ref remoteEP);
 
-                    //expects a 5-long string array
-                    //replyMsg[0]: ip address
-                    //replyMsg[1]: port
-                    //replyMsg[2]: owner name
-                    //replyMsg[3]: current player count
-                    //replyMsg[4]: max player count
-                    string[] replyMsg = Encoding.ASCII.GetString(reply).Split("||");
-
-                    IPEndPoint serverEP=new IPEndPoint(long.Parse(replyMsg[0]),int.Parse(replyMsg[1]));
-                    string ownerName = replyMsg[2];
-                    int playerCount=int.Parse(replyMsg[3]);
-                    int maxPlayerCount=int.Parse(replyMsg[4]);
-
-                    availableLobbies.Add(new AvailableLobby(
-                            serverEP,
-                            ownerName,
-                            playerCount,
-                            maxPlayerCount
-                        ));
+                    string replyMsg = Encoding.ASCII.GetString(reply);
+                    availableLobbies.Add(AvailableLobby.ParseString(replyMsg));
                 }
                 catch(SocketException se)
                 {
