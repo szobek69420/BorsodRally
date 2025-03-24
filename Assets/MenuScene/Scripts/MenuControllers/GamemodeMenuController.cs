@@ -22,7 +22,9 @@ public class GamemodeMenuController : MenuController
 
     [SerializeField] private TMP_InputField inputField_seed;
 
-    [SerializeField] private enum ActiveCanvas { GAMEMODE, SINGLE, MULTI};
+    [SerializeField] private Canvas canvas_singlePlayer;
+    [SerializeField] private Canvas canvas_multiPlayer;
+    [SerializeField] private Canvas canvas_gameMode;
 
     // Start is called before the first frame update
     void Start()
@@ -51,44 +53,14 @@ public class GamemodeMenuController : MenuController
         int length = PlayerPrefs.GetInt("length");
         float curviness = PlayerPrefs.GetFloat("curviness");
         int diffficulty = PlayerPrefs.GetInt("difficulty");
-
-        slider_length.minValue = 10;
-        slider_length.maxValue = 100;
-        slider_length.wholeNumbers = true;
+        
         slider_length.value = length;
-
-        slider_curviness.minValue = 0f;
-        slider_curviness.maxValue = 20f;
         slider_curviness.value = curviness;
-
-        slider_difficulty.minValue = 1f;
-        slider_difficulty.maxValue = 5f;
-        slider_difficulty.wholeNumbers = true;
         slider_difficulty.value = diffficulty;
 
         inputField_seed.ActivateInputField();
 
-        base.Show();
-
-        switchCanvas(ActiveCanvas.GAMEMODE);
-    }
-
-    private void switchCanvas(ActiveCanvas canvas)
-    {
-        Hide();
-
-        switch (canvas)
-        {
-            case ActiveCanvas.GAMEMODE:
-                canvases[0].enabled = true;
-                break;
-            case ActiveCanvas.SINGLE:
-                canvases[1].enabled = true;
-                break;
-            case ActiveCanvas.MULTI:
-                canvases[2].enabled = true;
-                break;
-        }
+        canvas_gameMode.enabled = true;
     }
 
     public void GoBackButtonFunction()
@@ -103,14 +75,16 @@ public class GamemodeMenuController : MenuController
 
     public void SingleplayerButtonFunction()
     {
-        switchCanvas(ActiveCanvas.SINGLE);
+        canvas_gameMode.enabled = false;
+        canvas_singlePlayer.enabled = true;
         
         GameObject.Find("MenuManager").GetComponent<MenuCameraPositions>().Singleplayer();
     }
 
     public void GoBackFromSingleButtonFunction()
     {
-        switchCanvas(ActiveCanvas.GAMEMODE);
+        canvas_singlePlayer.enabled = false;
+        canvas_gameMode.enabled = true;
 
         GameObject.Find("MenuManager").GetComponent<MenuCameraPositions>().Gamemode();
     }
