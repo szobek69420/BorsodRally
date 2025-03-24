@@ -6,19 +6,23 @@ using Unity.VisualScripting;
 
 public class RacetrackGenerator : MonoBehaviour
 {
-    public int trackLength = 100;       // Number of track segments
-    public float trackWidth = 5f;       // Width of the track
-    public float perlinScaleZ = 1f;     // Scale for the Perlin noise in Z-axis
-    public float perlinScaleY = 0.1f;   // Scale for the Perlin noise in Y-axis 
-    public int seed = 42;               // Seed for the Perlin Noise generation
-    public Material trackMaterial;      // Material to apply to the track surface
+    [SerializeField] public int seed = 42;                                              // Seed for the Perlin Noise generation
+    [SerializeField] public int trackLength = 100;                                      // Number of track segments
+    [SerializeField] public int trackWidth = 5;                                         // Width of the track
+    [SerializeField] public float perlinScaleZ = 1f;                                    // Scale for the Perlin noise in Z-axis
+    [SerializeField] public float perlinScaleY = 0.05f;                                 // Scale for the Perlin noise in Y-axis 
+    [SerializeField] public Material trackMaterial;                                     // Material to apply to the track surface
 
-    private List<Vector3> trackPoints = new List<Vector3>();    // List to hold track points
-    private MeshFilter meshFilter;                              // MeshFilter to apply the mesh to the object
-    private MeshRenderer meshRenderer;                          // MeshRenderer to apply the material
+    [SerializeField] private List<Vector3> trackPoints = new List<Vector3>();    // List to hold track points
+    [SerializeField] private MeshFilter meshFilter;                              // MeshFilter to apply the mesh to the object
+    [SerializeField] private MeshRenderer meshRenderer;                          // MeshRenderer to apply the material
 
     void Start()
     {
+        seed = PlayerPrefs.GetInt("seed");
+        trackLength = PlayerPrefs.GetInt("length");
+        perlinScaleZ = PlayerPrefs.GetFloat("curviness");
+
         StartGen();
     }
 
@@ -84,22 +88,6 @@ public class RacetrackGenerator : MonoBehaviour
             currentY += Mathf.Sin(currentX * 0.1f) * 20f * perlinScaleY;
 
             trackPoints.Add(new Vector3(currentX, currentY, currentZ));
-            //trackPoints.Add(new Vector3(currentX, 0, currentZ));
-
-            /*currentX = UnityEngine.Random.Range(-1f, 1f);
-            currentZ = UnityEngine.Random.Range(-1f, 1f);
-
-            currentY = Mathf.PerlinNoise(seed * currentY, 0.01f * currentY + seed) * 5f;
-            currentY += Mathf.Sin(currentX * 0.1f) * 20f * perlinScaleY;
-
-            Vector3 p = new Vector3(currentX, 0, currentZ);
-
-            p *= (20f/p.magnitude);
-            p += trackPoints[i - 1];
-            //p.y = currentY;
-
-            // Add the new point to the track
-            trackPoints.Add(p);*/
         }
     }
 
@@ -227,7 +215,7 @@ public class RacetrackGenerator : MonoBehaviour
             Vector3 p2 = trackPoints[i + 1];
             Vector3 p3 = trackPoints[i + 2];
 
-            for (float t = 0f; t <= 1f; t += 0.05f)
+            for (float t = 0f; t <= 1f; t += 0.01f)
             {
                 Vector3 smoothPoint = CatmullRom(p0, p1, p2, p3, t);
                 smoothPath.Add(smoothPoint);
