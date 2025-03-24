@@ -111,6 +111,15 @@ public class RacetrackGenerator : MonoBehaviour
         List<int> triangles = new List<int>();
         int vertexIndex = 0;
 
+        float uvCoordX1 = (90f / 780f);
+        float uvCoordX2 = (690f / 780f);
+
+        Vector2[] textUVs = new Vector2[] { new Vector2(uvCoordX1, 0f), new Vector2(uvCoordX2, 0f), Vector2.zero, Vector2.right, 
+            new Vector2(uvCoordX1, 0.25f), new Vector2(uvCoordX2, 0.25f), new Vector2(0f, 0.25f), new Vector2(1f, 0.25f),
+            new Vector2(uvCoordX1, 0.5f), new Vector2(uvCoordX2, 0.5f), new Vector2(0f, 0.5f), new Vector2(1f, 0.5f),
+            new Vector2(uvCoordX1, 0.75f), new Vector2(uvCoordX2, 0.75f), new Vector2(0f, 0.75f), new Vector2(1f, 0.75f),
+            new Vector2(uvCoordX1, 1f), new Vector2(uvCoordX2, 1f), Vector2.up, Vector2.one};
+
         for (int i = 0; i < points.Count; i++)
         {
             Vector3 forward = Vector3.zero;
@@ -136,21 +145,12 @@ public class RacetrackGenerator : MonoBehaviour
 
             vertices.Add(a);
             vertices.Add(b);
-    
-            if(i%2 == 0)
+
+            if (i % 5 == 0)
             {
-                uvs.Add(new Vector2((90 / 780), 0));
-                uvs.Add(new Vector2((690 / 780), 0));
-                uvs.Add(Vector2.zero);
-                uvs.Add(Vector2.right);
-
-                uvs.Add(new Vector2((90 / 780), 1));
-                uvs.Add(new Vector2((690 / 780), 1));
-                uvs.Add(Vector2.up);
-                uvs.Add(Vector2.one);
-
+                uvs.AddRange(textUVs);
             }
-            
+
             if (i < points.Count - 1)
             {
                 triangles.Add(vertexIndex);
@@ -181,6 +181,10 @@ public class RacetrackGenerator : MonoBehaviour
             }
             vertexIndex += 4;
         }
+
+        Debug.Log(uvs.Count);
+        Debug.Log(vertices.Count);
+        Debug.Log(points.Count);
 
         Mesh mesh = new Mesh();
         mesh.vertices = vertices.ToArray();
@@ -215,7 +219,7 @@ public class RacetrackGenerator : MonoBehaviour
             Vector3 p2 = trackPoints[i + 1];
             Vector3 p3 = trackPoints[i + 2];
 
-            for (float t = 0f; t <= 1f; t += 0.01f)
+            for (float t = 0f; t <= 1f; t += 0.05f)
             {
                 Vector3 smoothPoint = CatmullRom(p0, p1, p2, p3, t);
                 smoothPath.Add(smoothPoint);

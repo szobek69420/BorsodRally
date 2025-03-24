@@ -1864,8 +1864,8 @@ MonoBehaviour:
   m_HandleRect: {fileID: 396539876}
   m_Direction: 0
   m_MinValue: 0
-  m_MaxValue: 1
-  m_WholeNumbers: 0
+  m_MaxValue: 20
+  m_WholeNumbers: 1
   m_Value: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1926,6 +1926,9 @@ MonoBehaviour:
   slider_curviness: {fileID: 459546357}
   slider_difficulty: {fileID: 1087497857}
   inputField_seed: {fileID: 1248328246}
+  canvas_singlePlayer: {fileID: 502412670}
+  canvas_multiPlayer: {fileID: 0}
+  canvas_gameMode: {fileID: 1015291522}
 --- !u!1 &473872418
 GameObject:
   m_ObjectHideFlags: 0
@@ -4046,10 +4049,10 @@ MonoBehaviour:
   m_FillRect: {fileID: 1828156709}
   m_HandleRect: {fileID: 1533100532}
   m_Direction: 0
-  m_MinValue: 0
-  m_MaxValue: 1
-  m_WholeNumbers: 0
-  m_Value: 0
+  m_MinValue: 1
+  m_MaxValue: 5
+  m_WholeNumbers: 1
+  m_Value: 1
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -7504,10 +7507,10 @@ MonoBehaviour:
   m_FillRect: {fileID: 1595107171}
   m_HandleRect: {fileID: 1089339865}
   m_Direction: 0
-  m_MinValue: 0
-  m_MaxValue: 1
-  m_WholeNumbers: 0
-  m_Value: 0
+  m_MinValue: 10
+  m_MaxValue: 100
+  m_WholeNumbers: 1
+  m_Value: 10
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
