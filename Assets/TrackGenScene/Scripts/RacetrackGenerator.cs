@@ -127,7 +127,7 @@ public class RacetrackGenerator : MonoBehaviour
             {
                 forward += points[i + 1] - points[i];
             }
-            if (i > 0)
+            else
             {
                 forward += points[i] - points[i - 1];
             }
@@ -135,8 +135,21 @@ public class RacetrackGenerator : MonoBehaviour
 
             Vector3 left = new Vector3(-forward.z, forward.y, forward.x);
 
-            vertices.Add(points[i] + left * trackWidth * 0.5f);
-            vertices.Add(points[i] - left * trackWidth * 0.5f);
+            if (i < 2)
+            {
+                vertices.Add(points[i] + left * trackWidth * 0.5f);
+                vertices.Add(points[i] - left * trackWidth * 0.5f);
+            }
+            else
+            {
+                Vector3 oldForward = points[i - 1] - points[i - 2];
+                float angle = Vector3.SignedAngle(oldForward, forward, Vector3.up);
+
+                float shift = Mathf.Lerp(0f, 1f, (angle + 90) / 180);
+
+                vertices.Add(points[i] + left * trackWidth * shift);
+                vertices.Add(points[i] - left * trackWidth * (1 - shift));
+            }
 
             Vector3 a = vertices[vertices.Count - 2];
             a.y += 3f;
@@ -181,10 +194,6 @@ public class RacetrackGenerator : MonoBehaviour
             }
             vertexIndex += 4;
         }
-
-        Debug.Log(uvs.Count);
-        Debug.Log(vertices.Count);
-        Debug.Log(points.Count);
 
         Mesh mesh = new Mesh();
         mesh.vertices = vertices.ToArray();

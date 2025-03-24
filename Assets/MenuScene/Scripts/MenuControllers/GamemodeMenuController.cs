@@ -91,7 +91,8 @@ public class GamemodeMenuController : MenuController
 
     public void MultiplayerButtonFunction()
     {
-        switchCanvas(ActiveCanvas.MULTI);
+        canvas_gameMode.enabled = false;
+        canvas_multiPlayer.enabled = true;
 
         //are lobbies already searched?
         if (lobbySearcherThread != null && lobbySearcherThread.IsAlive)
