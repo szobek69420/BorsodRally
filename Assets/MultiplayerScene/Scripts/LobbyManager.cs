@@ -92,13 +92,13 @@ public class LobbyManager : MonoBehaviour
                     byte[] request = client.Receive(ref remoteEP);
                     string requestString = Encoding.ASCII.GetString(request);
 
-                    if(requestString.Equals("yo i wanna join"))//it is a request from a searcher thread
+                    if(requestString.Substring(0,16).Equals("yo i wanna join "))//it is a request from a searcher thread
                     {
-                        AvailableLobby replyData = new AvailableLobby(
-                            new IPEndPoint(localAddress, port),
-                            "Water Weight",
-                            1,
-                            4
+                        int requestScanCount=System.Convert.ToInt32(requestString.Substring(16));
+
+                        LobbyScanInfo replyData = new LobbyScanInfo(
+                            new AvailableLobby(new IPEndPoint(localAddress, port), "Water Weight", 1, 4),
+                            requestScanCount
                             );
                         byte[] reply = Encoding.ASCII.GetBytes(replyData.ToString());
                         client.Send(reply, reply.Length, remoteEP);
