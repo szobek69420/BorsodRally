@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
@@ -18,6 +19,7 @@ public class GamemodeMenuController : MenuController
     {
         GAMEMODE, SINGLEPLAYER, MULTIPLAYER
     };
+
 
     //canvases
     [SerializeField] private Canvas canvas_gameMode;
@@ -54,7 +56,7 @@ public class GamemodeMenuController : MenuController
 
     [SerializeField] private Button button_multiplayerJoin;
 
-    private ConcurrentList<AvailableLobby> availableLobbies = new ConcurrentList<AvailableLobby>();
+    private ConcurrentList<LobbyScanInfo> availableLobbies = new ConcurrentList<LobbyScanInfo>();
     private Thread lobbySearcherThread = null;
 
     [SerializeField] private Transform lobbyInfoParent;
@@ -135,19 +137,7 @@ public class GamemodeMenuController : MenuController
 
             case ActiveCanvas.MULTIPLAYER:
                 canvas_multiPlayerParent.enabled = true;
-
                 GameObject.Find("MenuManager").GetComponent<MenuCameraPositions>().Multiplayer();
-
-                //are lobbies already searched?
-                if (lobbySearcherThread != null && lobbySearcherThread.IsAlive)
-                    break;
-
-                availableLobbies.Clear();
-
-                //start a lobby searcher thread
-                lobbySearcherThread = new Thread(SearchForAvailableLobbies);
-                lobbySearcherThread.IsBackground = true;
-                lobbySearcherThread.Start();
                 break;
         }
     }
@@ -224,12 +214,16 @@ public class GamemodeMenuController : MenuController
     {
         canvas_multiPlayerJoin.enabled = false;
         canvas_multiPlayerHost.enabled = true;
+
+        KillLobbySearcherThread();
     }
 
     public void JoinButtonFunction()
     {
         canvas_multiPlayerHost.enabled = false;
         canvas_multiPlayerJoin.enabled = true;
+
+        StartLobbySearcherThread();
     }
 
     private void SearchForAvailableLobbies()
@@ -253,12 +247,37 @@ public class GamemodeMenuController : MenuController
             }
             client.Client.ReceiveTimeout = 100;
 
-            //TODO: send a request in every for example 5 seconds to get up-to-date lobby info
-            byte[] joinMsg = Encoding.ASCII.GetBytes("yo i wanna join");
-            client.Send(joinMsg, joinMsg.Length, new IPEndPoint(IPAddress.Broadcast, 42666));
+
+            long lastMessageTime = 0;
+            int scanCount = 0;
+            Stopwatch timer= new Stopwatch();
+            timer.Start();
 
             while (true)
             {
+                timer.Stop();
+                lastMessageTime += timer.ElapsedMilliseconds;
+                timer.Restart();
+
+                if(lastMessageTime>1000)
+                {
+                    //update variables
+                    lastMessageTime = 0;
+                    scanCount++;
+
+                    //yeet the lobbies whose host didn't respond for a long time
+                    for(int i=0;i<availableLobbies.Count;i++)
+                    {
+                        if (scanCount - availableLobbies[i].lastScanCount > 3)
+                            availableLobbies.RemoveAt(i--);
+                    }
+
+                    //scan the network
+                    byte[] joinMsg = Encoding.ASCII.GetBytes("yo i wanna join "+scanCount.ToString());
+                    for (int i=42666;i<42671;i++)//only scans the first 5 possible addresses
+                        client.Send(joinMsg, joinMsg.Length, new IPEndPoint(IPAddress.Broadcast, i));
+                }
+
                 IPEndPoint remoteEP=null;
 
                 try
@@ -266,14 +285,30 @@ public class GamemodeMenuController : MenuController
                     byte[] reply=client.Receive(ref remoteEP);
 
                     string replyMsg = Encoding.ASCII.GetString(reply);
-                    availableLobbies.Add(AvailableLobby.ParseString(replyMsg));
+                    LobbyScanInfo replyData=LobbyScanInfo.ParseString(replyMsg);
+
+                    //check if the reply is about an already registered lobby
+                    bool lobbyAlreadyExists = false;
+                    for(int i=0;i<availableLobbies.Count;i++)
+                    {
+                        if (availableLobbies[i].lobbyInfo.ip.Equals(replyData.lobbyInfo.ip))
+                        {
+                            availableLobbies[i] = replyData;
+                            lobbyAlreadyExists = true;
+                            break;
+                        }
+                    }
+
+                    //if not, register it
+                    if(!lobbyAlreadyExists)
+                        availableLobbies.Add(replyData);
                 }
                 catch(SocketException se)
                 {
                     if (se.SocketErrorCode == SocketError.TimedOut)
                         continue;
 
-                    Debug.Log(se.ToString());
+                    UnityEngine.Debug.Log(se.ToString());
                 }
             }
         }
@@ -286,6 +321,24 @@ public class GamemodeMenuController : MenuController
 
         if (lobbySearcherThread != null)
             lobbySearcherThread = null;
+
+        //Debug.Log("lobby searcher killed");
+    }
+
+    private void StartLobbySearcherThread()
+    {
+        //are lobbies already searched?
+        if (lobbySearcherThread != null && lobbySearcherThread.IsAlive)
+            return;
+
+        availableLobbies.Clear();
+
+        //start a lobby searcher thread
+        lobbySearcherThread = new Thread(SearchForAvailableLobbies);
+        lobbySearcherThread.IsBackground = true;
+        lobbySearcherThread.Start();
+
+        //Debug.Log("lobby searcher started");
     }
 
     private IEnumerator LobbyInfoUpdater()
@@ -305,7 +358,7 @@ public class GamemodeMenuController : MenuController
                     GameObject instance = Instantiate(lobbyInfoPrefabs, lobbyInfoParent);
                     instance.transform.localPosition = new Vector3(0, currentPositionY, 0);
                     instance.transform.localRotation = Quaternion.identity;
-                    instance.GetComponent<LobbyInfoUI>().Initialize(availableLobbies[i], StartMultiplayerJoinButtonFunction);
+                    instance.GetComponent<LobbyInfoUI>().Initialize(availableLobbies[i].lobbyInfo, StartMultiplayerJoinButtonFunction);
                     instantiatedLobbyInfos.Add(instance);
                 }
             }
