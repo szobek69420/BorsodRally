@@ -18,7 +18,7 @@ public abstract class RacerBase : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(true||gameManager?.State==GameManagerBase.GameState.RACE)
+        if(gameManager?.State==GameManagerBase.GameState.RACE)
         {
             ApplyGas();
             ApplyBrakes();

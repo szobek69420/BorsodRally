@@ -20,9 +20,36 @@ public abstract class GameManagerBase : MonoBehaviour
         protected set { _state = value; }
     }
 
-    [SerializeField] private RacetrackGenerator track;
+    [SerializeField] protected RacetrackGenerator track;
 
-    protected List<RacerBase> players = new List<RacerBase>();
+    protected List<GameObject> players = new List<GameObject>();
+
+    private void Start()
+    {
+        InitScene();
+    }
+
+    private void Update()
+    {
+        switch(State)
+        {
+            case GameState.LOBBY:
+                UpdateLobbyScreen();
+                break;
+
+            case GameState.COUNTDOWN:
+                UpdateCountdownScreen();
+                break;
+
+            case GameState.RACE:
+                UpdateRaceScreen();
+                break;
+
+            case GameState.END:
+                UpdateEndScreen();
+                break;
+        }
+    }
 
     protected abstract void InitScene();
     protected abstract void ShowLobbyScreen();
@@ -32,6 +59,5 @@ public abstract class GameManagerBase : MonoBehaviour
     protected abstract void StartRace();
     protected abstract void UpdateRaceScreen();
     public abstract void EndRace();
-    protected abstract void ShowEndScreen();
     protected abstract void UpdateEndScreen();
 }
