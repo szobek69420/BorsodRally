@@ -252,6 +252,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   carController: {fileID: 315010005834496200}
+  cameraOffset: {x: 0, y: 2, z: -5}
 --- !u!65 &2573106047334959294
 BoxCollider:
   m_ObjectHideFlags: 0

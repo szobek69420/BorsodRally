@@ -16,14 +16,16 @@ public abstract class RacerBase : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        if(gameManager?.State==GameManagerBase.GameState.RACE)
-        {
-            ApplyGas();
-            ApplyBrakes();
-            ApplySteering();
-        }
+        if (gameManager?.State == GameManagerBase.GameState.RACE)
+            RacerUpdate();
+    }
+
+    private void FixedUpdate()
+    {
+        if (gameManager?.State == GameManagerBase.GameState.RACE)
+            RacerFixedUpdate();
     }
 
     private void GetGameManager()
@@ -31,7 +33,6 @@ public abstract class RacerBase : MonoBehaviour
         gameManager = GameObject.Find("GameManager")?.GetComponent<GameManagerBase>();
     }
 
-    protected abstract void ApplyGas();
-    protected abstract void ApplyBrakes();
-    protected abstract void ApplySteering();
+    protected abstract void RacerUpdate();
+    protected abstract void RacerFixedUpdate();
 }
