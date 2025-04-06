@@ -16,6 +16,7 @@ public class GameManagerSingleplayer : GameManagerBase
 
     //ingame things
     [SerializeField] private Canvas canvas_ingame;
+    [SerializeField] private SpeedometerHandler speedo;
 
     //end things
     [SerializeField] private Canvas canvas_end;
@@ -69,7 +70,17 @@ public class GameManagerSingleplayer : GameManagerBase
     }
     protected override void UpdateRaceScreen()
     {
+        //get the player
+        foreach(var player in players)
+        {
+            RacerPlayer rp = null;
+            if (player.TryGetComponent<RacerPlayer>(out rp) == false)
+                continue;
 
+            Rigidbody rb = rp.gameObject.GetComponent<Rigidbody>();
+            speedo.SetSpeed(rb.velocity.magnitude);
+            break;
+        }
     }
 
     public override void EndRace()

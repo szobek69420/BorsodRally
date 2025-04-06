@@ -13,7 +13,6 @@ public class RacerPlayer : RacerBase
         ApplyBrakes();
         ApplyGas();
         ApplySteering();
-        UpdateCameraPosition();
     }
 
     protected override void RacerFixedUpdate()
@@ -50,7 +49,7 @@ public class RacerPlayer : RacerBase
                 cameraOffset.z * transform.forward +
                 cameraOffset.x * transform.right +
                 cameraOffset.y * Vector3.up;
-            rotation = Quaternion.LookRotation(transform.position - position);
+            rotation = Quaternion.LookRotation(transform.position + transform.up - position);
         }
         else
         {
@@ -64,20 +63,20 @@ public class RacerPlayer : RacerBase
                cameraOffset.z * forward +
                cameraOffset.x * right +
                cameraOffset.y * Vector3.up;
-            rotation = Quaternion.LookRotation(transform.position - position);
+            rotation = Quaternion.LookRotation(transform.position + transform.up - position);
         }
 
 
         Camera.main.transform.position = Vector3.Lerp(
                     Camera.main.transform.position,
                     position,
-                    0.1f
+                    0.2f
                     );
 
         Camera.main.transform.rotation = Quaternion.Lerp(
             Camera.main.transform.rotation,
             rotation,
-            0.1f
+            0.2f
             );
     }
 }
