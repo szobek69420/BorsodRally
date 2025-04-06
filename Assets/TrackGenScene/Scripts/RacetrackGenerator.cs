@@ -18,21 +18,25 @@ public class RacetrackGenerator : MonoBehaviour
     [SerializeField] private List<Vector3> trackPoints = new List<Vector3>();           // List to hold track points
     [SerializeField] private List<GameObject> trackParts = new List<GameObject>();      // List to hold track points
 
-    void Start()
+    private void Start()
     {
-        seed = PlayerPrefs.GetInt("seed");
-        trackLength = PlayerPrefs.GetInt("length");
-        perlinScaleZ = PlayerPrefs.GetFloat("curviness");
-
-        StartGen();
+        //FetchParameters();
+        //StartGen();
     }
 
-    void Update()
+    private void Update()
     {
         if(Input.GetKeyDown(KeyCode.R)) { ResetGen(); }
     }
 
-    void StartGen()
+    public void FetchParameters()
+    {
+        seed = PlayerPrefs.GetInt("seed");
+        trackLength = PlayerPrefs.GetInt("length");
+        perlinScaleZ = PlayerPrefs.GetFloat("curviness");
+    }
+
+    public void StartGen()
     {
         UnityEngine.Random.InitState(seed);
 
@@ -63,7 +67,7 @@ public class RacetrackGenerator : MonoBehaviour
 
     }
 
-    void ResetGen()
+    public void ResetGen()
     {
         Debug.Log("Reset");
 
@@ -75,7 +79,7 @@ public class RacetrackGenerator : MonoBehaviour
         StartGen();
     }
 
-    void GenerateSprintTrackPoints()
+    private void GenerateSprintTrackPoints()
     {
         trackPoints.Clear();
 
@@ -100,7 +104,7 @@ public class RacetrackGenerator : MonoBehaviour
         }
     }
 
-    void GenerateCircuitTrackPoints()
+    private void GenerateCircuitTrackPoints()
     {
         trackPoints.Clear();
 
@@ -111,6 +115,7 @@ public class RacetrackGenerator : MonoBehaviour
         trackPoints.Add(new Vector3(currentX, currentY, currentZ)); // Add the starting point (0, 0, 0)
 
     }
+
 
     void CreateRacetrackPhysicsMesh(List<Vector3> points, List<GameObject> gameObj)
     {
@@ -259,7 +264,7 @@ public class RacetrackGenerator : MonoBehaviour
         return smoothPath;
     }
 
-    Vector3 CatmullRom(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
+    private Vector3 CatmullRom(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
     {
         float t2 = t * t;
         float t3 = t2 * t;
