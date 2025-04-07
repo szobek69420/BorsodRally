@@ -32,11 +32,6 @@ public class SettingsMenuController : MenuController
         base.Show();
     }
 
-    public override void Hide()
-    {
-        base.Hide();
-    }
-
     public void GoBackButtonFunction()
     {
         GameObject.Find("MenuManager").GetComponent<MenuCameraPositions>().MainMenu();

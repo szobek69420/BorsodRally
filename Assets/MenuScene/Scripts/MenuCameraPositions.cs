@@ -27,6 +27,11 @@ public class MenuCameraPositions : MonoBehaviour
     [SerializeField] private Vector3 carPos_singleplayer;
     [SerializeField] private Vector3 carRot_singleplayer;
 
+    [SerializeField] private Vector3 cumPos_multiplayer;
+    [SerializeField] private Vector3 cumRot_multiplayer;
+    [SerializeField] private Vector3 carPos_multiplayer;
+    [SerializeField] private Vector3 carRot_multiplayer;
+
 
     private Vector3 targetCumPos;
     private Quaternion targetCumRot;
@@ -86,5 +91,14 @@ public class MenuCameraPositions : MonoBehaviour
 
         targetCarPos = carPos_singleplayer;
         targetCarRot = Quaternion.Euler(carRot_singleplayer);
+    }
+
+    public void Multiplayer()
+    {
+        targetCumPos = cumPos_multiplayer;
+        targetCumRot = Quaternion.Euler(cumRot_multiplayer);
+
+        targetCarPos = carPos_multiplayer;
+        targetCarRot = Quaternion.Euler(carRot_multiplayer);
     }
 }
