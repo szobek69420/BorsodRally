@@ -20,6 +20,11 @@ public class RacerPlayer : RacerBase
         UpdateCameraPosition();
     }
 
+    protected override void RacerOnFinish()
+    {
+        gameManager?.EndRace();
+    }
+
     private void ApplyBrakes()
     {
         carController.BrakeInput = Input.GetKey(KeyCode.Space) ? 1.0f : 0.0f;

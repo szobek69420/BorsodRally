@@ -8,21 +8,22 @@ using System.Drawing;
 
 public class RacetrackGenerator : MonoBehaviour
 {
-    [SerializeField] public int seed = 42;                                              // Seed for the Perlin Noise generation
-    [SerializeField] public int trackLength = 30;                                      // Number of track segments
-    [SerializeField] public int trackWidth = 15;                                        // Width of the track
-    [SerializeField] public float perlinScaleZ = 4f;                                    // Scale for the Perlin noise in Z-axis
-    [SerializeField] public float perlinScaleY = 1f;                                    // Scale for the Perlin noise in Y-axis 
-    [SerializeField] public Material trackMaterial;                                     // Material to apply to the track surface
+    public int seed = 42;                                              // Seed for the Perlin Noise generation
+    public int trackLength = 30;                                      // Number of track segments
+    public int trackWidth = 15;                                        // Width of the track
+    public float perlinScaleZ = 4f;                                    // Scale for the Perlin noise in Z-axis
+    public float perlinScaleY = 1f;                                    // Scale for the Perlin noise in Y-axis 
+    public Material trackMaterial;                                     // Material to apply to the track surface
 
-    [SerializeField] private int trackSectors = 20;
-    [SerializeField] private List<Vector3> trackPoints = new List<Vector3>();           // List to hold track control points
-    [SerializeField] private List<GameObject> trackParts = new List<GameObject>();      // List to hold track sections
+    private int trackSectors = 20;
+    private List<Vector3> trackPoints = new List<Vector3>();           // List to hold track control points
+    
+    private List<GameObject> trackParts = new List<GameObject>();      // List to hold track sections
 
-    [SerializeField] private GameObject startLine;
-    [SerializeField] private GameObject finishLine;
+    private GameObject startLine=null;
+    private GameObject finishLine=null;
 
-    [SerializeField] public List<Vector3> Trackpoints { get { return trackPoints; } }
+    public List<Vector3> TrackPoints { get { return trackPoints; } }
 
     private void Start()
     {
@@ -74,24 +75,30 @@ public class RacetrackGenerator : MonoBehaviour
 
         int distance = 15; //how far the start and finishline from end of track
 
+        if (startLine != null)
+            Destroy(startLine);
         startLine = new GameObject("StartLine");
+        startLine.tag = "StartLine";
         startLine.transform.SetParent(gameObject.transform);
         startLine.AddComponent<BoxCollider>();
         Vector3 forw = Vector3.Normalize(trackPoints[distance] - trackPoints[distance - 1]);
-        startLine.transform.Rotate(Vector3.up, (Vector3.SignedAngle(forw, Vector3.right, Vector3.down) - 90));
+        startLine.transform.rotation = Quaternion.LookRotation(forw);
         BoxCollider strL = startLine.GetComponent<BoxCollider>();
         strL.transform.position = trackPoints[10];
-        strL.size = new Vector2(trackWidth, 10);
+        strL.size = new Vector3(trackWidth, 10, 2);
         strL.isTrigger = true;
 
+        if (finishLine != null)
+            Destroy(finishLine);
         finishLine = new GameObject("FinishLine");
+        finishLine.tag = "FinishLine";
         finishLine.transform.SetParent(gameObject.transform);
         finishLine.AddComponent<BoxCollider>();
         forw = Vector3.Normalize(trackPoints[trackPoints.Count - distance] - trackPoints[trackPoints.Count - distance - 1]);
-        finishLine.transform.Rotate(Vector3.up,(Vector3.SignedAngle(forw, Vector3.right, Vector3.down) - 90));
+        finishLine.transform.rotation=Quaternion.LookRotation(forw);
         BoxCollider fnshL = finishLine.GetComponent<BoxCollider>();
         fnshL.transform.position = trackPoints[trackPoints.Count - 15];
-        fnshL.size = new Vector2(trackWidth, 10);
+        fnshL.size = new Vector3(trackWidth, 10, 2);
         fnshL.isTrigger = true;
 
     }
@@ -312,14 +319,14 @@ public class RacetrackGenerator : MonoBehaviour
             new Vector2(uvCoordX1, 1f), new Vector2(uvCoordX2, 1f), Vector2.up, Vector2.one};
     }
 
-    public BoxCollider GetStartLine()
+    public Transform GetStartLine()
     {
-        return startLine.GetComponent<BoxCollider>();
+        return startLine?.transform;
     }
 
-    public BoxCollider GetFinishLine()
+    public Transform GetFinishLine()
     {
-        return finishLine.GetComponent<BoxCollider>();
+        return finishLine?.transform;
     }
 
 }

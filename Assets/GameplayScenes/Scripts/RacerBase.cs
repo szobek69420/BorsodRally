@@ -7,7 +7,7 @@ using UnityEngine;
 public abstract class RacerBase : MonoBehaviour
 {
     [SerializeField] protected IngameCarController carController;
-    private GameManagerBase gameManager;
+    protected GameManagerBase gameManager;
 
     // Start is called before the first frame update
     void Start()
@@ -28,6 +28,15 @@ public abstract class RacerBase : MonoBehaviour
             RacerFixedUpdate();
     }
 
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.gameObject.CompareTag("FinishLine"))
+        {
+            gameManager?.RegisterFinish(this.gameObject);
+            RacerOnFinish();
+        }
+    }
+
     private void GetGameManager()
     {
         gameManager = GameObject.Find("GameManager")?.GetComponent<GameManagerBase>();
@@ -35,4 +44,5 @@ public abstract class RacerBase : MonoBehaviour
 
     protected abstract void RacerUpdate();
     protected abstract void RacerFixedUpdate();
+    protected abstract void RacerOnFinish();
 }
