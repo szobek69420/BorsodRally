@@ -23,9 +23,11 @@ public abstract class GameManagerBase : MonoBehaviour
     [SerializeField] protected RacetrackGenerator track;
 
     protected List<GameObject> players = new List<GameObject>();
+    protected List<GameObject> finishedPlayers= new List<GameObject>();
 
     private void Start()
     {
+        finishedPlayers.Clear();
         InitScene();
     }
 
@@ -60,4 +62,12 @@ public abstract class GameManagerBase : MonoBehaviour
     protected abstract void UpdateRaceScreen();
     public abstract void EndRace();
     protected abstract void UpdateEndScreen();
+    protected abstract void ReturnToMenu();
+
+    //provides an interface for the players to tell if they have finished
+    public void RegisterFinish(GameObject player)
+    {
+        if(finishedPlayers.Contains(player)==false)
+            finishedPlayers.Add(player);
+    }
 }
