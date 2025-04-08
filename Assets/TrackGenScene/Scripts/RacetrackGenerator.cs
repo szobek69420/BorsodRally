@@ -3,25 +3,31 @@ using System.Collections.Generic;
 using System;
 using Unity.VisualScripting;
 using System.Reflection;
+using System.Drawing;
 
 
 public class RacetrackGenerator : MonoBehaviour
 {
     [SerializeField] public int seed = 42;                                              // Seed for the Perlin Noise generation
-    [SerializeField] public int trackLength = 100;                                      // Number of track segments
-    [SerializeField] public int trackWidth = 5;                                         // Width of the track
-    [SerializeField] public float perlinScaleZ = 1f;                                    // Scale for the Perlin noise in Z-axis
-    [SerializeField] public float perlinScaleY = 0.05f;                                 // Scale for the Perlin noise in Y-axis 
+    [SerializeField] public int trackLength = 30;                                      // Number of track segments
+    [SerializeField] public int trackWidth = 15;                                        // Width of the track
+    [SerializeField] public float perlinScaleZ = 4f;                                    // Scale for the Perlin noise in Z-axis
+    [SerializeField] public float perlinScaleY = 1f;                                    // Scale for the Perlin noise in Y-axis 
     [SerializeField] public Material trackMaterial;                                     // Material to apply to the track surface
 
     [SerializeField] private int trackSectors = 20;
-    [SerializeField] private List<Vector3> trackPoints = new List<Vector3>();           // List to hold track points
-    [SerializeField] private List<GameObject> trackParts = new List<GameObject>();      // List to hold track points
+    [SerializeField] private List<Vector3> trackPoints = new List<Vector3>();           // List to hold track control points
+    [SerializeField] private List<GameObject> trackParts = new List<GameObject>();      // List to hold track sections
+
+    [SerializeField] private GameObject startLine;
+    [SerializeField] private GameObject finishLine;
+
+    [SerializeField] public List<Vector3> Trackpoints { get { return trackPoints; } }
 
     private void Start()
     {
         //FetchParameters();
-        //StartGen();
+        StartGen();
     }
 
     private void Update()
@@ -43,12 +49,13 @@ public class RacetrackGenerator : MonoBehaviour
         GenerateSprintTrackPoints();
         //GenerateCircuitTrackPoints();
 
-        // Smooth the track using Catmull-Rom spline
         trackPoints = CatmullRomSpline();
+
+        trackParts.Clear();
 
         for(int i = 0; i < trackSectors; i++)
         {
-            trackParts.Add(new GameObject());
+            trackParts.Add(new GameObject("Sector "+ (i + 1)));
             trackParts[i].transform.SetParent(gameObject.transform);
 
             trackParts[i].AddComponent<MeshFilter>();
@@ -65,16 +72,36 @@ public class RacetrackGenerator : MonoBehaviour
         CreateRacetrackPhysicsMesh(trackPoints, trackParts);
         //CreateRacetrackVisualMesh(trackPoints, trackParts);
 
-    }
+        int distance = 15; //how far the start and finishline from end of track
 
+        startLine = new GameObject("StartLine");
+        startLine.transform.SetParent(gameObject.transform);
+        startLine.AddComponent<BoxCollider>();
+        Vector3 forw = Vector3.Normalize(trackPoints[distance] - trackPoints[distance - 1]);
+        startLine.transform.Rotate(Vector3.up, (Vector3.SignedAngle(forw, Vector3.right, Vector3.down) - 90));
+        BoxCollider strL = startLine.GetComponent<BoxCollider>();
+        strL.transform.position = trackPoints[10];
+        strL.size = new Vector2(trackWidth, 10);
+        strL.isTrigger = true;
+
+        finishLine = new GameObject("FinishLine");
+        finishLine.transform.SetParent(gameObject.transform);
+        finishLine.AddComponent<BoxCollider>();
+        forw = Vector3.Normalize(trackPoints[trackPoints.Count - distance] - trackPoints[trackPoints.Count - distance - 1]);
+        finishLine.transform.Rotate(Vector3.up,(Vector3.SignedAngle(forw, Vector3.right, Vector3.down) - 90));
+        BoxCollider fnshL = finishLine.GetComponent<BoxCollider>();
+        fnshL.transform.position = trackPoints[trackPoints.Count - 15];
+        fnshL.size = new Vector2(trackWidth, 10);
+        fnshL.isTrigger = true;
+
+    }
+        
     public void ResetGen()
     {
         Debug.Log("Reset");
 
         foreach(GameObject go in trackParts)
             DestroyImmediate(go);
-
-        trackParts = null;
 
         StartGen();
     }
@@ -98,7 +125,7 @@ public class RacetrackGenerator : MonoBehaviour
 
             currentX += Mathf.Cos(currentX * Mathf.PI * 2f) * trackWidth * 3;
             currentZ += Mathf.Sin(currentZ * Mathf.PI * 2f) * trackWidth * perlinScaleZ;
-            currentY += Mathf.Sin(currentX * 0.1f) * 20f * perlinScaleY;
+            currentY += Mathf.Sin(currentX * 0.1f) * 10f * perlinScaleY;
 
             trackPoints.Add(new Vector3(currentX, currentY, currentZ));
         }
@@ -116,8 +143,62 @@ public class RacetrackGenerator : MonoBehaviour
 
     }
 
+    private List<Vector3> CatmullRomSpline()
+    {
+        List<Vector3> smoothPath = new List<Vector3>();
 
-    void CreateRacetrackPhysicsMesh(List<Vector3> points, List<GameObject> gameObj)
+        for (int i = 0; i < trackPoints.Count - 2; i++)
+        {
+            Vector3 p0 = trackPoints[i];
+
+            if (i == 0)
+            {
+                p0.y = 0;
+                p0.x = 0;
+                p0.z = 0;
+            }
+            else
+            {
+                p0 = trackPoints[i - 1];
+            }
+            Vector3 p1 = trackPoints[i];
+            Vector3 p2 = trackPoints[i + 1];
+            Vector3 p3 = trackPoints[i + 2];
+
+            for (float t = 0f; t <= 1f; t += 0.05f)
+            {
+                Vector3 smoothPoint = CatmullRom(p0, p1, p2, p3, t);
+                smoothPath.Add(smoothPoint);
+            }
+        }
+
+        return smoothPath;
+    }
+
+    private Vector3 CatmullRom(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
+    {
+        float t2 = t * t;
+        float t3 = t2 * t;
+
+        float x = 0.5f * ((2f * p1.x) +
+                          (-p0.x + p2.x) * t +
+                          (2f * p0.x - 5f * p1.x + 4f * p2.x - p3.x) * t2 +
+                          (-p0.x + 3f * p1.x - 3f * p2.x + p3.x) * t3);
+
+        float y = 0.5f * ((2f * p1.y) +
+                          (-p0.y + p2.y) * t +
+                          (2f * p0.y - 5f * p1.y + 4f * p2.y - p3.y) * t2 +
+                          (-p0.y + 3f * p1.y - 3f * p2.y + p3.y) * t3);
+
+        float z = 0.5f * ((2f * p1.z) +
+                          (-p0.z + p2.z) * t +
+                          (2f * p0.z - 5f * p1.z + 4f * p2.z - p3.z) * t2 +
+                          (-p0.z + 3f * p1.z - 3f * p2.z + p3.z) * t3);
+
+        return new Vector3(x, y, z);
+    }
+
+    private void CreateRacetrackPhysicsMesh(List<Vector3> points, List<GameObject> gameObj)
     {
         int index = 0;
         int pointsInOneSector = trackPoints.Count / trackSectors;
@@ -205,7 +286,7 @@ public class RacetrackGenerator : MonoBehaviour
                     triangles.Add(vertexIndex + 5);
                     triangles.Add(vertexIndex + 7);
                 }
-                if (step < points.Count - 1) Debug.DrawLine(points[step], points[step + 1], new UnityEngine.Color(1, 0, 0), 1000);
+                //if (step < points.Count - 1) Debug.DrawLine(points[step], points[step + 1], new UnityEngine.Color(1, 0, 0), 1000);
                 vertexIndex += 4;
             }
             Mesh meshF = new Mesh();
@@ -219,7 +300,7 @@ public class RacetrackGenerator : MonoBehaviour
 
     }
 
-    void CreateRacetrackVisualMesh(List<Vector3> points, List<GameObject> gameObj) 
+    private void CreateRacetrackVisualMesh(List<Vector3> points, List<GameObject> gameObj) 
     {
         float uvCoordX1 = (90f / 780f);
         float uvCoordX2 = (690f / 780f);
@@ -231,60 +312,14 @@ public class RacetrackGenerator : MonoBehaviour
             new Vector2(uvCoordX1, 1f), new Vector2(uvCoordX2, 1f), Vector2.up, Vector2.one};
     }
 
-    // Catmull-Rom Spline function to smooth the path
-    List<Vector3> CatmullRomSpline()
+    public BoxCollider GetStartLine()
     {
-        List<Vector3> smoothPath = new List<Vector3>();
-
-        for (int i = 0; i < trackPoints.Count - 2; i++)
-        {
-            Vector3 p0 = trackPoints[i];
-
-            if (i == 0)
-            {
-                p0.y = 0;
-                p0.x = 0;
-                p0.z = 0;
-            }
-            else
-            {
-                p0 = trackPoints[i - 1];
-            }
-            Vector3 p1 = trackPoints[i];
-            Vector3 p2 = trackPoints[i + 1];
-            Vector3 p3 = trackPoints[i + 2];
-
-            for (float t = 0f; t <= 1f; t += 0.05f)
-            {
-                Vector3 smoothPoint = CatmullRom(p0, p1, p2, p3, t);
-                smoothPath.Add(smoothPoint);
-            }
-        }
-
-        return smoothPath;
+        return startLine.GetComponent<BoxCollider>();
     }
 
-    private Vector3 CatmullRom(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
+    public BoxCollider GetFinishLine()
     {
-        float t2 = t * t;
-        float t3 = t2 * t;
-
-        float x = 0.5f * ((2f * p1.x) +
-                          (-p0.x + p2.x) * t +
-                          (2f * p0.x - 5f * p1.x + 4f * p2.x - p3.x) * t2 +
-                          (-p0.x + 3f * p1.x - 3f * p2.x + p3.x) * t3);
-
-        float y = 0.5f * ((2f * p1.y) +
-                          (-p0.y + p2.y) * t +
-                          (2f * p0.y - 5f * p1.y + 4f * p2.y - p3.y) * t2 +
-                          (-p0.y + 3f * p1.y - 3f * p2.y + p3.y) * t3);
-
-        float z = 0.5f * ((2f * p1.z) +
-                          (-p0.z + p2.z) * t +
-                          (2f * p0.z - 5f * p1.z + 4f * p2.z - p3.z) * t2 +
-                          (-p0.z + 3f * p1.z - 3f * p2.z + p3.z) * t3);
-
-        return new Vector3(x, y, z);
+        return finishLine.GetComponent<BoxCollider>();
     }
 
 }
