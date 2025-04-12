@@ -1955,7 +1955,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   seed: 42
-  trackLength: 100
+  trackLength: 10
   trackWidth: 15
   perlinScaleZ: 1
   perlinScaleY: 0.05

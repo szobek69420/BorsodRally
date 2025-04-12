@@ -31,7 +31,7 @@ public class RacetrackGenerator : MonoBehaviour
     private void Start()
     {
         //FetchParameters();
-        StartGen();
+        //StartGen();
     }
 
     private void Update()
