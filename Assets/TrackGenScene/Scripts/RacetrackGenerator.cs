@@ -8,6 +8,9 @@ using System.Drawing;
 
 public class RacetrackGenerator : MonoBehaviour
 {
+    private const int START_LINE_INDEX = 15;
+    private const int FINISH_LINE_INDEX = 15;
+
     public int seed = 42;                                              // Seed for the Perlin Noise generation
     public int trackLength = 30;                                      // Number of track segments
     public int trackWidth = 15;                                        // Width of the track
@@ -58,6 +61,7 @@ public class RacetrackGenerator : MonoBehaviour
         {
             trackParts.Add(new GameObject("Sector "+ (i + 1)));
             trackParts[i].transform.SetParent(gameObject.transform);
+            trackParts[i].layer = 6;    //the track layer, necessary for the ml agents
 
             trackParts[i].AddComponent<MeshFilter>();
             trackParts[i].AddComponent<MeshRenderer>();
@@ -73,18 +77,16 @@ public class RacetrackGenerator : MonoBehaviour
         CreateRacetrackPhysicsMesh(trackPoints, trackParts);
         //CreateRacetrackVisualMesh(trackPoints, trackParts);
 
-        int distance = 15; //how far the start and finishline from end of track
-
         if (startLine != null)
             Destroy(startLine);
         startLine = new GameObject("StartLine");
         startLine.tag = "StartLine";
         startLine.transform.SetParent(gameObject.transform);
         startLine.AddComponent<BoxCollider>();
-        Vector3 forw = Vector3.Normalize(trackPoints[distance] - trackPoints[distance - 1]);
+        Vector3 forw = Vector3.Normalize(trackPoints[START_LINE_INDEX] - trackPoints[START_LINE_INDEX - 1]);
         startLine.transform.rotation = Quaternion.LookRotation(forw);
         BoxCollider strL = startLine.GetComponent<BoxCollider>();
-        strL.transform.position = trackPoints[10];
+        strL.transform.position = trackPoints[START_LINE_INDEX];
         strL.size = new Vector3(trackWidth, 10, 2);
         strL.isTrigger = true;
 
@@ -94,10 +96,10 @@ public class RacetrackGenerator : MonoBehaviour
         finishLine.tag = "FinishLine";
         finishLine.transform.SetParent(gameObject.transform);
         finishLine.AddComponent<BoxCollider>();
-        forw = Vector3.Normalize(trackPoints[trackPoints.Count - distance] - trackPoints[trackPoints.Count - distance - 1]);
+        forw = Vector3.Normalize(trackPoints[trackPoints.Count - FINISH_LINE_INDEX] - trackPoints[trackPoints.Count - FINISH_LINE_INDEX - 1]);
         finishLine.transform.rotation=Quaternion.LookRotation(forw);
         BoxCollider fnshL = finishLine.GetComponent<BoxCollider>();
-        fnshL.transform.position = trackPoints[trackPoints.Count - 15];
+        fnshL.transform.position = trackPoints[trackPoints.Count - FINISH_LINE_INDEX];
         fnshL.size = new Vector3(trackWidth, 10, 2);
         fnshL.isTrigger = true;
 
@@ -329,4 +331,32 @@ public class RacetrackGenerator : MonoBehaviour
         return finishLine?.transform;
     }
 
+    //returns a value in [0;1] based on the closest trackpoint to the given checkpoint
+    //the start and finish positions are considered
+    public float CalculateProgress(Vector3 racistPosition)
+    {
+        int closestIndex = GetNearestTrackPointIndex(racistPosition);
+        return (((float)(closestIndex-START_LINE_INDEX))/(trackPoints.Count-FINISH_LINE_INDEX-START_LINE_INDEX+1));
+    }
+
+    public int GetNearestTrackPointIndex(Vector3 racistPosition)
+    {
+        int closestIndex = -1;
+        float minSqrDistance = float.PositiveInfinity;
+        for (int i = START_LINE_INDEX; i <= trackPoints.Count - FINISH_LINE_INDEX; i++)
+        {
+            float distance = (racistPosition - trackPoints[i]).sqrMagnitude;
+            if (distance < minSqrDistance)
+            {
+                minSqrDistance = distance;
+                closestIndex = i;
+            }
+        }
+
+        //check if there is gebasz
+        if (closestIndex == -1)
+            throw new Exception("There are no suitable track points");
+
+        return closestIndex;
+    }
 }

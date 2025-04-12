@@ -21,7 +21,7 @@ public class GameManagerSingleplayer : GameManagerBase
     [SerializeField] private SpeedometerHandler speedo;
     [SerializeField] private TMP_Text text_progress;
 
-    private int highestIndexReached = 0;
+    private float greatestProgress = 0;
 
     //end things
     [SerializeField] private Canvas canvas_end;
@@ -94,22 +94,11 @@ public class GameManagerSingleplayer : GameManagerBase
             speedo.SetSpeed(rb.velocity.magnitude);
 
             //set the progress
-            List<Vector3> trackPoints = track.TrackPoints;
-            int closestIndex = -1;
-            float closestSqrDistance = 0.0f;
-            for(int i=0;i<trackPoints.Count;i++)
-            {
-                float currentSqrDistance=(player.transform.position-trackPoints[i]).sqrMagnitude;
-                if(closestIndex==-1||currentSqrDistance<closestSqrDistance)
-                {
-                    closestIndex = i;
-                    closestSqrDistance = currentSqrDistance;
-                }
-            }
-            if(highestIndexReached < closestIndex)
-                highestIndexReached = closestIndex;
+            float currentProgress = track.CalculateProgress(rp.gameObject.transform.position);
+            if(greatestProgress < currentProgress)
+                greatestProgress = currentProgress;
 
-            text_progress.text = (int)(100.0f * ((float)(highestIndexReached + 1) / trackPoints.Count)) + "%";
+            text_progress.text = (int)(100.0f * greatestProgress) + "%";
             break;
         }
     }
