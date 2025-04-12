@@ -21,7 +21,7 @@ public class GameManagerSingleplayer : GameManagerBase
     [SerializeField] private SpeedometerHandler speedo;
     [SerializeField] private TMP_Text text_progress;
 
-    private int highestIndexReached = 0;
+    private float greatestProgress = 0;
 
     //end things
     [SerializeField] private Canvas canvas_end;
@@ -35,13 +35,23 @@ public class GameManagerSingleplayer : GameManagerBase
         track.FetchParameters();
         track.StartGen();
 
-        //instantiate racers (only the player yet)
+        //instantiate racers
         Transform startLine = track.GetStartLine();
 
-        GameObject player=GameObject.Instantiate(carPrefab_player, new Vector3(0.0f, 2.0f, 0.0f), Quaternion.identity);
-        player.transform.position = startLine.position + new Vector3(0.0f, 2.0f, 0.0f);
-        player.transform.rotation = startLine.rotation;
-        players.Add(player);
+        for(int i=-1;i<=1;i+=2)
+        {
+            for(int j=-1;j<=1;j+=2)
+            {
+                Vector3 spawnPosition = startLine.position + 3 * i * startLine.right + 5 * j * startLine.forward + 2.0f * startLine.up;
+                GameObject racer = null;
+                if(i==-1&&j==-1)
+                    racer = GameObject.Instantiate(carPrefab_player, spawnPosition, startLine.rotation);
+                else
+                    racer = GameObject.Instantiate(carPrefab_ai, spawnPosition, startLine.rotation);
+
+                players.Add(racer);
+            }
+        }
 
         //start countdown
         StartCountdown();
@@ -94,22 +104,11 @@ public class GameManagerSingleplayer : GameManagerBase
             speedo.SetSpeed(rb.velocity.magnitude);
 
             //set the progress
-            List<Vector3> trackPoints = track.TrackPoints;
-            int closestIndex = -1;
-            float closestSqrDistance = 0.0f;
-            for(int i=0;i<trackPoints.Count;i++)
-            {
-                float currentSqrDistance=(player.transform.position-trackPoints[i]).sqrMagnitude;
-                if(closestIndex==-1||currentSqrDistance<closestSqrDistance)
-                {
-                    closestIndex = i;
-                    closestSqrDistance = currentSqrDistance;
-                }
-            }
-            if(highestIndexReached < closestIndex)
-                highestIndexReached = closestIndex;
+            float currentProgress = track.CalculateProgress(rp.gameObject.transform.position);
+            if(greatestProgress < currentProgress)
+                greatestProgress = currentProgress;
 
-            text_progress.text = (int)(100.0f * ((float)(highestIndexReached + 1) / trackPoints.Count)) + "%";
+            text_progress.text = (int)(100.0f * greatestProgress) + "%";
             break;
         }
     }

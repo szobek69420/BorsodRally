@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 2100000, guid: bbe9494f815f3c340956427c884b72a0, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -696,7 +696,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.003921569}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1832,8 +1832,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   track: {fileID: 2010014583}
-  carPrefab_player: {fileID: 4373515764449821659, guid: f21bc2d2e9469bc428de4d31862f46bf, type: 3}
-  carPrefab_ai: {fileID: 0}
+  carPrefab_player: {fileID: 4373515764449821659, guid: 89a95042b80cb6b47a50352446605242, type: 3}
+  carPrefab_ai: {fileID: 6554113695750834724, guid: ad96dab89619c0e4dade6dcdbb53dab7, type: 3}
   canvas_countdown: {fileID: 152871002}
   text_countdown: {fileID: 1332587804}
   canvas_ingame: {fileID: 177742268}
