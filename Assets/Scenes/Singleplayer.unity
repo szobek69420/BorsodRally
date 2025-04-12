@@ -696,7 +696,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.003921569}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1833,7 +1833,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   track: {fileID: 2010014583}
   carPrefab_player: {fileID: 4373515764449821659, guid: 89a95042b80cb6b47a50352446605242, type: 3}
-  carPrefab_ai: {fileID: 0}
+  carPrefab_ai: {fileID: 6554113695750834724, guid: ad96dab89619c0e4dade6dcdbb53dab7, type: 3}
   canvas_countdown: {fileID: 152871002}
   text_countdown: {fileID: 1332587804}
   canvas_ingame: {fileID: 177742268}

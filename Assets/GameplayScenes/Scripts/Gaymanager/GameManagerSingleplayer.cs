@@ -35,13 +35,23 @@ public class GameManagerSingleplayer : GameManagerBase
         track.FetchParameters();
         track.StartGen();
 
-        //instantiate racers (only the player yet)
+        //instantiate racers
         Transform startLine = track.GetStartLine();
 
-        GameObject player=GameObject.Instantiate(carPrefab_player, new Vector3(0.0f, 2.0f, 0.0f), Quaternion.identity);
-        player.transform.position = startLine.position + new Vector3(0.0f, 2.0f, 0.0f);
-        player.transform.rotation = startLine.rotation;
-        players.Add(player);
+        for(int i=-1;i<=1;i+=2)
+        {
+            for(int j=-1;j<=1;j+=2)
+            {
+                Vector3 spawnPosition = startLine.position + 3 * i * startLine.right + 5 * j * startLine.forward + 2.0f * startLine.up;
+                GameObject racer = null;
+                if(i==-1&&j==-1)
+                    racer = GameObject.Instantiate(carPrefab_player, spawnPosition, startLine.rotation);
+                else
+                    racer = GameObject.Instantiate(carPrefab_ai, spawnPosition, startLine.rotation);
+
+                players.Add(racer);
+            }
+        }
 
         //start countdown
         StartCountdown();
