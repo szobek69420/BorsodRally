@@ -1832,7 +1832,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   track: {fileID: 2010014583}
-  carPrefab_player: {fileID: 4373515764449821659, guid: 89a95042b80cb6b47a50352446605242, type: 3}
+  carPrefab_player: {fileID: 4373515764449821659, guid: f21bc2d2e9469bc428de4d31862f46bf, type: 3}
   carPrefab_ai: {fileID: 0}
   canvas_countdown: {fileID: 152871002}
   text_countdown: {fileID: 1332587804}
@@ -1955,7 +1955,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   seed: 42
-  trackLength: 100
+  trackLength: 10
   trackWidth: 15
   perlinScaleZ: 1
   perlinScaleY: 0.05
