@@ -13,7 +13,7 @@ public class RacetrackGenerator : MonoBehaviour
     private const int FINISH_LINE_INDEX = 15;
 
     public int seed = 42;                                              // Seed for the Perlin Noise generation
-    public int trackLength = 30;                                      // Number of track segments
+    public int trackLength = 30;                                       // Number of track segments
     public int trackWidth = 15;                                        // Width of the track
     public float perlinScaleZ = 4f;                                    // Scale for the Perlin noise in Z-axis
     public float perlinScaleY = 1f;                                    // Scale for the Perlin noise in Y-axis 
@@ -83,8 +83,8 @@ public class RacetrackGenerator : MonoBehaviour
         }
 
         // Create the mesh for the track surface
-        CreateRacetrackPhysicsMesh(trackPoints, trackParts);
-        //CreateRacetrackVisualMesh(trackPoints, trackParts);
+        CreateRacetrackMesh(trackPoints, trackParts);
+        //CreateEnvironmentMesh(trackPoints, trackParts);
 
         if (startLine != null)
             Destroy(startLine);
@@ -216,15 +216,21 @@ public class RacetrackGenerator : MonoBehaviour
         return new Vector3(x, y, z);
     }
 
-    private void CreateRacetrackPhysicsMesh(List<Vector3> points, List<GameObject> gameObj)
+    private void CreateRacetrackMesh(List<Vector3> points, List<GameObject> gameObj)
     {
         int index = 0;
         int pointsInOneSector = trackPoints.Count / trackSectors;
+
+        float uvCoordX1 = (90f / 780f);
+        float uvCoordX2 = (690f / 780f);
+        Vector2[] textUVs = new Vector2[] { new Vector2(uvCoordX1, 0f), new Vector2(uvCoordX2, 0f), Vector2.zero, Vector2.right,
+            new Vector2(uvCoordX1, 1f), new Vector2(uvCoordX2, 1f), Vector2.up, Vector2.one};
 
         for (int i = 0; i < trackSectors; i++)
         {
             List<Vector3> vertices = new List<Vector3>();
             List<int> triangles = new List<int>();
+            List<Vector2> uvs = new List<Vector2>();
             int vertexIndex = 0;
             int k = 0;
 
@@ -278,6 +284,11 @@ public class RacetrackGenerator : MonoBehaviour
                 vertices.Add(a);
                 vertices.Add(b);
 
+                if (j % 2 == 0)
+                {
+                    uvs.AddRange(textUVs);
+                }
+
                 if (j < k - 1)
                 {
                     triangles.Add(vertexIndex);
@@ -310,24 +321,18 @@ public class RacetrackGenerator : MonoBehaviour
             Mesh meshF = new Mesh();
             meshF.vertices = vertices.ToArray();
             meshF.triangles = triangles.ToArray();
+            meshF.uv = uvs.ToArray();
             meshF.RecalculateNormals();
             meshF.RecalculateBounds();
-            gameObj[index].GetComponent<MeshFilter>().mesh = meshF;  
+            gameObj[index].GetComponent<MeshFilter>().mesh = meshF;
             gameObj[index++].GetComponent<MeshCollider>().sharedMesh = meshF;
         }
 
     }
 
-    private void CreateRacetrackVisualMesh(List<Vector3> points, List<GameObject> gameObj) 
-    {
-        float uvCoordX1 = (90f / 780f);
-        float uvCoordX2 = (690f / 780f);
+    private void CreateEnvironmentMesh(List<Vector3> points, List<GameObject> gameObj)
+    {   
 
-        Vector2[] textUVs = new Vector2[] { new Vector2(uvCoordX1, 0f), new Vector2(uvCoordX2, 0f), Vector2.zero, Vector2.right, 
-            new Vector2(uvCoordX1, 0.25f), new Vector2(uvCoordX2, 0.25f), new Vector2(0f, 0.25f), new Vector2(1f, 0.25f),
-            new Vector2(uvCoordX1, 0.5f), new Vector2(uvCoordX2, 0.5f), new Vector2(0f, 0.5f), new Vector2(1f, 0.5f),
-            new Vector2(uvCoordX1, 0.75f), new Vector2(uvCoordX2, 0.75f), new Vector2(0f, 0.75f), new Vector2(1f, 0.75f),
-            new Vector2(uvCoordX1, 1f), new Vector2(uvCoordX2, 1f), Vector2.up, Vector2.one};
     }
 
     public Transform GetStartLine()
