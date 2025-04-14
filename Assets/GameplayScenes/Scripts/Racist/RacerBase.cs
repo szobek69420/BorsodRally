@@ -6,7 +6,6 @@ using UnityEngine;
 
 public abstract class RacerBase : MonoBehaviour
 {
-    [SerializeField] protected IngameCarController carController;
     protected GameManagerBase gameManager;
 
     // Start is called before the first frame update
