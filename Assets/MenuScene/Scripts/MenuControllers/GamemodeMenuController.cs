@@ -174,40 +174,67 @@ public class GamemodeMenuController : MenuController
 
     public void StartSingleplayerButtonFunction()
     {
-        PlayerPrefs.SetInt("length", (int)slider_length.value);
+        int length = (int)slider_length.value;
+        int seed = 0;
+        int.TryParse(inputField_seed.text, out seed);
+        float curviness = slider_curviness.value;
+        int difficulty = (int)slider_difficulty.value;
 
-        int seed;
-        if (int.TryParse(inputField_seed.text, out seed)){
-            PlayerPrefs.SetInt("seed", seed);   
-        }
+        //set the menu values
+        PlayerPrefs.SetInt("length", length);
+        PlayerPrefs.SetInt("seed", seed);
+        PlayerPrefs.SetFloat("curviness", curviness);
+        PlayerPrefs.SetInt("difficulty", difficulty);
 
-        PlayerPrefs.SetFloat("curviness", slider_curviness.value);
-        PlayerPrefs.SetInt("difficulty", (int)slider_difficulty.value);
-        
-        SceneManager.LoadSceneAsync("TrackGen");
+        //set the values for the game scene (they have to be process specific)
+        int processId=Process.GetCurrentProcess().Id;
+        PlayerPrefs.SetInt("length"+processId, length);
+        PlayerPrefs.SetInt("seed" + processId, seed);
+        PlayerPrefs.SetFloat("curviness" + processId, curviness);
+        PlayerPrefs.SetInt("difficulty" + processId, difficulty);
+
+        //load scene
+        SceneManager.LoadSceneAsync("Singleplayer");
     }
 
     public void StartMultiplayerHostButtonFunction()
     {
         KillLobbySearcherThread();
 
-        PlayerPrefs.SetInt("length", (int)slider_lengthHost.value);
+        int length = (int)slider_length.value;
+        int seed = 0;
+        int.TryParse(inputField_seed.text, out seed);
+        float curviness = slider_curviness.value;
+        int difficulty = (int)slider_difficulty.value;
 
-        int seed;
-        if (int.TryParse(inputField_seedHost.text, out seed))
-        {
-            PlayerPrefs.SetInt("seed", seed);
-        }
+        //set the menu values
+        PlayerPrefs.SetInt("length", length);
+        PlayerPrefs.SetInt("seed", seed);
+        PlayerPrefs.SetFloat("curviness", curviness);
+        PlayerPrefs.SetInt("difficulty", difficulty);
 
-        PlayerPrefs.SetFloat("curviness", slider_curvinessHost.value);
-        PlayerPrefs.SetInt("difficulty", (int)slider_difficultyHost.value);
+        //set the values for the game scene (they have to be process specific)
+        int processId = Process.GetCurrentProcess().Id;
+        PlayerPrefs.SetInt("length" + processId, length);
+        PlayerPrefs.SetInt("seed" + processId, seed);
+        PlayerPrefs.SetFloat("curviness" + processId, curviness);
+        PlayerPrefs.SetInt("difficulty" + processId, difficulty);
+        PlayerPrefs.SetInt("isHost" + processId, 69);
 
+        //load scene
         SceneManager.LoadSceneAsync("Multiplayer");
     }
 
     public void StartMultiplayerJoinButtonFunction(AvailableLobby lobbyInfo)
     {
+        KillLobbySearcherThread();
 
+        //query the track parameters from the host
+
+        //set the track parameters for the game scene
+
+        //load scene
+        SceneManager.LoadScene("Multiplayer");
     }
 
     public void HostButtonFunction()
@@ -279,6 +306,8 @@ public class GamemodeMenuController : MenuController
                 }
 
                 IPEndPoint remoteEP=null;
+
+                UnityEngine.Debug.Log("nigga");
 
                 try
                 {

@@ -186,7 +186,7 @@ GameObject:
   - component: {fileID: 2573106047334959294}
   - component: {fileID: 3403775888983078141}
   m_Layer: 0
-  m_Name: car_countach
+  m_Name: car_player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
