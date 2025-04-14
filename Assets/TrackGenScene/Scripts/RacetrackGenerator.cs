@@ -75,7 +75,7 @@ public class RacetrackGenerator : MonoBehaviour
 
         // Create the mesh for the track surface
         CreateRacetrackPhysicsMesh(trackPoints, trackParts);
-        //CreateRacetrackVisualMesh(trackPoints, trackParts);
+        CreateRacetrackVisualMesh(trackPoints, trackParts);
 
         if (startLine != null)
             Destroy(startLine);
@@ -303,22 +303,123 @@ public class RacetrackGenerator : MonoBehaviour
             meshF.triangles = triangles.ToArray();
             meshF.RecalculateNormals();
             meshF.RecalculateBounds();
-            gameObj[index].GetComponent<MeshFilter>().mesh = meshF;  
+            //gameObj[index].GetComponent<MeshFilter>().mesh = meshF;  
             gameObj[index++].GetComponent<MeshCollider>().sharedMesh = meshF;
         }
 
     }
 
-    private void CreateRacetrackVisualMesh(List<Vector3> points, List<GameObject> gameObj) 
+    private void CreateRacetrackVisualMesh(List<Vector3> points, List<GameObject> gameObj)
     {
+        int index = 0;
+        int pointsInOneSector = trackPoints.Count / trackSectors;
+
         float uvCoordX1 = (90f / 780f);
         float uvCoordX2 = (690f / 780f);
-
         Vector2[] textUVs = new Vector2[] { new Vector2(uvCoordX1, 0f), new Vector2(uvCoordX2, 0f), Vector2.zero, Vector2.right, 
-            new Vector2(uvCoordX1, 0.25f), new Vector2(uvCoordX2, 0.25f), new Vector2(0f, 0.25f), new Vector2(1f, 0.25f),
-            new Vector2(uvCoordX1, 0.5f), new Vector2(uvCoordX2, 0.5f), new Vector2(0f, 0.5f), new Vector2(1f, 0.5f),
-            new Vector2(uvCoordX1, 0.75f), new Vector2(uvCoordX2, 0.75f), new Vector2(0f, 0.75f), new Vector2(1f, 0.75f),
             new Vector2(uvCoordX1, 1f), new Vector2(uvCoordX2, 1f), Vector2.up, Vector2.one};
+
+        for (int i = 0; i < trackSectors; i++)
+        {
+            List<Vector3> vertices = new List<Vector3>();
+            List<int> triangles = new List<int>();
+            List<Vector2> uvs = new List<Vector2>();
+            int vertexIndex = 0;
+            int k = 0;
+
+            if (i == trackSectors - 1)
+            {
+                k = pointsInOneSector;
+            }
+            else
+            {
+                k = pointsInOneSector + 1;
+            }
+
+            for (int j = 0; j < k; j++)
+            {
+                Vector3 forward = Vector3.zero;
+                int step = (i * pointsInOneSector) + j;
+
+                if (step < points.Count - 1)
+                {
+                    forward += points[step + 1] - points[step];
+                }
+                else if (step < trackPoints.Count)
+                {
+                    forward += points[step] - points[step - 1];
+                }
+                forward.Normalize();
+
+                Vector3 left = new Vector3(-forward.z, forward.y, forward.x);
+
+                if (step < 2)
+                {
+                    vertices.Add(points[step] + left * trackWidth * 0.5f);
+                    vertices.Add(points[step] - left * trackWidth * 0.5f);
+                }
+                else
+                {
+                    Vector3 oldForward = points[step - 1] - points[step - 2];
+                    float angle = Vector3.SignedAngle(oldForward, forward, Vector3.up);
+
+                    float shift = Mathf.Lerp(0f, 1f, (angle + 90) / 180);
+
+                    vertices.Add(points[step] + left * trackWidth * shift);
+                    vertices.Add(points[step] - left * trackWidth * (1 - shift));
+                }
+
+                Vector3 a = vertices[vertices.Count - 2];
+                a.y += 3f;
+                Vector3 b = vertices[vertices.Count - 1];
+                b.y += 3f;
+
+                vertices.Add(a);
+                vertices.Add(b);
+
+                if (j % 2 == 0)
+                {
+                    uvs.AddRange(textUVs);
+                }
+
+                if (j < k - 1)
+                {
+                    triangles.Add(vertexIndex);
+                    triangles.Add(vertexIndex + 4);
+                    triangles.Add(vertexIndex + 1);
+
+                    triangles.Add(vertexIndex + 1);
+                    triangles.Add(vertexIndex + 4);
+                    triangles.Add(vertexIndex + 5);
+
+                    triangles.Add(vertexIndex);
+                    triangles.Add(vertexIndex + 2);
+                    triangles.Add(vertexIndex + 4);
+
+                    triangles.Add(vertexIndex + 2);
+                    triangles.Add(vertexIndex + 6);
+                    triangles.Add(vertexIndex + 4);
+
+                    triangles.Add(vertexIndex + 3);
+                    triangles.Add(vertexIndex + 1);
+                    triangles.Add(vertexIndex + 5);
+
+                    triangles.Add(vertexIndex + 3);
+                    triangles.Add(vertexIndex + 5);
+                    triangles.Add(vertexIndex + 7);
+                }
+                //if (step < points.Count - 1) Debug.DrawLine(points[step], points[step + 1], new UnityEngine.Color(1, 0, 0), 1000);
+                vertexIndex += 4;
+            }
+            Mesh meshF = new Mesh();
+            meshF.vertices = vertices.ToArray();
+            meshF.triangles = triangles.ToArray();
+            meshF.uv = uvs.ToArray();
+            meshF.RecalculateNormals();
+            meshF.RecalculateBounds();
+            gameObj[index++].GetComponent<MeshFilter>().mesh = meshF;
+        }
+
     }
 
     public Transform GetStartLine()
