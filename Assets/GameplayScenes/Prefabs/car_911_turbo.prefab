@@ -180,6 +180,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2329714761336712559}
+  - component: {fileID: 5656878807326927790}
   - component: {fileID: 315010005834496200}
   - component: {fileID: 8709526192208255618}
   - component: {fileID: 2573106047334959294}
@@ -212,6 +213,23 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5656878807326927790
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4373515764449821659}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ee1975d9f518df4f8dda91634fb4c72, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  car: {fileID: 2329714761336712559}
+  wheelFl: {fileID: 3881131992440096039}
+  wheelFr: {fileID: 2040993815129118834}
+  wheelRl: {fileID: 7866298274936282695}
+  wheelRr: {fileID: 3101568107076397536}
 --- !u!114 &315010005834496200
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -224,18 +242,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9dafa3e2a152bde4cb02bff29b056be8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  carComponents: {fileID: 5656878807326927790}
   frontWheelColliders:
   - {fileID: 1738766328197091934}
   - {fileID: 964019043227172737}
   rearWheelColliders:
   - {fileID: 7717832614865307343}
   - {fileID: 6326756962852268683}
-  frontWheels:
-  - {fileID: 3881131992440096039}
-  - {fileID: 2040993815129118834}
-  rearWheels:
-  - {fileID: 7866298274936282695}
-  - {fileID: 3101568107076397536}
   MAX_ACCELERATING_FORCE: 5000
   MAX_BRAKING_FORCE: 8000
   MAX_STEER_ANGLE: 30

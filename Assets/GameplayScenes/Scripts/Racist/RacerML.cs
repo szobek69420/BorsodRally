@@ -5,6 +5,7 @@ using UnityEngine;
 public class RacerML : RacerBase
 {
     [SerializeField] private MLController agent;
+    [SerializeField] private IngameCarController carController;
 
     protected override void RacerUpdate()
     {

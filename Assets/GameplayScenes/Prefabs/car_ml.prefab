@@ -710,6 +710,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5049087133934904464}
+  - component: {fileID: 8336625436087361407}
   - component: {fileID: 7068990234384363831}
   - component: {fileID: 2654803448328418066}
   - component: {fileID: 7487635127786262499}
@@ -745,6 +746,23 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8336625436087361407
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6554113695750834724}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ee1975d9f518df4f8dda91634fb4c72, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  car: {fileID: 5049087133934904464}
+  wheelFl: {fileID: 6024046361716051160}
+  wheelFr: {fileID: 8797267075154334093}
+  wheelRl: {fileID: 824033794121160632}
+  wheelRr: {fileID: 5570883498272759839}
 --- !u!114 &7068990234384363831
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -757,18 +775,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9dafa3e2a152bde4cb02bff29b056be8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  carComponents: {fileID: 8336625436087361407}
   frontWheelColliders:
   - {fileID: 9107523125662391201}
   - {fileID: 7720815672222971518}
   rearWheelColliders:
   - {fileID: 963212985967480624}
   - {fileID: 3569134778639967092}
-  frontWheels:
-  - {fileID: 6024046361716051160}
-  - {fileID: 8797267075154334093}
-  rearWheels:
-  - {fileID: 824033794121160632}
-  - {fileID: 5570883498272759839}
   MAX_ACCELERATING_FORCE: 5000
   MAX_BRAKING_FORCE: 8000
   MAX_STEER_ANGLE: 30
@@ -784,8 +797,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fae821f574965944826fec3ca780b35, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  carController: {fileID: 7068990234384363831}
   agent: {fileID: 6655382325284881207}
+  carController: {fileID: 7068990234384363831}
 --- !u!114 &7487635127786262499
 MonoBehaviour:
   m_ObjectHideFlags: 0
