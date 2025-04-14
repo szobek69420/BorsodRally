@@ -12,6 +12,11 @@ public class MenuCameraPositions : MonoBehaviour
     [SerializeField] private Vector3 carPos_mainMenu;
     [SerializeField] private Vector3 carRot_mainMenu;
 
+    [SerializeField] private Vector3 cumPos_garage;
+    [SerializeField] private Vector3 cumRot_garage;
+    [SerializeField] private Vector3 carPos_garage;
+    [SerializeField] private Vector3 carRot_garage;
+    
     [SerializeField] private Vector3 cumPos_settings;
     [SerializeField] private Vector3 cumRot_settings;
     [SerializeField] private Vector3 carPos_settings;
@@ -39,6 +44,21 @@ public class MenuCameraPositions : MonoBehaviour
     private Vector3 targetCarPos;
     private Quaternion targetCarRot;
 
+    public Vector3 TargetCarPos
+    {
+        get; private set;
+    }
+
+    public Quaternion TargetCarRot
+    {
+        get; private set;
+    }
+
+    public Transform Car
+    {
+        get { return car; } set { car = value; }
+    }
+
     private void Start()
     {
         targetCumPos = cumPos_mainMenu;
@@ -46,6 +66,9 @@ public class MenuCameraPositions : MonoBehaviour
 
         targetCarPos = carPos_mainMenu;
         targetCarRot = Quaternion.Euler(carRot_mainMenu);
+
+        TargetCarPos = carPos_mainMenu;
+        TargetCarRot = Quaternion.Euler(carRot_mainMenu);
     }
 
     private void FixedUpdate()
@@ -64,6 +87,15 @@ public class MenuCameraPositions : MonoBehaviour
 
         targetCarPos = carPos_mainMenu;
         targetCarRot = Quaternion.Euler(carRot_mainMenu);
+    }
+
+    public void Garage()
+    {
+        targetCumPos = cumPos_garage;
+        targetCumRot = Quaternion.Euler(cumRot_garage);
+
+        targetCarPos = carPos_settings;
+        targetCarRot = Quaternion.Euler(carRot_garage);
     }
 
     public void Settings()

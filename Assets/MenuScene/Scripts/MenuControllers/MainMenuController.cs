@@ -8,6 +8,7 @@ using UnityEngine.EventSystems;
 public class MainMenuController : MenuController
 {
     [SerializeField] private Button button_start;
+    [SerializeField] private Button button_garage;
     [SerializeField] private Button button_settings;
     [SerializeField] private Button button_exit;
 
@@ -16,6 +17,7 @@ public class MainMenuController : MenuController
     {
         button_start.onClick.AddListener(() => { StartButtonFunction(); PlayClickSound(); });
 
+        button_garage.onClick.AddListener(() => { GarageButtonFunction(); PlayClickSound(); });
         button_settings.onClick.AddListener(() => { SettingsButtonFunction(); PlayClickSound(); });
         button_exit.onClick.AddListener(() => { ExitButtonFunction(); PlayClickSound(); });
     }
@@ -35,6 +37,16 @@ public class MainMenuController : MenuController
         GameObject.Find("MenuManager").GetComponent<MenuCameraPositions>().Gamemode();
 
         MenuController mc = GameObject.Find("GamemodeMenuController").GetComponent<MenuController>();
+
+        this.Hide();
+        mc.Show();
+    }
+
+    public void GarageButtonFunction()
+    {
+        GameObject.Find("MenuManager").GetComponent<MenuCameraPositions>().Garage();
+
+        MenuController mc = GameObject.Find("GarageMenuController").GetComponent<MenuController>();
 
         this.Hide();
         mc.Show();
