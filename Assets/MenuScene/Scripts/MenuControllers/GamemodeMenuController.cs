@@ -184,7 +184,7 @@ public class GamemodeMenuController : MenuController
         PlayerPrefs.SetFloat("curviness", slider_curviness.value);
         PlayerPrefs.SetInt("difficulty", (int)slider_difficulty.value);
         
-        SceneManager.LoadSceneAsync("TrackGen");
+        SceneManager.LoadSceneAsync("Singleplayer");
     }
 
     public void StartMultiplayerHostButtonFunction()
