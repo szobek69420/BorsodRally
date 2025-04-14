@@ -140,7 +140,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _wheelRadius: 0.35
-  _suspensionTarget: 0.2
+  _suspensionTarget: 0.1
   _maxSuspensionDistance: 0.1
   _forcePoint: 0.2
   _springForce: 90000
@@ -251,7 +251,7 @@ MonoBehaviour:
   - {fileID: 6326756962852268683}
   MAX_ACCELERATING_FORCE: 5000
   MAX_BRAKING_FORCE: 8000
-  MAX_STEER_ANGLE: 30
+  MAX_STEER_ANGLE: 20
 --- !u!114 &8709526192208255618
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -448,7 +448,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _wheelRadius: 0.35
-  _suspensionTarget: 0.2
+  _suspensionTarget: 0.1
   _maxSuspensionDistance: 0.1
   _forcePoint: 0.2
   _springForce: 90000
@@ -590,7 +590,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _wheelRadius: 0.35
-  _suspensionTarget: 0.2
+  _suspensionTarget: 0.1
   _maxSuspensionDistance: 0.1
   _forcePoint: 0.2
   _springForce: 90000
@@ -826,7 +826,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _wheelRadius: 0.35
-  _suspensionTarget: 0.2
+  _suspensionTarget: 0.1
   _maxSuspensionDistance: 0.1
   _forcePoint: 0.2
   _springForce: 90000

@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -13,6 +14,8 @@ public class GameManagerMultiplayer : GameManagerBase
 {
     [SerializeField] private GameObject carPrefab_player;
     [SerializeField] private GameObject carPrefab_opponent;
+
+    private List<PlayerInfo> joinedPlayer=new List<PlayerInfo>();
 
     //lobby things
 
@@ -34,11 +37,17 @@ public class GameManagerMultiplayer : GameManagerBase
 
     public override void OnNetworkSpawn()
     {
+        if (!IsOwner)
+            return;
+
         InitScene();
     }
 
     public override void OnDestroy()
     {
+        if (!IsOwner)
+            return;
+
         KillLobbyResponderThread();//necessary for debugging, because the editor can't automatically close threads on stop
     }
 
@@ -67,45 +76,64 @@ public class GameManagerMultiplayer : GameManagerBase
 
     protected override void ShowLobbyScreen()
     {
+        if (!IsOwner)
+            return;
+
         State = GameState.LOBBY;
     }
 
     protected override void UpdateLobbyScreen()
     {
-        //the singleplayer mode doesn't need a lobby screen
+        if (!IsOwner)
+            return;
     }
 
     protected override void StartCountdown()
     {
+        if (!IsOwner)
+            return;
+
         State = GameManagerBase.GameState.COUNTDOWN;
     }
 
     protected override void UpdateCountdownScreen()
     {
-
+        if (!IsOwner)
+            return;
     }
     protected override void StartRace()
     {
+        if (!IsOwner)
+            return;
+
         State = GameManagerBase.GameState.RACE;
     }
     protected override void UpdateRaceScreen()
     {
-        
+        if (!IsOwner)
+            return;
     }
 
     public override void EndRace()
     {
+        if (!IsOwner)
+            return;
+
         State = GameManagerBase.GameState.END;
 
     }
 
     protected override void UpdateEndScreen()
     {
-
+        if (!IsOwner)
+            return;
     }
 
     protected override void ReturnToMenu()
     {
+        if (!IsOwner)
+            return;
+
         SceneManager.LoadScene("MenuScene");
     }
 
