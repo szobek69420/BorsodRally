@@ -4,6 +4,7 @@ using System;
 using Unity.VisualScripting;
 using System.Reflection;
 using System.Drawing;
+using System.Diagnostics;
 
 
 public class RacetrackGenerator : MonoBehaviour
@@ -41,9 +42,17 @@ public class RacetrackGenerator : MonoBehaviour
 
     public void FetchParameters()
     {
-        seed = PlayerPrefs.GetInt("seed");
-        trackLength = PlayerPrefs.GetInt("length");
-        perlinScaleZ = PlayerPrefs.GetFloat("curviness");
+        int processId=Process.GetCurrentProcess().Id;
+
+        seed = PlayerPrefs.GetInt("seed"+processId);
+        trackLength = PlayerPrefs.GetInt("length"+processId);
+        perlinScaleZ = PlayerPrefs.GetFloat("curviness"+processId);
+    }
+
+    //cannot set the ip and difficulty parameters
+    public LobbyTrackInfo SerializeParameters()
+    {
+        return new LobbyTrackInfo(null, trackLength, seed, perlinScaleZ, 69);
     }
 
     public void StartGen()
@@ -107,7 +116,7 @@ public class RacetrackGenerator : MonoBehaviour
         
     public void ResetGen()
     {
-        Debug.Log("Reset");
+        UnityEngine.Debug.Log("Reset");
 
         foreach(GameObject go in trackParts)
             DestroyImmediate(go);

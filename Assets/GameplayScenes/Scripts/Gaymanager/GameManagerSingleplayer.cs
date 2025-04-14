@@ -28,9 +28,16 @@ public class GameManagerSingleplayer : GameManagerBase
     [SerializeField] private TMP_Text text_position;
     [SerializeField] private Button button_returnToMenu;
 
+    private void Start()
+    {
+        InitScene();
+    }
 
     protected override void InitScene()
     {
+        //get the track generator
+        GetTrackManager();
+
         //generate track
         track.FetchParameters();
         track.StartGen();

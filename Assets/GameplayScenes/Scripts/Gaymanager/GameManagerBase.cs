@@ -2,34 +2,30 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.IO.LowLevel.Unsafe;
 using UnityEngine;
+using Unity.Netcode;
 
-public abstract class GameManagerBase : MonoBehaviour
+public abstract class GameManagerBase : NetworkBehaviour
 {
     public enum GameState
     {
+        NOTHING,
         LOBBY,
         COUNTDOWN,
         RACE,
         END
     };
 
-    private GameState _state;
+    private GameState _state=GameState.NOTHING;
     public GameState State
     {
         get { return _state; }
         protected set { _state = value; }
     }
 
-    [SerializeField] protected RacetrackGenerator track;
+    protected RacetrackGenerator track;
 
     protected List<GameObject> players = new List<GameObject>();
     protected List<GameObject> finishedPlayers= new List<GameObject>();
-
-    private void Start()
-    {
-        finishedPlayers.Clear();
-        InitScene();
-    }
 
     private void Update()
     {
@@ -69,5 +65,10 @@ public abstract class GameManagerBase : MonoBehaviour
     {
         if(finishedPlayers.Contains(player)==false)
             finishedPlayers.Add(player);
+    }
+
+    protected void GetTrackManager()
+    {
+        track = GameObject.Find("TrackManager").GetComponent<RacetrackGenerator>();
     }
 }
