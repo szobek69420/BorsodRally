@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class RacerPlayer : RacerBase
 {
+    [SerializeField] private IngameCarController carController;
     [SerializeField] private Vector3 cameraOffset;
 
     protected override void RacerUpdate()

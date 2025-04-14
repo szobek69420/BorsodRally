@@ -4,11 +4,10 @@ using UnityEngine;
 
 public class IngameCarController : MonoBehaviour
 {
+    [SerializeField] private IngameCarComponents carComponents;
+
     [SerializeField] private BasedWheelCollider[] frontWheelColliders;
     [SerializeField] private BasedWheelCollider[] rearWheelColliders;
-
-    [SerializeField] private Transform[] frontWheels;
-    [SerializeField] private Transform[] rearWheels;
 
     [SerializeField] private float MAX_ACCELERATING_FORCE = 100.0f;
     [SerializeField] private float MAX_BRAKING_FORCE = 100.0f;
@@ -68,6 +67,9 @@ public class IngameCarController : MonoBehaviour
 
     void UpdateWheelPositions()
     {
+        Transform[] frontWheels=new Transform[] {carComponents.wheelFl, carComponents.wheelFr};
+        Transform[] rearWheels=new Transform[] {carComponents.wheelRl, carComponents.wheelRr};
+
         for(int i=0;i<frontWheelColliders.Length;i++)
         {
             Vector3 position;
@@ -75,8 +77,8 @@ public class IngameCarController : MonoBehaviour
 
             frontWheelColliders[i].GetWorldPose(out position, out rotation);
 
-            frontWheels[i].transform.position = position;
-            frontWheels[i].transform.rotation= rotation;
+            frontWheels[i].position = position;
+            frontWheels[i].rotation= rotation;
         }
 
         for (int i = 0; i < rearWheelColliders.Length; i++)
@@ -86,8 +88,8 @@ public class IngameCarController : MonoBehaviour
 
             rearWheelColliders[i].GetWorldPose(out position, out rotation);
 
-            rearWheels[i].transform.position = position;
-            rearWheels[i].transform.rotation = rotation;
+            rearWheels[i].position = position;
+            rearWheels[i].rotation = rotation;
         }
     }
 }
