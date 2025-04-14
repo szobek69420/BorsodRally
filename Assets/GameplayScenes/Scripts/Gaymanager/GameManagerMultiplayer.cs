@@ -170,10 +170,18 @@ public class GameManagerMultiplayer : GameManagerBase
                         int requestScanCount = System.Convert.ToInt32(requestString.Substring(16));
 
                         LobbyScanInfo replyData = new LobbyScanInfo(
-                            new AvailableLobby(new IPEndPoint(hostAddress, hostPort), "Water Weight", 1, 4),
+                            new AvailableLobby(new IPEndPoint(hostAddress, port), "Water Weight", 1, 4),
                             requestScanCount
                             );
                         byte[] reply = Encoding.ASCII.GetBytes(replyData.ToString());
+                        client.Send(reply, reply.Length, remoteEP);
+                    }
+                    else if(requestString.Equals("i am approaching"))
+                    {
+                        LobbyTrackInfo lti = track.SerializeParameters();
+                        lti.ip = new IPEndPoint(hostAddress, hostPort);
+
+                        byte[] reply=Encoding.ASCII.GetBytes(lti.ToString());
                         client.Send(reply, reply.Length, remoteEP);
                     }
                 }

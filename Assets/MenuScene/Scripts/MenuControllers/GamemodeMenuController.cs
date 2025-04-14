@@ -221,6 +221,8 @@ public class GamemodeMenuController : MenuController
         PlayerPrefs.SetInt("difficulty" + processId, difficulty);
         PlayerPrefs.SetInt("isHost" + processId, 69);
 
+        PlayerPrefs.SetString("name" + processId, processId.ToString());
+
         //load scene
         SceneManager.LoadSceneAsync("Multiplayer");
     }
@@ -230,8 +232,36 @@ public class GamemodeMenuController : MenuController
         KillLobbySearcherThread();
 
         //query the track parameters from the host
+        LobbyTrackInfo lti = null;
+        try
+        {
+            byte[] message= Encoding.ASCII.GetBytes("i am approaching");
+
+            UdpClient client = new UdpClient();
+            client.Client.Bind(new IPEndPoint(IPAddress.Any, UnityEngine.Random.Range(55000, 60000)));
+            client.Send(message, message.Length, lobbyInfo.ip);
+
+            IPEndPoint remoteEp = null;
+            byte[] response=client.Receive(ref remoteEp);
+            lti = LobbyTrackInfo.ParseString(Encoding.ASCII.GetString(response));
+            
+        }
+        catch(Exception ex)
+        {
+            return;
+        }
 
         //set the track parameters for the game scene
+        int processId = Process.GetCurrentProcess().Id;
+        PlayerPrefs.SetInt("length" + processId, lti.length);
+        PlayerPrefs.SetInt("seed" + processId, lti.seed);
+        PlayerPrefs.SetFloat("curviness" + processId, lti.curviness);
+        PlayerPrefs.SetInt("difficulty" + processId, lti.difficulty);
+        PlayerPrefs.SetInt("isHost" + processId, 0);
+        PlayerPrefs.SetString("hostAddress"+processId, lti.ip.Address.ToString());
+        PlayerPrefs.SetInt("hostPort"+processId, lti.ip.Port);
+
+        PlayerPrefs.SetString("name" + processId, processId.ToString());
 
         //load scene
         SceneManager.LoadScene("Multiplayer");
@@ -306,8 +336,6 @@ public class GamemodeMenuController : MenuController
                 }
 
                 IPEndPoint remoteEP=null;
-
-                UnityEngine.Debug.Log("nigga");
 
                 try
                 {
