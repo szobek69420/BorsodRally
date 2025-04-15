@@ -6,7 +6,6 @@ using System.Reflection;
 using System.Drawing;
 using System.Diagnostics;
 
-
 public class RacetrackGenerator : MonoBehaviour
 {
     private const int START_LINE_INDEX = 15;
@@ -42,7 +41,7 @@ public class RacetrackGenerator : MonoBehaviour
 
     public void FetchParameters()
     {
-        int processId=Process.GetCurrentProcess().Id;
+        int processId = Process.GetCurrentProcess().Id;
 
         seed = PlayerPrefs.GetInt("seed"+processId);
         trackLength = PlayerPrefs.GetInt("length"+processId);
@@ -284,7 +283,7 @@ public class RacetrackGenerator : MonoBehaviour
                 vertices.Add(a);
                 vertices.Add(b);
 
-                if (j % 2 == 0)
+                if ((j + 1) % 2 == 0)
                 {
                     uvs.AddRange(textUVs);
                 }
@@ -318,6 +317,9 @@ public class RacetrackGenerator : MonoBehaviour
                 //if (step < points.Count - 1) Debug.DrawLine(points[step], points[step + 1], new UnityEngine.Color(1, 0, 0), 1000);
                 vertexIndex += 4;
             }
+
+            if(vertices.Count % 8 != 0) { uvs.AddRange(textUVs[0..4]); }
+
             Mesh meshF = new Mesh();
             meshF.vertices = vertices.ToArray();
             meshF.triangles = triangles.ToArray();
