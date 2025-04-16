@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 1560902987
+  GlobalObjectIdHash: 974406042
   InScenePlacedSourceGlobalObjectIdHash: 0
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -66,14 +66,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 079f59739f657c74b986b17de2a96452, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  track: {fileID: 0}
   carPrefab_player: {fileID: 0}
   carPrefab_opponent: {fileID: 0}
-  canvas_countdown: {fileID: 0}
-  text_countdown: {fileID: 0}
-  canvas_ingame: {fileID: 0}
-  speedo: {fileID: 0}
-  text_progress: {fileID: 0}
-  canvas_end: {fileID: 0}
-  text_position: {fileID: 0}
-  button_returnToMenu: {fileID: 0}
+  lobbyElement_prefab: {fileID: 3207473876894815629, guid: 1d6dd1b32a63b3b4593385b80d52fc65, type: 3}

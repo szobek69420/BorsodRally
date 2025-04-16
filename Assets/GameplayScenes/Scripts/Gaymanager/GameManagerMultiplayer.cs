@@ -15,39 +15,39 @@ public class GameManagerMultiplayer : GameManagerBase
 	[SerializeField] private GameObject carPrefab_player;
 	[SerializeField] private GameObject carPrefab_opponent;
 
+	private GameManagerMultiplayerUIVariables ui = null;
+
 	private List<PlayerInfo> joinedPlayers =new List<PlayerInfo>();
 
-	//lobby things
+    //lobby things
+    [SerializeField] private GameObject lobbyElement_prefab;
+    private List<GameObject> instantiatedLobbyElements = new List<GameObject>();
+	private JoinedPlayerInfo lobbyInfo = new JoinedPlayerInfo(69);	//the current state of the lobby
+	private bool lobbyInfoUpdated = true;	//should reinstantiate the lobby elements (new state has arrived from the server)
 
 	//countdown things
-	[SerializeField] private Canvas canvas_countdown;
-	[SerializeField] private TMP_Text text_countdown;
 
 	//ingame things
-	[SerializeField] private Canvas canvas_ingame;
-	[SerializeField] private SpeedometerHandler speedo;
-	[SerializeField] private TMP_Text text_progress;
-
 	private float greatestProgress = 0;
 
 	//end things
-	[SerializeField] private Canvas canvas_end;
-	[SerializeField] private TMP_Text text_position;
-	[SerializeField] private Button button_returnToMenu;
 
 	public override void OnNetworkSpawn()
 	{
+		//get the ui elements
+		ui=GameObject.Find("NetworkManager").GetComponent<GameManagerMultiplayerUIVariables>();
+
         //register the player
         int processId = System.Diagnostics.Process.GetCurrentProcess().Id;
         string name = PlayerPrefs.GetString("name" + processId);
         RegisterPlayerServerRpc(new PlayerInfo(name, processId));
 
-        if (!IsOwner)
-			return;
-
         //initialize scene
         InitScene();
-	}
+
+        //start countdown
+        ShowLobbyScreen();
+    }
 
 	public override void OnDestroy()
 	{
@@ -59,6 +59,9 @@ public class GameManagerMultiplayer : GameManagerBase
 
 	protected override void InitScene()
 	{
+		if (!IsOwner)
+			return;
+
 		//get the track generator
 		GetTrackManager();
 
@@ -75,31 +78,90 @@ public class GameManagerMultiplayer : GameManagerBase
 		//generate track
 		track.FetchParameters();
 		track.StartGen();
-
-		//start countdown
-		ShowLobbyScreen();
 	}
 
 	protected override void ShowLobbyScreen()
 	{
-		if (!IsOwner)
-			return;
-
 		State = GameState.LOBBY;
+
+        if (!IsOwner)
+            return;
+        ui.canvas_lobby.enabled = true;
 	}
 
 	protected override void UpdateLobbyScreen()
 	{
-		if (!IsOwner)
-			return;
-	}
+        //sync the data with the other players
+        if (IsHost)
+        {
+			JoinedPlayerInfo players;
+			switch(joinedPlayers.Count) 
+			{
+				case 0:
+					players = new JoinedPlayerInfo(69);
+					break;
+				case 1:
+					players = new JoinedPlayerInfo(joinedPlayers[0]);
+					break;
+                case 2:
+                    players = new JoinedPlayerInfo(joinedPlayers[0], joinedPlayers[1]);
+                    break;
+                case 3:
+                    players = new JoinedPlayerInfo(joinedPlayers[0], joinedPlayers[1], joinedPlayers[2]);
+                    break;
+				default:
+					players = new JoinedPlayerInfo(joinedPlayers[0], joinedPlayers[1], joinedPlayers[2], joinedPlayers[3]);
+					break;
+            }
+
+			UpdateJoinedPlayersClientRpc(players);
+        }
+
+        if (!IsOwner)
+            return;
+
+        //set canvas
+        if (lobbyInfoUpdated)
+		{
+			lobbyInfoUpdated = false;
+
+			for(int i=0;i<instantiatedLobbyElements.Count;i++)
+				Destroy(instantiatedLobbyElements[i]);
+			instantiatedLobbyElements.Clear();
+
+			for(int i=1;i<=lobbyInfo.playerCount;i++)
+			{
+				GameObject instance = Instantiate(lobbyElement_prefab, ui.lobbyElement_origin);
+				instance.GetComponent<RectTransform>().localPosition = new Vector3(0.0f, -170.0f * (i-1), 0.0f);
+				switch(i)
+				{
+					case 1:
+						instance.GetComponent<LobbyUIElementHandler>().SetInfo(lobbyInfo.player1.name.ToString(), 1);
+						break;
+                    case 2:
+                        instance.GetComponent<LobbyUIElementHandler>().SetInfo(lobbyInfo.player2.name.ToString(), 2);
+                        break;
+                    case 3:
+                        instance.GetComponent<LobbyUIElementHandler>().SetInfo(lobbyInfo.player3.name.ToString(), 3);
+                        break;
+                    default:
+                        instance.GetComponent<LobbyUIElementHandler>().SetInfo(lobbyInfo.player4.name.ToString(), 4);
+                        break;
+                }
+				instantiatedLobbyElements.Add(instance);
+			}
+
+            ui.text_waitingForHost.gameObject.SetActive(!IsHost);
+            ui.button_startGame.gameObject.SetActive(IsHost);
+        }
+    }
 
 	protected override void StartCountdown()
 	{
-		if (!IsOwner)
-			return;
+        State = GameManagerBase.GameState.COUNTDOWN;
 
-		State = GameManagerBase.GameState.COUNTDOWN;
+        if (!IsOwner)
+			return;
 	}
 
 	protected override void UpdateCountdownScreen()
@@ -109,10 +171,10 @@ public class GameManagerMultiplayer : GameManagerBase
 	}
 	protected override void StartRace()
 	{
-		if (!IsOwner)
-			return;
+        State = GameManagerBase.GameState.RACE;
 
-		State = GameManagerBase.GameState.RACE;
+        if (!IsOwner)
+			return;
 	}
 	protected override void UpdateRaceScreen()
 	{
@@ -122,11 +184,10 @@ public class GameManagerMultiplayer : GameManagerBase
 
 	public override void EndRace()
 	{
-		if (!IsOwner)
+        State = GameManagerBase.GameState.END;
+
+        if (!IsOwner)
 			return;
-
-		State = GameManagerBase.GameState.END;
-
 	}
 
 	protected override void UpdateEndScreen()
@@ -148,15 +209,20 @@ public class GameManagerMultiplayer : GameManagerBase
 	{
         if (joinedPlayers.Contains(playerInfo) == false)
 			joinedPlayers.Add(playerInfo);
+	}
 
-		Debug.Log(joinedPlayers.GetHashCode().ToString() + " " + joinedPlayers.Count.ToString()+" "+OwnerClientId);
-		foreach (var player in joinedPlayers)
-			Debug.Log(player.name+" "+player.id.ToString());
+	[ClientRpc]
+	private void UpdateJoinedPlayersClientRpc(JoinedPlayerInfo playersInLobby)
+	{
+		//do something
+		lobbyInfo = playersInLobby;
+		lobbyInfoUpdated = true;
 	}
 
 	//lobby responder things----------------------------------------------------------------------------------------------
 	//this is the thread that is responsibly for responding to the lobby searcher thread in the menu
-	private Thread lobbyResponderThread = null;
+	private const int RECEIVE_TIMEOUT = 500;
+    private Thread lobbyResponderThread = null;
 	private IPAddress hostAddress = null;
 	private ushort hostPort = 0;
 
@@ -190,6 +256,7 @@ public class GameManagerMultiplayer : GameManagerBase
 				try
 				{
 					localEP = new IPEndPoint(IPAddress.Any, port);
+					client.Client.ReceiveTimeout = RECEIVE_TIMEOUT;
 					client.Client.Bind(localEP);
 					break;
 				}
