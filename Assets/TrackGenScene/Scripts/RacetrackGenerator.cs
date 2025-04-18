@@ -4,7 +4,7 @@ using System;
 using Unity.VisualScripting;
 using System.Reflection;
 using System.Drawing;
-
+using System.Diagnostics;
 
 public class RacetrackGenerator : MonoBehaviour
 {
@@ -41,9 +41,17 @@ public class RacetrackGenerator : MonoBehaviour
 
     public void FetchParameters()
     {
-        seed = PlayerPrefs.GetInt("seed");
-        trackLength = PlayerPrefs.GetInt("length");
-        perlinScaleZ = PlayerPrefs.GetFloat("curviness");
+        int processId = Process.GetCurrentProcess().Id;
+
+        seed = PlayerPrefs.GetInt("seed"+processId);
+        trackLength = PlayerPrefs.GetInt("length"+processId);
+        perlinScaleZ = PlayerPrefs.GetFloat("curviness"+processId);
+    }
+
+    //cannot set the ip and difficulty parameters
+    public LobbyTrackInfo SerializeParameters()
+    {
+        return new LobbyTrackInfo(null, trackLength, seed, perlinScaleZ, 69);
     }
 
     public void StartGen()
@@ -107,7 +115,7 @@ public class RacetrackGenerator : MonoBehaviour
         
     public void ResetGen()
     {
-        Debug.Log("Reset");
+        UnityEngine.Debug.Log("Reset");
 
         foreach(GameObject go in trackParts)
             DestroyImmediate(go);
@@ -275,7 +283,7 @@ public class RacetrackGenerator : MonoBehaviour
                 vertices.Add(a);
                 vertices.Add(b);
 
-                if (j % 2 == 0)
+                if ((j + 1) % 2 == 0)
                 {
                     uvs.AddRange(textUVs);
                 }
@@ -309,6 +317,9 @@ public class RacetrackGenerator : MonoBehaviour
                 //if (step < points.Count - 1) Debug.DrawLine(points[step], points[step + 1], new UnityEngine.Color(1, 0, 0), 1000);
                 vertexIndex += 4;
             }
+
+            if(vertices.Count % 8 != 0) { uvs.AddRange(textUVs[0..4]); }
+
             Mesh meshF = new Mesh();
             meshF.vertices = vertices.ToArray();
             meshF.triangles = triangles.ToArray();

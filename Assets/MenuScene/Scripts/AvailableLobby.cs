@@ -5,7 +5,7 @@ public class AvailableLobby
 {
     public const string SEPARATOR = "||";
 
-    public IPEndPoint ip;
+    public IPEndPoint ip; //the ip address of the lobby responder
     public string ownerName;
     public int playerCount;
     public int maxPlayerCount;
