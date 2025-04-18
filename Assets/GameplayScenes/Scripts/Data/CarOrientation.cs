@@ -26,6 +26,9 @@ public struct CarOrientation : INetworkSerializable
     public float wheelRrPosX, wheelRrPosY, wheelRrPosZ;
     public float wheelRrRotX, wheelRrRotY, wheelRrRotZ;
 
+    //car velocity
+    public float velocityX, velocityY, velocityZ;
+
     public CarOrientation(int placeHolder)//use this if the car is not in use
     {
         id = CAR_NOT_USED;
@@ -44,9 +47,11 @@ public struct CarOrientation : INetworkSerializable
 
         wheelRrPosX = 0; wheelRrPosY = 0; wheelRrPosZ = 0;
         wheelRrRotX = 0; wheelRrRotY = 0; wheelRrRotZ = 0;
+
+        velocityX = 0; velocityY = 0; velocityZ = 0;
     }
 
-    public CarOrientation(int ownerId, Transform car, Transform wheelFl, Transform wheelFr, Transform wheelRl, Transform wheelRr)
+    public CarOrientation(int ownerId, Transform car, Transform wheelFl, Transform wheelFr, Transform wheelRl, Transform wheelRr, Vector3 velocity)
     {
         id = ownerId;
 
@@ -94,6 +99,11 @@ public struct CarOrientation : INetworkSerializable
         wheelRrRotX = wheelRr.rotation.eulerAngles.x;
         wheelRrRotY = wheelRr.rotation.eulerAngles.y;
         wheelRrRotZ = wheelRr.rotation.eulerAngles.z;
+
+        //velocity
+        velocityX = velocity.x;
+        velocityY = velocity.y;
+        velocityZ = velocity.z;
     }
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -136,5 +146,9 @@ public struct CarOrientation : INetworkSerializable
         serializer.SerializeValue(ref wheelRrRotX);
         serializer.SerializeValue(ref wheelRrRotY);
         serializer.SerializeValue(ref wheelRrRotZ);
+
+        serializer.SerializeValue(ref velocityX);
+        serializer.SerializeValue(ref velocityY);
+        serializer.SerializeValue(ref velocityZ);
     }
 }
