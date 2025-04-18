@@ -230,6 +230,7 @@ MonoBehaviour:
   wheelFr: {fileID: 2040993815129118834}
   wheelRl: {fileID: 7866298274936282695}
   wheelRr: {fileID: 3101568107076397536}
+  rb: {fileID: 3403775888983078141}
 --- !u!114 &315010005834496200
 MonoBehaviour:
   m_ObjectHideFlags: 0

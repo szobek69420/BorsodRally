@@ -12,6 +12,8 @@ using UnityEngine.UI;
 
 public class GameManagerMultiplayer : GameManagerBase
 {
+	public static GameManagerMultiplayer Singleton { get; private set; } = null;
+
 	[SerializeField] private GameObject carPrefab_player;
 	[SerializeField] private GameObject carPrefab_opponent;
 
@@ -34,8 +36,21 @@ public class GameManagerMultiplayer : GameManagerBase
 
 	public override void OnNetworkSpawn()
 	{
-		//get the ui elements
-		ui=GameObject.Find("NetworkManager").GetComponent<GameManagerMultiplayerUIVariables>();
+		if(IsHost)
+		{
+			if(Singleton!=null&&Singleton!=this)
+			{
+				Debug.Log("Multiple GameManagerMultiplayer instances are not allowed");
+				Destroy(gameObject);
+				return;
+			}
+			Singleton = this;
+		}
+		else
+            GetSingletonServerRpc(GameObject.Find("NetworkManager").GetComponent<NetworkManager>().LocalClientId);
+
+        //get the ui elements
+        ui = GameObject.Find("NetworkManager").GetComponent<GameManagerMultiplayerUIVariables>();
 
         //register the player
         int processId = System.Diagnostics.Process.GetCurrentProcess().Id;
@@ -84,8 +99,6 @@ public class GameManagerMultiplayer : GameManagerBase
 	{
 		State = GameState.LOBBY;
 
-        if (!IsOwner)
-            return;
         ui.canvas_lobby.enabled = true;
 	}
 
@@ -116,9 +129,6 @@ public class GameManagerMultiplayer : GameManagerBase
 
 			UpdateJoinedPlayersClientRpc(players);
         }
-
-        if (!IsOwner)
-            return;
 
         //set canvas
         if (lobbyInfoUpdated)
@@ -155,7 +165,7 @@ public class GameManagerMultiplayer : GameManagerBase
             ui.button_startGame.gameObject.SetActive(IsHost);
         }
     }
-
+	
 	protected override void StartCountdown()
 	{
         State = GameManagerBase.GameState.COUNTDOWN;
@@ -200,9 +210,40 @@ public class GameManagerMultiplayer : GameManagerBase
 	{
 		if (!IsOwner)
 			return;
-
+		
 		SceneManager.LoadScene("MenuScene");
 	}
+
+	[ServerRpc(RequireOwnership = false)]
+	private void GetSingletonServerRpc(ulong senderClientId)
+	{
+		if(Singleton!=null)
+		{
+            ClientRpcParams clientRpcParams = new ClientRpcParams
+            {
+                Send = new ClientRpcSendParams
+                {
+                    TargetClientIds = new[] { senderClientId }
+                }
+            };
+            SendSingletonClientRpc(NetworkObjectId, clientRpcParams);
+        }
+	}
+
+	[ClientRpc]
+	private void SendSingletonClientRpc(ulong networkObjectId, ClientRpcParams rpcParams)
+	{
+        if (Singleton == null)
+        {
+            if (GameObject.Find("NetworkManager").GetComponent<NetworkManager>().SpawnManager.SpawnedObjects.TryGetValue(networkObjectId, out NetworkObject networkObject))
+            {
+                Singleton = networkObject.GetComponent<GameManagerMultiplayer>();
+                Debug.Log("Client: Singleton set");
+            }
+            else
+                Debug.LogError("Client: NetworkObject with the id: " + networkObjectId + " isn't found");
+        }
+    }
 
     [ServerRpc(RequireOwnership = false)]
     private void RegisterPlayerServerRpc(PlayerInfo playerInfo)
