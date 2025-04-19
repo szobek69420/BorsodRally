@@ -221,7 +221,7 @@ public class GamemodeMenuController : MenuController
         PlayerPrefs.SetInt("difficulty" + processId, difficulty);
         PlayerPrefs.SetInt("isHost" + processId, 69);
 
-        PlayerPrefs.SetString("name" + processId, processId.ToString());
+        PlayerPrefs.SetString("name" + processId, PlayerPrefs.GetString("name"));
 
         //load scene
         SceneManager.LoadSceneAsync("Multiplayer");
@@ -261,7 +261,7 @@ public class GamemodeMenuController : MenuController
         PlayerPrefs.SetString("hostAddress"+processId, lti.ip.Address.ToString());
         PlayerPrefs.SetInt("hostPort"+processId, lti.ip.Port);
 
-        PlayerPrefs.SetString("name" + processId, processId.ToString());
+        PlayerPrefs.SetString("name" + processId, PlayerPrefs.GetString("name"));
 
         //load scene
         SceneManager.LoadScene("Multiplayer");
