@@ -1,13 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
-using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 
-public class RacerPlayer : RacerBase
+//it is the racer that is piloted by the host
+public class RacerPlayerMultiplayerHost : RacerBase
 {
     [SerializeField] private IngameCarController carController;
     [SerializeField] private Vector3 cameraOffset;
+
+    public int PlayerId { get; set; } = 69;
+
 
     protected override void RacerUpdate()
     {
@@ -20,10 +22,10 @@ public class RacerPlayer : RacerBase
     {
         UpdateCameraPosition();
     }
-    
+
     protected override void RacerOnFinish()
     {
-        gameManager?.EndRace();
+        throw new System.NotImplementedException();
     }
 
     private void ApplyBrakes()
@@ -43,12 +45,12 @@ public class RacerPlayer : RacerBase
 
     private void UpdateCameraPosition()
     {
-        Rigidbody rb= GetComponent<Rigidbody>();
+        Rigidbody rb = GetComponent<Rigidbody>();
 
-        Vector3 position=Vector3.zero;
-        Quaternion rotation=Quaternion.identity;
+        Vector3 position = Vector3.zero;
+        Quaternion rotation = Quaternion.identity;
 
-        if (rb==null||rb.velocity.magnitude<1.0f)
+        if (rb == null || rb.velocity.magnitude < 1.0f)
         {
             position =
                 transform.position +
@@ -61,7 +63,7 @@ public class RacerPlayer : RacerBase
         {
             Vector3 forward = rb.velocity;
             forward.y = 0.0f;
-            forward=Vector3.Normalize(forward);
+            forward = Vector3.Normalize(forward);
             Vector3 right = Vector3.Normalize(Vector3.Cross(Vector3.up, forward));
 
             position =

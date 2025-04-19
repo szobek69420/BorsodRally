@@ -25,9 +25,10 @@ public class GameManagerMultiplayer : GameManagerBase
     [SerializeField] private GameObject lobbyElement_prefab;
     private List<GameObject> instantiatedLobbyElements = new List<GameObject>();
 	private JoinedPlayerInfo lobbyInfo = new JoinedPlayerInfo(69);	//the current state of the lobby
-	private bool lobbyInfoUpdated = true;	//should reinstantiate the lobby elements (new state has arrived from the server)
+	private bool lobbyInfoUpdated = true;   //should reinstantiate the lobby elements (new state has arrived from the server)
 
 	//countdown things
+	private float countdownTime = 0.0f;
 
 	//ingame things
 	private float greatestProgress = 0;
@@ -99,6 +100,9 @@ public class GameManagerMultiplayer : GameManagerBase
 	{
 		State = GameState.LOBBY;
 
+		ui.button_startGame.onClick.RemoveAllListeners();
+		ui.button_startGame.onClick.AddListener(() => { StartCountdown(); });
+
         ui.canvas_lobby.enabled = true;
 	}
 
@@ -168,17 +172,21 @@ public class GameManagerMultiplayer : GameManagerBase
 	
 	protected override void StartCountdown()
 	{
-        State = GameManagerBase.GameState.COUNTDOWN;
-
-        if (!IsOwner)
-			return;
-	}
+		if(IsHost)
+            StartCountdownClientRpc();
+    }
 
 	protected override void UpdateCountdownScreen()
 	{
-		if (!IsOwner)
-			return;
-	}
+		if(IsHost)
+		{
+            countdownTime -= Time.deltaTime;
+			UpdateCountdownScreenClientRpc(countdownTime);
+        }
+
+		//update text
+        ui.text_countdown.text = (((int)countdownTime) + 1).ToString();
+    }
 	protected override void StartRace()
 	{
         State = GameManagerBase.GameState.RACE;
@@ -252,12 +260,40 @@ public class GameManagerMultiplayer : GameManagerBase
 			joinedPlayers.Add(playerInfo);
 	}
 
-	[ClientRpc]
+	[ClientRpc(RequireOwnership = false)]
 	private void UpdateJoinedPlayersClientRpc(JoinedPlayerInfo playersInLobby)
 	{
 		//do something
 		lobbyInfo = playersInLobby;
 		lobbyInfoUpdated = true;
+	}
+
+	[ClientRpc(RequireOwnership = false)]
+	private void StartCountdownClientRpc()
+	{
+        State = GameManagerBase.GameState.COUNTDOWN;
+
+        countdownTime = 3.0f;
+
+		ui.canvas_lobby.enabled = false;
+        ui.canvas_countdown.enabled = true;
+    }
+
+	[ClientRpc(RequireOwnership = false)]
+	private void UpdateCountdownScreenClientRpc(float countdownTime)
+	{
+		this.countdownTime = countdownTime;
+	}
+
+	public void UpdateClientInput(CarInput input)
+	{
+		UpdateClientInputServerRpc(input);
+	}
+
+	[ServerRpc(RequireOwnership = false)]
+	private void UpdateClientInputServerRpc(CarInput input)
+	{
+		//TODO
 	}
 
 	//lobby responder things----------------------------------------------------------------------------------------------
