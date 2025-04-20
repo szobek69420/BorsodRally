@@ -65,40 +65,40 @@ public struct CarOrientation : INetworkSerializable
         carRotZ = car.rotation.eulerAngles.z;
 
         //wheels
-        wheelFlPosX = wheelFl.position.x;
-        wheelFlPosY = wheelFl.position.y;
-        wheelFlPosZ = wheelFl.position.z;
+        wheelFlPosX = wheelFl.localPosition.x;
+        wheelFlPosY = wheelFl.localPosition.y;
+        wheelFlPosZ = wheelFl.localPosition.z;
 
-        wheelFlRotX = wheelFl.rotation.eulerAngles.x;
-        wheelFlRotY = wheelFl.rotation.eulerAngles.y;
-        wheelFlRotZ = wheelFl.rotation.eulerAngles.z;
-
-
-        wheelFrPosX = wheelFr.position.x;
-        wheelFrPosY = wheelFr.position.y;
-        wheelFrPosZ = wheelFr.position.z;
-
-        wheelFrRotX = wheelFr.rotation.eulerAngles.x;
-        wheelFrRotY = wheelFr.rotation.eulerAngles.y;
-        wheelFrRotZ = wheelFr.rotation.eulerAngles.z;
+        wheelFlRotX = wheelFl.localRotation.eulerAngles.x;
+        wheelFlRotY = wheelFl.localRotation.eulerAngles.y;
+        wheelFlRotZ = wheelFl.localRotation.eulerAngles.z;
 
 
-        wheelRlPosX = wheelRl.position.x;
-        wheelRlPosY = wheelRl.position.y;
-        wheelRlPosZ = wheelRl.position.z;
+        wheelFrPosX = wheelFr.localPosition.x;
+        wheelFrPosY = wheelFr.localPosition.y;
+        wheelFrPosZ = wheelFr.localPosition.z;
 
-        wheelRlRotX = wheelRl.rotation.eulerAngles.x;
-        wheelRlRotY = wheelRl.rotation.eulerAngles.y;
-        wheelRlRotZ = wheelRl.rotation.eulerAngles.z;
+        wheelFrRotX = wheelFr.localRotation.eulerAngles.x;
+        wheelFrRotY = wheelFr.localRotation.eulerAngles.y;
+        wheelFrRotZ = wheelFr.localRotation.eulerAngles.z;
 
 
-        wheelRrPosX = wheelRr.position.x;
-        wheelRrPosY = wheelRr.position.y;
-        wheelRrPosZ = wheelRr.position.z;
+        wheelRlPosX = wheelRl.localPosition.x;
+        wheelRlPosY = wheelRl.localPosition.y;
+        wheelRlPosZ = wheelRl.localPosition.z;
 
-        wheelRrRotX = wheelRr.rotation.eulerAngles.x;
-        wheelRrRotY = wheelRr.rotation.eulerAngles.y;
-        wheelRrRotZ = wheelRr.rotation.eulerAngles.z;
+        wheelRlRotX = wheelRl.localRotation.eulerAngles.x;
+        wheelRlRotY = wheelRl.localRotation.eulerAngles.y;
+        wheelRlRotZ = wheelRl.localRotation.eulerAngles.z;
+
+
+        wheelRrPosX = wheelRr.localPosition.x;
+        wheelRrPosY = wheelRr.localPosition.y;
+        wheelRrPosZ = wheelRr.localPosition.z;
+
+        wheelRrRotX = wheelRr.localRotation.eulerAngles.x;
+        wheelRrRotY = wheelRr.localRotation.eulerAngles.y;
+        wheelRrRotZ = wheelRr.localRotation.eulerAngles.z;
 
         //velocity
         velocityX = velocity.x;

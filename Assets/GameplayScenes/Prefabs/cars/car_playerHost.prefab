@@ -262,6 +262,7 @@ GameObject:
   - component: {fileID: 7842165148838557217}
   - component: {fileID: 2318036244664238296}
   - component: {fileID: 3216264874944248987}
+  - component: {fileID: 1071269918292426901}
   m_Layer: 0
   m_Name: car_playerHost
   m_TagString: Untagged
@@ -343,7 +344,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   carController: {fileID: 558991786740773038}
-  cameraOffset: {x: 0, y: 0, z: 0}
+  cameraOffset: {x: 0, y: 2, z: -5}
 --- !u!65 &2318036244664238296
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -373,6 +374,19 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 1
+--- !u!114 &1071269918292426901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4552869385993472957}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6e52d2773b35454380afbe57c1c04e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  id: 69
 --- !u!1 &4647065601474289757
 GameObject:
   m_ObjectHideFlags: 0

@@ -8,9 +8,6 @@ public class RacerPlayerMultiplayerHost : RacerBase
     [SerializeField] private IngameCarController carController;
     [SerializeField] private Vector3 cameraOffset;
 
-    public int PlayerId { get; set; } = 69;
-
-
     protected override void RacerUpdate()
     {
         ApplyBrakes();
