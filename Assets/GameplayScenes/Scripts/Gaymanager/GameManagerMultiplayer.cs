@@ -14,10 +14,13 @@ public class GameManagerMultiplayer : GameManagerBase
 {
 	public static GameManagerMultiplayer Singleton { get; private set; } = null;
 
-	[SerializeField] private GameObject carPrefab_player;
-	[SerializeField] private GameObject carPrefab_opponent;
+	[SerializeField] private GameObject carPrefab_playerHost;
+	[SerializeField] private GameObject carPrefab_opponentHost;
 
-	private GameManagerMultiplayerUIVariables ui = null;
+    [SerializeField] private GameObject carPrefab_playerClient;
+    [SerializeField] private GameObject carPrefab_opponentClient;
+
+    private GameManagerMultiplayerUIVariables ui = null;
 
 	private List<PlayerInfo> joinedPlayers =new List<PlayerInfo>();
 
@@ -25,9 +28,10 @@ public class GameManagerMultiplayer : GameManagerBase
     [SerializeField] private GameObject lobbyElement_prefab;
     private List<GameObject> instantiatedLobbyElements = new List<GameObject>();
 	private JoinedPlayerInfo lobbyInfo = new JoinedPlayerInfo(69);	//the current state of the lobby
-	private bool lobbyInfoUpdated = true;	//should reinstantiate the lobby elements (new state has arrived from the server)
+	private bool lobbyInfoUpdated = true;   //should reinstantiate the lobby elements (new state has arrived from the server)
 
 	//countdown things
+	private float countdownTime = 0.0f;
 
 	//ingame things
 	private float greatestProgress = 0;
@@ -74,9 +78,6 @@ public class GameManagerMultiplayer : GameManagerBase
 
 	protected override void InitScene()
 	{
-		if (!IsOwner)
-			return;
-
 		//get the track generator
 		GetTrackManager();
 
@@ -98,6 +99,9 @@ public class GameManagerMultiplayer : GameManagerBase
 	protected override void ShowLobbyScreen()
 	{
 		State = GameState.LOBBY;
+
+		ui.button_startGame.onClick.RemoveAllListeners();
+		ui.button_startGame.onClick.AddListener(() => { StartCountdown(); });
 
         ui.canvas_lobby.enabled = true;
 	}
@@ -168,29 +172,57 @@ public class GameManagerMultiplayer : GameManagerBase
 	
 	protected override void StartCountdown()
 	{
-        State = GameManagerBase.GameState.COUNTDOWN;
+		if(IsHost)
+		{
+            StartCountdownClientRpc();
+			SpawnCars();
+        }
 
-        if (!IsOwner)
-			return;
-	}
+		KillLobbyResponderThread();
+    }
 
 	protected override void UpdateCountdownScreen()
 	{
-		if (!IsOwner)
-			return;
-	}
+		if(IsHost)
+		{
+            countdownTime -= Time.deltaTime;
+			UpdateCountdownScreenClientRpc(countdownTime);
+			UpdateCarOrientations();
+        }
+
+		//update text
+        ui.text_countdown.text = (((int)countdownTime) + 1).ToString();
+
+		if (countdownTime <= 0)
+			StartRace();
+    }
 	protected override void StartRace()
 	{
-        State = GameManagerBase.GameState.RACE;
-
-        if (!IsOwner)
-			return;
+		if(IsHost)
+			StartRaceClientRpc();
 	}
 	protected override void UpdateRaceScreen()
 	{
-		if (!IsOwner)
-			return;
-	}
+		if(IsHost)
+            UpdateCarOrientations();
+
+		int processId=System.Diagnostics.Process.GetCurrentProcess().Id;
+		foreach(GameObject player in players)
+		{
+			if(player.GetComponent<RacerId>().id == processId)
+			{
+				RacerPlayerMultiplayerClient rpmc;
+				RacerPlayerMultiplayerHost rpmh;
+				if (player.TryGetComponent<RacerPlayerMultiplayerClient>(out rpmc))
+					ui.speedo.SetSpeed(rpmc.Velocity.magnitude);
+				else if (player.TryGetComponent<RacerPlayerMultiplayerHost>(out rpmh))
+					ui.speedo.SetSpeed(player.GetComponent<Rigidbody>().velocity.magnitude);
+				else
+					continue;
+				break;
+			}
+		}
+    }
 
 	public override void EndRace()
 	{
@@ -238,6 +270,7 @@ public class GameManagerMultiplayer : GameManagerBase
             if (GameObject.Find("NetworkManager").GetComponent<NetworkManager>().SpawnManager.SpawnedObjects.TryGetValue(networkObjectId, out NetworkObject networkObject))
             {
                 Singleton = networkObject.GetComponent<GameManagerMultiplayer>();
+				Singleton.gameObject.name = "GameManager";
                 Debug.Log("Client: Singleton set");
             }
             else
@@ -252,12 +285,163 @@ public class GameManagerMultiplayer : GameManagerBase
 			joinedPlayers.Add(playerInfo);
 	}
 
-	[ClientRpc]
+	[ClientRpc(RequireOwnership = false)]
 	private void UpdateJoinedPlayersClientRpc(JoinedPlayerInfo playersInLobby)
 	{
 		//do something
 		lobbyInfo = playersInLobby;
 		lobbyInfoUpdated = true;
+	}
+
+	[ClientRpc(RequireOwnership = false)]
+	private void StartCountdownClientRpc()
+	{
+        State = GameManagerBase.GameState.COUNTDOWN;
+
+        countdownTime = 3.0f;
+
+		ui.canvas_lobby.enabled = false;
+        ui.canvas_countdown.enabled = true;
+    }
+
+	[ClientRpc(RequireOwnership = false)]
+	private void UpdateCountdownScreenClientRpc(float countdownTime)
+	{
+		this.countdownTime = countdownTime;
+	}
+
+	[ClientRpc(RequireOwnership = false)]
+	private void StartRaceClientRpc()
+	{
+        State = GameManagerBase.GameState.RACE;
+
+		ui.canvas_countdown.enabled = false;
+		ui.canvas_ingame.enabled = true;
+    }
+
+	public void UpdateClientInput(CarInput input)
+	{
+		UpdateClientInputServerRpc(input);
+	}
+
+	[ServerRpc(RequireOwnership = false)]
+	private void UpdateClientInputServerRpc(CarInput input)
+	{
+		foreach(GameObject player in players)
+		{
+			if(player.GetComponent<RacerId>().id==input.id)
+			{
+				IngameCarController cc=player.GetComponent<IngameCarController>();
+
+				cc.AccelInput = input.throttleInput;
+				cc.BrakeInput = input.brakeInput;
+				cc.SteerInput = input.steerInput;
+
+				break;
+			}
+		}
+	}
+
+	private void SpawnCars()
+	{
+		if (!IsHost)
+			return;
+
+        //instantiate racers
+        Transform startLine = track.GetStartLine();
+		int processId=System.Diagnostics.Process.GetCurrentProcess().Id;
+
+		for(int i=0;i<joinedPlayers.Count;i++)
+		{
+			int x = 2*(i % 2)-1;
+			int y = 2*(i / 2)-1;
+
+            Vector3 spawnPosition = startLine.position + 3 * x * startLine.right + 5 * y * startLine.forward + 2.0f * startLine.up;
+            GameObject racer = null;
+            if (joinedPlayers[i].id==processId)
+                racer = GameObject.Instantiate(carPrefab_playerHost, spawnPosition, startLine.rotation);
+            else
+                racer = GameObject.Instantiate(carPrefab_opponentHost, spawnPosition, startLine.rotation);
+			racer.GetComponent<RacerId>().id=joinedPlayers[i].id;
+
+            players.Add(racer);
+        }
+
+		//send the data to the clients
+        UpdateCarOrientations();
+	}
+
+	private void UpdateCarOrientations()
+	{
+		List<CarOrientation> orientations = new List<CarOrientation>();
+
+		for(int i=0;i<joinedPlayers.Count&&i<players.Count;i++)
+		{
+			CarOrientation co = players[i].GetComponent<IngameCarComponents>().GetOrientation();
+			co.id = joinedPlayers[i].id;
+			orientations.Add(co);
+		}
+
+		switch(orientations.Count)
+		{
+			case 0:
+				return;
+			case 1:
+				UpdateCarOrientationsClientRpc(new CarOrientationPackage(orientations[0]));
+				break;
+			case 2:
+                UpdateCarOrientationsClientRpc(new CarOrientationPackage(orientations[0], orientations[1]));
+                break;
+            case 3:
+                UpdateCarOrientationsClientRpc(new CarOrientationPackage(orientations[0], orientations[1], orientations[2]));
+                break;
+            case 4:
+                UpdateCarOrientationsClientRpc(new CarOrientationPackage(orientations[0], orientations[1], orientations[2], orientations[3]));
+                break;
+        }
+	}
+
+	[ClientRpc(RequireOwnership = false)]
+	private void UpdateCarOrientationsClientRpc(CarOrientationPackage orientations)
+	{
+		if (IsHost)
+			return;
+
+		CarOrientation[] cos = new CarOrientation[] { orientations.car1, orientations.car2, orientations.car3, orientations.car4 };
+		for (int i = 0; i < orientations.carCount;i++)
+		{
+			bool found = false;
+			for (int j = 0; j < players.Count; j++)
+			{
+				if (players[j].GetComponent<RacerId>()?.id == cos[i].id)
+				{
+					found = true;
+
+					//set orientation
+					players[j].GetComponent<RacerClientOrientationDelay>().Orientation=cos[i];
+				}
+			}
+
+			//if not found, instantiate a new car
+			if(!found)
+			{
+				int processId = System.Diagnostics.Process.GetCurrentProcess().Id;
+				GameObject racist = null;
+
+				if (processId == cos[i].id)
+				{
+                    racist = Instantiate(carPrefab_playerClient);
+					racist.GetComponent<RacerPlayerMultiplayerClient>().Velocity = new Vector3(cos[i].velocityX, cos[i].velocityY, cos[i].velocityZ);//set velocity
+                }
+				else
+					racist = Instantiate(carPrefab_opponentClient);
+
+				racist.GetComponent<RacerId>().id = cos[i].id;//set id
+				racist.GetComponent<IngameCarComponents>().SetOrientation(cos[i]);//set orientation
+
+				players.Add(racist);
+			}
+		}
 	}
 
 	//lobby responder things----------------------------------------------------------------------------------------------

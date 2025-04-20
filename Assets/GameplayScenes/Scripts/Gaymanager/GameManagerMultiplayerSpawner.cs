@@ -20,6 +20,7 @@ public class GameManagerMultiplayerSpawner : MonoBehaviour
             if (GameManagerMultiplayer.Singleton == null)
             {
                 GameObject spawnedObject = Instantiate(prefab);
+                spawnedObject.name = "GameManager";
                 NetworkObject networkObject = spawnedObject.GetComponent<NetworkObject>();
                 networkObject.Spawn();
                 Debug.Log("Singleton Network Object spawned on the server.");
