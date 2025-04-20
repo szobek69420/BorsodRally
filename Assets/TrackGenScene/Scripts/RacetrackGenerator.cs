@@ -14,13 +14,13 @@ public class RacetrackGenerator : MonoBehaviour
     public int seed = 42;                                              // Seed for the Perlin Noise generation
     public int trackLength = 30;                                       // Number of track segments
     public int trackWidth = 15;                                        // Width of the track
-    public float perlinScaleZ = 4f;                                    // Scale for the Perlin noise in Z-axis
-    public float perlinScaleY = 1f;                                    // Scale for the Perlin noise in Y-axis 
+    public float curviness = 4f;                                       // Scale for the curviness
+    public float elevation = 2f;                                       // Scale for the elevation Y-axis 
     public Material trackMaterial;                                     // Material to apply to the track surface
 
     private int trackSectors = 20;
     private List<Vector3> trackPoints = new List<Vector3>();           // List to hold track control points
-    private ControlPointGeneratorBase controlPointGenerator;
+    private PathGeneratorBase controlPointGenerator;
     
     private List<GameObject> trackParts = new List<GameObject>();      // List to hold track sections
 
@@ -46,21 +46,21 @@ public class RacetrackGenerator : MonoBehaviour
 
         seed = PlayerPrefs.GetInt("seed"+processId);
         trackLength = PlayerPrefs.GetInt("length"+processId);
-        perlinScaleZ = PlayerPrefs.GetFloat("curviness"+processId);
+        curviness = PlayerPrefs.GetFloat("curviness"+processId);
     }
 
     //cannot set the ip and difficulty parameters
     public LobbyTrackInfo SerializeParameters()
     {
-        return new LobbyTrackInfo(null, trackLength, seed, perlinScaleZ, 69);
+        return new LobbyTrackInfo(null, trackLength, seed, curviness, 69);
     }
 
     public void StartGen()
     {
-        controlPointGenerator = new TestControlPointGenerator();        //you can change the pathgenerator here
+        controlPointGenerator = new RandomPathGenerator();        //you can change the pathgenerator here
 
         trackPoints.Clear();
-        trackPoints = controlPointGenerator.GenerateTrackPoints(seed, trackLength, perlinScaleZ, perlinScaleY);
+        trackPoints = controlPointGenerator.GenerateTrackPoints(seed, trackLength, curviness, elevation);
 
         trackParts.Clear();
 
@@ -221,7 +221,7 @@ public class RacetrackGenerator : MonoBehaviour
                     triangles.Add(vertexIndex + 5);
                     triangles.Add(vertexIndex + 7);
                 }
-                //if (step < points.Count - 1) Debug.DrawLine(points[step], points[step + 1], new UnityEngine.Color(1, 0, 0), 1000);
+                if (step < points.Count - 1) UnityEngine.Debug.DrawLine(points[step], points[step + 1], new UnityEngine.Color(1, 0, 0), 1000);
                 vertexIndex += 4;
             }
 
