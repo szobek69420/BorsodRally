@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class IngameCarComponents : MonoBehaviour
 {
-    private const float EPSILON = 0.1f;
+    private const float EPSILON = 0.5f;
     private const float SQR_EPSILON = EPSILON*EPSILON;
 
     public Transform car;
@@ -49,12 +49,19 @@ public class IngameCarComponents : MonoBehaviour
 
     public void ExtrapolateOrientation()
     {
-        const float CORRECTION_LERP_STRENGTH = 0.1f;
+        const float CORRECTION_LERP_STRENGTH = 0.2f;
        
         #region LongCalc
         Vector3 estimatedCarPos = new Vector3(currentOrientation.carPosX, currentOrientation.carPosY, currentOrientation.carPosZ)+
             (Time.time-currentOrientationTime)*new Vector3(currentOrientation.velocityX, currentOrientation.velocityY, currentOrientation.velocityZ);
-        Quaternion estimatedCarRot = Quaternion.Euler(currentOrientation.carRotX, currentOrientation.carRotY, currentOrientation.carRotZ);
+        
+        Vector3 helper=new Vector3(currentOrientation.angularVelocityX, currentOrientation.angularVelocityY, currentOrientation.angularVelocityZ);
+        Quaternion estimatedCarRot = 
+            Quaternion.AngleAxis(
+                (Time.time - currentOrientationTime)*Mathf.Rad2Deg*helper.magnitude,
+                helper.normalized
+            ) *
+            Quaternion.Euler(currentOrientation.carRotX, currentOrientation.carRotY, currentOrientation.carRotZ);
 
 
         Vector3 estimatedWheelFlPos= new Vector3(currentOrientation.wheelFlPosX, currentOrientation.wheelFlPosY, currentOrientation.wheelFlPosZ);
@@ -73,35 +80,19 @@ public class IngameCarComponents : MonoBehaviour
         if ((car.transform.position - estimatedCarPos).sqrMagnitude > SQR_EPSILON)
             car.transform.position = Vector3.Lerp(car.transform.position, estimatedCarPos, CORRECTION_LERP_STRENGTH);
         else car.transform.position = estimatedCarPos;
-        if (Quaternion.Dot(car.transform.rotation, estimatedCarRot) > 1-EPSILON)
+        if (Quaternion.Dot(car.transform.rotation, estimatedCarRot) < 1-EPSILON)
             car.transform.rotation = Quaternion.Lerp(car.transform.rotation, estimatedCarRot, CORRECTION_LERP_STRENGTH);
         else car.transform.rotation = estimatedCarRot;
 
-        if ((wheelFl.transform.localPosition - estimatedWheelFlPos).sqrMagnitude > SQR_EPSILON)
-            wheelFl.transform.localPosition = Vector3.Lerp(wheelFl.transform.localPosition, estimatedWheelFlPos, CORRECTION_LERP_STRENGTH);
-        else wheelFl.transform.localPosition = estimatedWheelFlPos;
-        if ((wheelFr.transform.localPosition - estimatedWheelFrPos).sqrMagnitude > SQR_EPSILON)
-            wheelFr.transform.localPosition = Vector3.Lerp(wheelFr.transform.localPosition, estimatedWheelFrPos, CORRECTION_LERP_STRENGTH);
-        else wheelFr.transform.localPosition = estimatedWheelFrPos;
-        if ((wheelRl.transform.localPosition - estimatedWheelRlPos).sqrMagnitude > SQR_EPSILON)
-            wheelRl.transform.localPosition = Vector3.Lerp(wheelRl.transform.localPosition, estimatedWheelRlPos, CORRECTION_LERP_STRENGTH);
-        else wheelRl.transform.localPosition = estimatedWheelRlPos;
-        if ((wheelRr.transform.localPosition - estimatedWheelRrPos).sqrMagnitude > SQR_EPSILON)
-            wheelRr.transform.localPosition = Vector3.Lerp(wheelRr.transform.localPosition, estimatedWheelRrPos, CORRECTION_LERP_STRENGTH);
-        else wheelRr.transform.localPosition = estimatedWheelRrPos;
+        wheelFl.transform.localPosition = estimatedWheelFlPos;
+        wheelFr.transform.localPosition = estimatedWheelFrPos;
+        wheelRl.transform.localPosition = estimatedWheelRlPos;
+        wheelRr.transform.localPosition = estimatedWheelRrPos;
 
-        if (Quaternion.Dot(wheelFl.transform.localRotation, estimatedWheelFlRot) > 1 - EPSILON)
-            wheelFl.transform.localRotation = Quaternion.Lerp(wheelFl.transform.localRotation, estimatedWheelFlRot, CORRECTION_LERP_STRENGTH);
-        else wheelFl.transform.localRotation = estimatedWheelFlRot;
-        if (Quaternion.Dot(wheelFr.transform.localRotation, estimatedWheelFrRot) > 1 - EPSILON)
-            wheelFr.transform.localRotation = Quaternion.Lerp(wheelFr.transform.localRotation, estimatedWheelFrRot, CORRECTION_LERP_STRENGTH);
-        else wheelFr.transform.localRotation = estimatedWheelFrRot;
-        if (Quaternion.Dot(wheelRl.transform.localRotation, estimatedWheelRlRot) > 1 - EPSILON)
-            wheelRl.transform.localRotation = Quaternion.Lerp(wheelRl.transform.localRotation, estimatedWheelRlRot, CORRECTION_LERP_STRENGTH);
-        else wheelRl.transform.localRotation = estimatedWheelRlRot;
-        if (Quaternion.Dot(wheelRr.transform.localRotation, estimatedWheelRrRot) > 1 - EPSILON)
-            wheelRr.transform.localRotation = Quaternion.Lerp(wheelRr.transform.localRotation, estimatedWheelRrRot, CORRECTION_LERP_STRENGTH);
-        else wheelRr.transform.localRotation = estimatedWheelRrRot;
+        wheelFl.transform.localRotation = estimatedWheelFlRot;
+        wheelFr.transform.localRotation = estimatedWheelFrRot;
+        wheelRl.transform.localRotation = estimatedWheelRlRot;
+        wheelRr.transform.localRotation = estimatedWheelRrRot;
     }
 
     public void SetCurrentOrientation(CarOrientation co)
