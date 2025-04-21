@@ -418,7 +418,7 @@ public class GameManagerMultiplayer : GameManagerBase
 					found = true;
 
 					//set orientation
-					players[j].GetComponent<RacerClientOrientationDelay>().Orientation=cos[i];
+					players[j].GetComponent<IngameCarComponents>().SetCurrentOrientation(cos[i]);
 				}
 			}
 
