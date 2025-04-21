@@ -218,7 +218,7 @@ GameObject:
   - component: {fileID: 190551725067068230}
   - component: {fileID: 6692799666483109464}
   - component: {fileID: -2479169651134731811}
-  - component: {fileID: -2703705031435258137}
+  - component: {fileID: -5991373375447139965}
   m_Layer: 0
   m_Name: car_opponentClient
   m_TagString: Untagged
@@ -290,7 +290,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: 69
---- !u!114 &-2703705031435258137
+--- !u!114 &-5991373375447139965
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -299,7 +299,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4892530895363315005}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8bb91adde0238974a9a9902cd9e55cd3, type: 3}
+  m_Script: {fileID: 11500000, guid: 503d7994ee14fe04b91bba432e8cdc53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &6901512456252035170
