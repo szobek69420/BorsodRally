@@ -22,6 +22,8 @@ public class GameManagerMultiplayer : GameManagerBase
 
     private GameManagerMultiplayerUIVariables ui = null;
 
+	string ownerName = null;
+	int ownerId = 0;
 	private List<PlayerInfo> joinedPlayers =new List<PlayerInfo>();
 
     //lobby things
@@ -60,6 +62,8 @@ public class GameManagerMultiplayer : GameManagerBase
         int processId = System.Diagnostics.Process.GetCurrentProcess().Id;
         string name = PlayerPrefs.GetString("name" + processId);
         RegisterPlayerServerRpc(new PlayerInfo(name, processId));
+		ownerName = name;
+		ownerId = processId;
 
         //initialize scene
         InitScene();
@@ -226,24 +230,23 @@ public class GameManagerMultiplayer : GameManagerBase
 
 	public override void EndRace()
 	{
-        State = GameManagerBase.GameState.END;
 
-        if (!IsOwner)
-			return;
 	}
 
 	protected override void UpdateEndScreen()
 	{
-		if (!IsOwner)
-			return;
-	}
+        if (IsHost)
+            UpdateCarOrientations();
+    }
 
 	protected override void ReturnToMenu()
 	{
-		if (!IsOwner)
-			return;
-		
-		SceneManager.LoadScene("MenuScene");
+		NetworkManager networkManager = GameObject.Find("NetworkManager").GetComponent<NetworkManager>();
+        networkManager.DisconnectClient(OwnerClientId);
+        if (IsHost)
+            networkManager.Shutdown();
+
+        SceneManager.LoadScene("MenuScene");
 	}
 
 	[ServerRpc(RequireOwnership = false)]
@@ -444,6 +447,35 @@ public class GameManagerMultiplayer : GameManagerBase
 		}
 	}
 
+	[ClientRpc]
+	private void ShowLobbyScreenClientRpc(int playerId, int position)
+	{
+		if (ownerId != playerId)
+			return;
+
+        State = GameState.END;
+
+        switch (position)
+        {
+            case 1: ui.text_position.text = "First"; break;
+            case 2: ui.text_position.text = "Second"; break;
+            case 3: ui.text_position.text = "Third"; break;
+            case 4: ui.text_position.text = "Fourth"; break;
+            default: ui.text_position.text = position.ToString(); break;
+        }
+
+        ui.button_returnToMenu.onClick.RemoveAllListeners();
+        ui.button_returnToMenu.onClick.AddListener(() => { ReturnToMenu(); });
+
+        ui.canvas_ingame.enabled = false;
+        ui.canvas_end.enabled = true;
+    }
+
+	public void RegisterMultiplayerFinish(int playerId)
+	{
+		ShowLobbyScreenClientRpc(playerId, finishedPlayers.Count);
+	}
+
 	//lobby responder things----------------------------------------------------------------------------------------------
 	//this is the thread that is responsibly for responding to the lobby searcher thread in the menu
 	private const int RECEIVE_TIMEOUT = 500;
@@ -505,7 +537,7 @@ public class GameManagerMultiplayer : GameManagerBase
 						int requestScanCount = System.Convert.ToInt32(requestString.Substring(16));
 
 						LobbyScanInfo replyData = new LobbyScanInfo(
-							new AvailableLobby(new IPEndPoint(hostAddress, port), "Water Weight", 1, 4),
+							new AvailableLobby(new IPEndPoint(hostAddress, port), ownerName, joinedPlayers.Count, 4),
 							requestScanCount
 							);
 						byte[] reply = Encoding.ASCII.GetBytes(replyData.ToString());

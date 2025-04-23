@@ -26,7 +26,7 @@ public class GameManagerMultiplayerUIVariables : MonoBehaviour
     private float greatestProgress = 0;
 
     //end things
-    [SerializeField] private Canvas canvas_end;
-    [SerializeField] private TMP_Text text_position;
-    [SerializeField] private Button button_returnToMenu;
+    public Canvas canvas_end;
+    public TMP_Text text_position;
+    public Button button_returnToMenu;
 }

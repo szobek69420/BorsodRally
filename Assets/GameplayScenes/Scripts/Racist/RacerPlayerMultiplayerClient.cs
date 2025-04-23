@@ -12,11 +12,9 @@ public class RacerPlayerMultiplayerClient : RacerBase
 
 	protected override void RacerUpdate()
 	{
-		
-	}
+        if (gameManager?.State != GameManagerBase.GameState.RACE)
+            return;
 
-	protected override void RacerFixedUpdate()
-	{
         (gameManager as GameManagerMultiplayer).UpdateClientInput(
             new CarInput(
                 this.GetComponent<RacerId>().id,
@@ -25,9 +23,11 @@ public class RacerPlayerMultiplayerClient : RacerBase
                 ApplySteering()
                 )
             );
+    }
 
+	protected override void RacerFixedUpdate()
+	{
 		cameraVelocity = Vector3.Lerp(cameraVelocity, Velocity, 0.3f);
-
         UpdateCameraPosition();
 	}
 

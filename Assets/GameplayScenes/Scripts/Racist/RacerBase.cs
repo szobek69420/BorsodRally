@@ -17,14 +17,12 @@ public abstract class RacerBase : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        if (gameManager?.State == GameManagerBase.GameState.RACE)
-            RacerUpdate();
+        RacerUpdate();
     }
 
     private void FixedUpdate()
     {
-        if (gameManager?.State == GameManagerBase.GameState.RACE)
-            RacerFixedUpdate();
+        RacerFixedUpdate();
     }
 
     private void OnTriggerEnter(Collider other)
