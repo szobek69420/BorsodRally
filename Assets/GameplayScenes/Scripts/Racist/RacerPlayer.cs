@@ -11,6 +11,9 @@ public class RacerPlayer : RacerBase
 
     protected override void RacerUpdate()
     {
+        if (gameManager?.State != GameManagerBase.GameState.RACE)
+            return;
+
         ApplyBrakes();
         ApplyGas();
         ApplySteering();

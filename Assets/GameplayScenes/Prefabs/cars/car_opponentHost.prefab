@@ -262,6 +262,7 @@ GameObject:
   - component: {fileID: 2413776491535121158}
   - component: {fileID: 3311925406148118341}
   - component: {fileID: -6038356426551964481}
+  - component: {fileID: 9160536764880341422}
   m_Layer: 0
   m_Name: car_opponentHost
   m_TagString: Untagged
@@ -372,6 +373,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: 69
+--- !u!114 &9160536764880341422
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4502244846214754403}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 65fc14c919c6dee478b6f781a4baec20, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4695447689957809027
 GameObject:
   m_ObjectHideFlags: 0

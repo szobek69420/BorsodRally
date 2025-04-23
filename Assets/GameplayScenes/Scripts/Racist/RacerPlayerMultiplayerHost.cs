@@ -10,6 +10,9 @@ public class RacerPlayerMultiplayerHost : RacerBase
 
     protected override void RacerUpdate()
     {
+        if (gameManager?.State != GameManagerBase.GameState.RACE)
+            return;
+
         ApplyBrakes();
         ApplyGas();
         ApplySteering();
@@ -22,8 +25,7 @@ public class RacerPlayerMultiplayerHost : RacerBase
 
     protected override void RacerOnFinish()
     {
-        throw new System.NotImplementedException();
-    }
+        (gameManager as GameManagerMultiplayer).RegisterMultiplayerFinish(this.GetComponent<RacerId>().id);   }
 
     private void ApplyBrakes()
     {
