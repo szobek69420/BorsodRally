@@ -19,7 +19,7 @@ public class MultiplayerStarter : MonoBehaviour
         if (PlayerPrefs.HasKey("isHost"+processId) && PlayerPrefs.GetInt("isHost"+processId) != 0)
         {
             //get local address and port
-            localAddress=GetLocalAddress();
+            localAddress =GetLocalAddress();
             localPort = (ushort)Random.Range(50000, 60000);
 
             //set the unity transport address to the local address
@@ -28,6 +28,7 @@ public class MultiplayerStarter : MonoBehaviour
 
             //zsa
             this.gameObject.GetComponent<NetworkManager>().StartHost();
+            this.gameObject.GetComponent<GameManagerMultiplayerSpawner>().OnServerStarted();
         }
         else
         {

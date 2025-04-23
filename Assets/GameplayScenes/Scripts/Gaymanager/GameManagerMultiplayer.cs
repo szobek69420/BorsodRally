@@ -242,9 +242,10 @@ public class GameManagerMultiplayer : GameManagerBase
 	protected override void ReturnToMenu()
 	{
 		NetworkManager networkManager = GameObject.Find("NetworkManager").GetComponent<NetworkManager>();
-        networkManager.DisconnectClient(OwnerClientId);
-        if (IsHost)
-            networkManager.Shutdown();
+        networkManager.Shutdown();
+		Destroy(networkManager.gameObject);
+
+		Singleton = null;
 
         SceneManager.LoadScene("MenuScene");
 	}

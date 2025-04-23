@@ -7,12 +7,13 @@ public class GameManagerMultiplayerSpawner : MonoBehaviour
 {
     public GameObject prefab;
 
+
     void Awake()
     {
-        GameObject.Find("NetworkManager").GetComponent<NetworkManager>().OnServerStarted += OnServerStarted;
+        //GameObject.Find("NetworkManager").GetComponent<NetworkManager>().OnServerStarted += OnServerStarted;
     }
 
-    private void OnServerStarted()
+    public void OnServerStarted()
     {
         if (GameObject.Find("NetworkManager").GetComponent<NetworkManager>().IsHost)
         {
