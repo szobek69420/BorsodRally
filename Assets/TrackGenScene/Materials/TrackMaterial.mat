@@ -74,9 +74,9 @@ Material:
     - _DstBlend: 0
     - _EnableExternalAlpha: 0
     - _GlossMapScale: 0.507
-    - _Glossiness: 0.5
+    - _Glossiness: 0.402
     - _GlossyReflections: 1
-    - _Metallic: 0.305
+    - _Metallic: 0.361
     - _Mode: 1
     - _OcclusionStrength: 1
     - _Parallax: 0.02

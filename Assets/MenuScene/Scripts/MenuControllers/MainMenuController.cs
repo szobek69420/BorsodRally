@@ -12,6 +12,8 @@ public class MainMenuController : MenuController
     [SerializeField] private Button button_settings;
     [SerializeField] private Button button_exit;
 
+    [SerializeField] private TMP_InputField inputField_name;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -20,11 +22,20 @@ public class MainMenuController : MenuController
         button_garage.onClick.AddListener(() => { GarageButtonFunction(); PlayClickSound(); });
         button_settings.onClick.AddListener(() => { SettingsButtonFunction(); PlayClickSound(); });
         button_exit.onClick.AddListener(() => { ExitButtonFunction(); PlayClickSound(); });
+
+        inputField_name.onSubmit.AddListener((string sugus) => { NameInputFieldOnSubmit(); });
+
+        Show();
     }
 
     public override void Show()
     {
         base.Show();
+
+        if (!PlayerPrefs.HasKey("name"))
+            PlayerPrefs.SetString("name", "ebic gaymer");
+
+        inputField_name.text = PlayerPrefs.GetString("name");
     }
 
     public override void Hide()
@@ -65,5 +76,10 @@ public class MainMenuController : MenuController
     public void ExitButtonFunction()
     {
         Application.Quit();
+    }
+
+    private void NameInputFieldOnSubmit()
+    {
+        PlayerPrefs.SetString("name", inputField_name.text);
     }
 }

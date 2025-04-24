@@ -26,6 +26,10 @@ public struct CarOrientation : INetworkSerializable
     public float wheelRrPosX, wheelRrPosY, wheelRrPosZ;
     public float wheelRrRotX, wheelRrRotY, wheelRrRotZ;
 
+    //car velocity
+    public float velocityX, velocityY, velocityZ;
+    public float angularVelocityX, angularVelocityY, angularVelocityZ;
+
     public CarOrientation(int placeHolder)//use this if the car is not in use
     {
         id = CAR_NOT_USED;
@@ -44,9 +48,12 @@ public struct CarOrientation : INetworkSerializable
 
         wheelRrPosX = 0; wheelRrPosY = 0; wheelRrPosZ = 0;
         wheelRrRotX = 0; wheelRrRotY = 0; wheelRrRotZ = 0;
+
+        velocityX = 0; velocityY = 0; velocityZ = 0;
+        angularVelocityX = 0; angularVelocityY = 0; angularVelocityZ = 0;
     }
 
-    public CarOrientation(int ownerId, Transform car, Transform wheelFl, Transform wheelFr, Transform wheelRl, Transform wheelRr)
+    public CarOrientation(int ownerId, Transform car, Transform wheelFl, Transform wheelFr, Transform wheelRl, Transform wheelRr, Vector3 velocity, Vector3 angularVelocity)
     {
         id = ownerId;
 
@@ -60,40 +67,49 @@ public struct CarOrientation : INetworkSerializable
         carRotZ = car.rotation.eulerAngles.z;
 
         //wheels
-        wheelFlPosX = wheelFl.position.x;
-        wheelFlPosY = wheelFl.position.y;
-        wheelFlPosZ = wheelFl.position.z;
+        wheelFlPosX = wheelFl.localPosition.x;
+        wheelFlPosY = wheelFl.localPosition.y;
+        wheelFlPosZ = wheelFl.localPosition.z;
 
-        wheelFlRotX = wheelFl.rotation.eulerAngles.x;
-        wheelFlRotY = wheelFl.rotation.eulerAngles.y;
-        wheelFlRotZ = wheelFl.rotation.eulerAngles.z;
-
-
-        wheelFrPosX = wheelFr.position.x;
-        wheelFrPosY = wheelFr.position.y;
-        wheelFrPosZ = wheelFr.position.z;
-
-        wheelFrRotX = wheelFr.rotation.eulerAngles.x;
-        wheelFrRotY = wheelFr.rotation.eulerAngles.y;
-        wheelFrRotZ = wheelFr.rotation.eulerAngles.z;
+        wheelFlRotX = wheelFl.localRotation.eulerAngles.x;
+        wheelFlRotY = wheelFl.localRotation.eulerAngles.y;
+        wheelFlRotZ = wheelFl.localRotation.eulerAngles.z;
 
 
-        wheelRlPosX = wheelRl.position.x;
-        wheelRlPosY = wheelRl.position.y;
-        wheelRlPosZ = wheelRl.position.z;
+        wheelFrPosX = wheelFr.localPosition.x;
+        wheelFrPosY = wheelFr.localPosition.y;
+        wheelFrPosZ = wheelFr.localPosition.z;
 
-        wheelRlRotX = wheelRl.rotation.eulerAngles.x;
-        wheelRlRotY = wheelRl.rotation.eulerAngles.y;
-        wheelRlRotZ = wheelRl.rotation.eulerAngles.z;
+        wheelFrRotX = wheelFr.localRotation.eulerAngles.x;
+        wheelFrRotY = wheelFr.localRotation.eulerAngles.y;
+        wheelFrRotZ = wheelFr.localRotation.eulerAngles.z;
 
 
-        wheelRrPosX = wheelRr.position.x;
-        wheelRrPosY = wheelRr.position.y;
-        wheelRrPosZ = wheelRr.position.z;
+        wheelRlPosX = wheelRl.localPosition.x;
+        wheelRlPosY = wheelRl.localPosition.y;
+        wheelRlPosZ = wheelRl.localPosition.z;
 
-        wheelRrRotX = wheelRr.rotation.eulerAngles.x;
-        wheelRrRotY = wheelRr.rotation.eulerAngles.y;
-        wheelRrRotZ = wheelRr.rotation.eulerAngles.z;
+        wheelRlRotX = wheelRl.localRotation.eulerAngles.x;
+        wheelRlRotY = wheelRl.localRotation.eulerAngles.y;
+        wheelRlRotZ = wheelRl.localRotation.eulerAngles.z;
+
+
+        wheelRrPosX = wheelRr.localPosition.x;
+        wheelRrPosY = wheelRr.localPosition.y;
+        wheelRrPosZ = wheelRr.localPosition.z;
+
+        wheelRrRotX = wheelRr.localRotation.eulerAngles.x;
+        wheelRrRotY = wheelRr.localRotation.eulerAngles.y;
+        wheelRrRotZ = wheelRr.localRotation.eulerAngles.z;
+
+        //velocity
+        velocityX = velocity.x;
+        velocityY = velocity.y;
+        velocityZ = velocity.z;
+
+        angularVelocityX = angularVelocity.x;
+        angularVelocityY = angularVelocity.y;
+        angularVelocityZ = angularVelocity.z;
     }
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -136,5 +152,13 @@ public struct CarOrientation : INetworkSerializable
         serializer.SerializeValue(ref wheelRrRotX);
         serializer.SerializeValue(ref wheelRrRotY);
         serializer.SerializeValue(ref wheelRrRotZ);
+
+        serializer.SerializeValue(ref velocityX);
+        serializer.SerializeValue(ref velocityY);
+        serializer.SerializeValue(ref velocityZ);
+
+        serializer.SerializeValue(ref angularVelocityX);
+        serializer.SerializeValue(ref angularVelocityY);
+        serializer.SerializeValue(ref angularVelocityZ);
     }
 }

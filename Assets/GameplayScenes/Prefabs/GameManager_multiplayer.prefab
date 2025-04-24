@@ -66,6 +66,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 079f59739f657c74b986b17de2a96452, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  carPrefab_player: {fileID: 0}
-  carPrefab_opponent: {fileID: 0}
+  carPrefab_playerHost: {fileID: 4552869385993472957, guid: 54700801e477f9a48aaf83525b6220b9, type: 3}
+  carPrefab_opponentHost: {fileID: 4502244846214754403, guid: 0a5174dc71875f148b938d966238d614, type: 3}
+  carPrefab_playerClient: {fileID: 2387794842492819682, guid: 7cab1919e35619743954c47895eed794, type: 3}
+  carPrefab_opponentClient: {fileID: 4892530895363315005, guid: 309ec0fc248d50a4999abc62127d8a68, type: 3}
   lobbyElement_prefab: {fileID: 3207473876894815629, guid: 1d6dd1b32a63b3b4593385b80d52fc65, type: 3}
