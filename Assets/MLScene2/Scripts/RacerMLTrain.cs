@@ -10,7 +10,7 @@ public class RacerMLTrain : RacerBase
 
     protected override void RacerFixedUpdate()
     {
-        
+        ApplyDownforce();
     }
 
     protected override void RacerUpdate()
@@ -38,5 +38,12 @@ public class RacerMLTrain : RacerBase
     private void ApplySteering()
     {
         carController.SteerInput = agent.SteerInput;
+    }
+
+    private void ApplyDownforce()
+    {
+        Rigidbody rb = GetComponent<Rigidbody>();
+        float velocityMagnitude = Vector3.Dot(rb.velocity, transform.forward);
+        rb.AddForce(-100.0f * Time.fixedDeltaTime * velocityMagnitude * transform.up, ForceMode.Impulse);
     }
 }

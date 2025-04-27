@@ -172,6 +172,59 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &624778457 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5408861831341414193, guid: abb51361cce151a44a1b61695d7e18f5, type: 3}
+  m_PrefabInstance: {fileID: 1690745460}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &637618255
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 637618257}
+  - component: {fileID: 637618256}
+  m_Layer: 0
+  m_Name: TerrainManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &637618256
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 637618255}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62e3619b0bdf0714db358d71aa4420b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sectorPrefab: {fileID: 6673843550659780996, guid: b137da4d91f212b41a3bd73cf8e3b877, type: 3}
+  gridSize: 5
+  trackCenter: {fileID: 371521282}
+  sectorSize: 64
+--- !u!4 &637618257
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 637618255}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1044998933
 GameObject:
   m_ObjectHideFlags: 0
@@ -275,7 +328,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 5408861831341414193, guid: abb51361cce151a44a1b61695d7e18f5, type: 3}
       propertyPath: m_RootOrder
-      value: 3
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 5408861831341414193, guid: abb51361cce151a44a1b61695d7e18f5, type: 3}
       propertyPath: m_LocalPosition.x
@@ -321,6 +374,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: car_mltrain
       objectReference: {fileID: 0}
+    - target: {fileID: 7664613324904347095, guid: abb51361cce151a44a1b61695d7e18f5, type: 3}
+      propertyPath: MaxStep
+      value: 5000
+      objectReference: {fileID: 0}
+    - target: {fileID: 9157635448985457421, guid: abb51361cce151a44a1b61695d7e18f5, type: 3}
+      propertyPath: m_BehaviorType
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: abb51361cce151a44a1b61695d7e18f5, type: 3}
 --- !u!1 &2130858048
@@ -334,6 +395,7 @@ GameObject:
   - component: {fileID: 2130858051}
   - component: {fileID: 2130858050}
   - component: {fileID: 2130858049}
+  - component: {fileID: 2130858052}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -407,3 +469,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2130858052
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2130858048}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a10477482636f94f8fc20fd0aeb6d34, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  followee: {fileID: 624778457}
+  offset: {x: 0, y: 5, z: -10}
+  lookAtFollowee: 1

@@ -4,6 +4,7 @@ using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
 using Unity.MLAgents;
+using Unity.Barracuda;
 
 public class MLTrainController : Agent
 {
@@ -26,6 +27,28 @@ public class MLTrainController : Agent
     public float BrakeInput { get; private set; } = 0;
 
     private float lastProgress = 0.0f;
+    private float[] distances=null;
+    private float[] normalizedAngles = null;
+
+    private void FixedUpdate()
+    {
+        distances = Raycast();
+        normalizedAngles = CalculateNormalizedAngles();
+
+        //check if the car is falling
+        if (Mathf.Abs(rb.velocity.y) > 20.0f)
+        {
+            Dieded();
+        }
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if(other.gameObject.layer==7)//the car collided with the track walls
+        {
+            AddReward(-10.0f);
+        }
+    }
 
     public override void OnEpisodeBegin()
     {
@@ -43,6 +66,10 @@ public class MLTrainController : Agent
         Transform startLine=track.GetStartLine();
         transform.position = startLine.position + 3.0f * Vector3.up;
         transform.rotation = startLine.rotation;
+
+        //reset velocity
+        rb.velocity = 5.0f*transform.forward;
+        rb.angularVelocity = Vector3.zero;
     }
 
     //if the local basis is rotated, it might not work
@@ -54,37 +81,17 @@ public class MLTrainController : Agent
         Vector3 velocityNormalized = isStationary ? Vector3.zero : Vector3.Normalize(velocity);
 
         //wall distances
-        float[] distances = Raycast();
+        if (distances == null)
+            distances = Raycast();
         foreach (float distance in distances)
             sensor.AddObservation(distance / RAYCAST_MAX_DISTANCE);
 
         //the angle between the velocity and some of the upcoming track points
-        Vector3 horizontalVelocityNormalized = new Vector3(velocityNormalized.x, 0.0f, velocityNormalized.z).normalized;
-
-        int currentTrackPoint = track.GetNearestTrackPointIndex(rb.position);
-        int nearTrackPoint = Mathf.Clamp(currentTrackPoint + 20, currentTrackPoint, track.TrackPoints.Count - 1);
-
-        int[] upcomingTrackPoints = new int[2];
-        upcomingTrackPoints[0] = Mathf.Clamp(currentTrackPoint + 40, currentTrackPoint, track.TrackPoints.Count - 1);
-        upcomingTrackPoints[1] = Mathf.Clamp(currentTrackPoint + 50, currentTrackPoint, track.TrackPoints.Count - 1);
-
-        float[] normalizedAngles = new float[2];
-
-        for(int i=0;i<upcomingTrackPoints.Length;i++)
+        if (normalizedAngles == null)
+            normalizedAngles = CalculateNormalizedAngles();
+        for(int i=0;i<normalizedAngles.Length;i++)
         {
-            Vector3 trackPointDirection = track.TrackPoints[nearTrackPoint] - track.TrackPoints[currentTrackPoint];
-            trackPointDirection = Vector3.Normalize(trackPointDirection);
-
-            float normalizedAngle = Mathf.Atan2(
-                    Vector3.Dot(trackPointDirection, horizontalVelocityNormalized),
-                    Vector3.Dot(Vector3.Cross(Vector3.up, trackPointDirection), horizontalVelocityNormalized)
-                    );
-            normalizedAngle /= Mathf.PI;
-            normalizedAngle = 0.5f * normalizedAngle + 0.5f;
-            normalizedAngle = Mathf.Clamp(normalizedAngle, 0.0f, 1.0f);
-
-            normalizedAngles[i]= normalizedAngle;
-            sensor.AddObservation(normalizedAngle);
+            sensor.AddObservation(normalizedAngles[i]);
         }
 
         //velocity
@@ -93,18 +100,18 @@ public class MLTrainController : Agent
         //tilt
         sensor.AddObservation(CalculateTilt());
 
-        //add reward for going in the right direction at high speed
-        AddReward(0.01f * (0.5f - Mathf.Abs(normalizedAngles[0] - 0.5f)));
+        //add reward for going in the right direction
+        AddReward(0.1f * (0.5f - Mathf.Abs(normalizedAngles[0] - 0.5f)));
 
         //punish slow driving
-        if (speed < 30.0f)
-            AddReward(0.02f * (speed - 30.0f));
+        if (speed < 20.0f)
+            AddReward(0.02f * (speed - 20.0f));
 
         //reward the progress
         float currentProgress = track.CalculateProgress(rb.position);
         if(lastProgress< currentProgress)
         {
-            AddReward(100.0f * (currentProgress - lastProgress));
+            AddReward(1000.0f * (currentProgress - lastProgress));
             lastProgress = currentProgress;
         }
     }
@@ -118,8 +125,24 @@ public class MLTrainController : Agent
         AddReward(-BrakeInput);
     }
 
+    public override void Heuristic(in ActionBuffers actionsOut)
+    {
+        ActionSegment<float> continuous = actionsOut.ContinuousActions;
+        continuous[0] = Input.GetAxisRaw("Horizontal");
+        continuous[1] = Input.GetAxisRaw("Vertical");
+
+        ActionSegment<int> discrete = actionsOut.DiscreteActions;
+        discrete[0] = Input.GetKey(KeyCode.Space) ? 5 : 0;
+    }
+
     public void GoalReached()
     {
+        EndEpisode();
+    }
+
+    public void Dieded()
+    {
+        AddReward(-1000.0f);
         EndEpisode();
     }
 
@@ -153,6 +176,9 @@ public class MLTrainController : Agent
             {
                 distances[i] = RAYCAST_MAX_DISTANCE;
             }
+
+            //draw ray
+            Debug.DrawLine(raycastOrigin.position, raycastOrigin.position+distances[i] * raycastDirection, Color.red, Time.fixedDeltaTime);
         }
 
 
@@ -176,5 +202,41 @@ public class MLTrainController : Agent
         tiltNormalized = 0.5f * tiltNormalized + 0.5f;
 
         return tiltNormalized;
+    }
+
+    //the normalized angles between the velocity and some upcoming track points
+    float[] CalculateNormalizedAngles()
+    {
+        Vector3 velocityNormalized = rb.velocity.normalized;
+        Vector3 horizontalVelocityNormalized = new Vector3(velocityNormalized.x, 0.0f, velocityNormalized.z).normalized;
+
+        int currentTrackPoint = track.GetNearestTrackPointIndex(rb.position);
+
+        int[] upcomingTrackPoints = new int[2];
+        upcomingTrackPoints[0] = Mathf.Clamp(currentTrackPoint + 40, currentTrackPoint, track.TrackPoints.Count - 1);
+        upcomingTrackPoints[1] = Mathf.Clamp(currentTrackPoint + 80, currentTrackPoint, track.TrackPoints.Count - 1);
+
+        float[] normalizedAngles = new float[2];
+
+        for (int i = 0; i < upcomingTrackPoints.Length; i++)
+        {
+            Vector3 trackPointDirection = track.TrackPoints[upcomingTrackPoints[i]] - track.TrackPoints[currentTrackPoint];
+            trackPointDirection = Vector3.Normalize(trackPointDirection);
+
+            float normalizedAngle = Mathf.Atan2(
+                    Vector3.Dot(trackPointDirection, horizontalVelocityNormalized),
+                    Vector3.Dot(Vector3.Cross(Vector3.up, trackPointDirection), horizontalVelocityNormalized)
+                    );
+            normalizedAngle /= Mathf.PI;
+            normalizedAngle = 0.5f * normalizedAngle + 0.5f;
+            normalizedAngle = Mathf.Clamp(normalizedAngle, 0.0f, 1.0f);
+
+            normalizedAngles[i] = normalizedAngle;
+
+            //draw the direction to the track point
+            Debug.DrawLine(raycastOrigin.position, track.TrackPoints[upcomingTrackPoints[i]], Color.green, Time.fixedDeltaTime);
+        }
+
+        return normalizedAngles;
     }
 }
