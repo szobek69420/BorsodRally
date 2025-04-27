@@ -51,6 +51,13 @@ public class RacetrackGenerator : MonoBehaviour
         curviness = PlayerPrefs.GetFloat("curviness"+processId);
     }
 
+    public void RandomizeParameters()
+    {
+        seed = UnityEngine.Random.Range(0, 200000);
+        trackLength = UnityEngine.Random.Range(10, 100);
+        curviness = UnityEngine.Random.Range(1.0f, 3.0f);
+    }
+
     //cannot set the ip and difficulty parameters
     public LobbyTrackInfo SerializeParameters()
     {
@@ -85,7 +92,7 @@ public class RacetrackGenerator : MonoBehaviour
 
             trackWalls.Add(new GameObject("Guide Wall " + (i + 1)));
             trackWalls[i].transform.SetParent(gameObject.transform);
-            trackWalls[i].layer = 6;                            //the track layer, necessary for the ml agents
+            trackWalls[i].layer = 7;                            //the track layer, necessary for the ml agents
 
             trackWalls[i].AddComponent<MeshFilter>();
             trackWalls[i].AddComponent<MeshCollider>();
