@@ -14,7 +14,8 @@ public class MLTrainController : Agent
         new Vector3(Mathf.Sin(-0.25f*Mathf.PI), 0.0f, Mathf.Cos(-0.25f*Mathf.PI)),
         new Vector3(Mathf.Sin(0.0f*Mathf.PI), 0.0f, Mathf.Cos(0.0f*Mathf.PI)),
         new Vector3(Mathf.Sin(0.25f*Mathf.PI), 0.0f, Mathf.Cos(0.25f*Mathf.PI)),
-        new Vector3(Mathf.Sin(0.5f*Mathf.PI), 0.0f, Mathf.Cos(0.5f*Mathf.PI))
+        new Vector3(Mathf.Sin(0.5f*Mathf.PI), 0.0f, Mathf.Cos(0.5f*Mathf.PI)),
+        new Vector3(Mathf.Sin(Mathf.PI), 0.0f, Mathf.Cos(Mathf.PI)) //backwards
     };
     private static float RAYCAST_MAX_DISTANCE = 150.0f;
 
@@ -68,7 +69,7 @@ public class MLTrainController : Agent
         transform.rotation = startLine.rotation;
 
         //reset velocity
-        rb.velocity = 5.0f*transform.forward;
+        rb.velocity = 20.0f*transform.forward;
         rb.angularVelocity = Vector3.zero;
     }
 
@@ -91,7 +92,7 @@ public class MLTrainController : Agent
             normalizedAngles = CalculateNormalizedAngles();
         for(int i=0;i<normalizedAngles.Length;i++)
         {
-            sensor.AddObservation(normalizedAngles[i]);
+            sensor.AddObservation(1.0f-normalizedAngles[i]);
         }
 
         //velocity
@@ -101,17 +102,13 @@ public class MLTrainController : Agent
         sensor.AddObservation(CalculateTilt());
 
         //add reward for going in the right direction
-        AddReward(0.1f * (0.5f - Mathf.Abs(normalizedAngles[0] - 0.5f)));
-
-        //punish slow driving
-        if (speed < 20.0f)
-            AddReward(0.02f * (speed - 20.0f));
+        AddReward(100.0f*speed * (0.5f - Mathf.Abs(normalizedAngles[0] - 0.5f)));
 
         //reward the progress
         float currentProgress = track.CalculateProgress(rb.position);
         if(lastProgress< currentProgress)
         {
-            AddReward(1000.0f * (currentProgress - lastProgress));
+            AddReward(10000.0f * (currentProgress - lastProgress));
             lastProgress = currentProgress;
         }
     }
@@ -153,8 +150,8 @@ public class MLTrainController : Agent
         int mask = LayerMask.GetMask("TrackWall");
 
         Vector3 forward = transform.forward;
-        if (Mathf.Pow(rb.velocity.x, 2.0f) + Mathf.Pow(rb.velocity.z, 2.0f) > 1.0f)
-            forward = rb.velocity.normalized;
+        //if (Mathf.Pow(rb.velocity.x, 2.0f) + Mathf.Pow(rb.velocity.z, 2.0f) > 1.0f)
+            //forward = rb.velocity.normalized;
         Vector3 right = Vector3.Normalize(Vector3.Cross(Vector3.up, forward));
 
         for (int i = 0; i < RAYCAST_DIRECTIONS.Length; i++)
