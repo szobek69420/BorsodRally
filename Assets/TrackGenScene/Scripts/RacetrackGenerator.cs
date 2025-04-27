@@ -51,6 +51,13 @@ public class RacetrackGenerator : MonoBehaviour
         curviness = PlayerPrefs.GetFloat("curviness"+processId);
     }
 
+    public void RandomizeParameters()
+    {
+        seed = UnityEngine.Random.Range(0, 200000);
+        trackLength = 20;//this should be the same for every ml episode
+        curviness = UnityEngine.Random.Range(1.0f, 2.5f);
+    }
+
     //cannot set the ip and difficulty parameters
     public LobbyTrackInfo SerializeParameters()
     {
@@ -66,6 +73,7 @@ public class RacetrackGenerator : MonoBehaviour
         trackPoints = controlPointGenerator.GenerateTrackPoints(seed, trackLength, curviness, elevation);
 
         trackParts.Clear();
+        trackWalls.Clear();
 
         for(int i = 0; i < trackSectors; i++)
         {
@@ -85,7 +93,7 @@ public class RacetrackGenerator : MonoBehaviour
 
             trackWalls.Add(new GameObject("Guide Wall " + (i + 1)));
             trackWalls[i].transform.SetParent(gameObject.transform);
-            trackWalls[i].layer = 6;                            //the track layer, necessary for the ml agents
+            trackWalls[i].layer = 7;                            //the track layer, necessary for the ml agents
 
             trackWalls[i].AddComponent<MeshFilter>();
             trackWalls[i].AddComponent<MeshCollider>();
@@ -131,7 +139,9 @@ public class RacetrackGenerator : MonoBehaviour
         UnityEngine.Debug.Log("Reset");
 
         foreach(GameObject go in trackParts)
-            DestroyImmediate(go);
+            Destroy(go);
+        foreach (GameObject go in trackWalls)
+            Destroy(go);
 
         StartGen();
     }
@@ -333,20 +343,20 @@ public class RacetrackGenerator : MonoBehaviour
                     triangles.Add(vertexIndex + 5);*/
 
                     triangles.Add(vertexIndex);
-                    triangles.Add(vertexIndex + 2);
                     triangles.Add(vertexIndex + 4);
+                    triangles.Add(vertexIndex + 2);
 
                     triangles.Add(vertexIndex + 2);
+                    triangles.Add(vertexIndex + 4);
                     triangles.Add(vertexIndex + 6);
-                    triangles.Add(vertexIndex + 4);
 
                     triangles.Add(vertexIndex + 3);
+                    triangles.Add(vertexIndex + 5);
                     triangles.Add(vertexIndex + 1);
-                    triangles.Add(vertexIndex + 5);
 
                     triangles.Add(vertexIndex + 3);
-                    triangles.Add(vertexIndex + 5);
                     triangles.Add(vertexIndex + 7);
+                    triangles.Add(vertexIndex + 5);
                 }
                 vertexIndex += 4;
             }
