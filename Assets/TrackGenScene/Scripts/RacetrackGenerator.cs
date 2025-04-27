@@ -11,18 +11,20 @@ public class RacetrackGenerator : MonoBehaviour
     private const int START_LINE_INDEX = 15;
     private const int FINISH_LINE_INDEX = 15;
 
-    public int seed = 42;                                              // Seed for the Perlin Noise generation
+    public int seed = 42;                                              // Seed for generation
     public int trackLength = 30;                                       // Number of track segments
     public int trackWidth = 15;                                        // Width of the track
     public float curviness = 4f;                                       // Scale for the curviness
-    public float elevation = 2f;                                       // Scale for the elevation Y-axis 
+    public float elevation = 5f;                                       // Scale for the elevation Y-axis 
     public Material trackMaterial;                                     // Material to apply to the track surface
 
     private int trackSectors = 20;
     private List<Vector3> trackPoints = new List<Vector3>();           // List to hold track control points
     private PathGeneratorBase controlPointGenerator;
-    
     private List<GameObject> trackParts = new List<GameObject>();      // List to hold track sections
+    private List<GameObject> trackWalls = new List<GameObject>();      // List to hold guide walls for ML cars 
+
+    private TerrainManager terrain;
 
     private GameObject startLine=null;
     private GameObject finishLine=null;
@@ -57,7 +59,8 @@ public class RacetrackGenerator : MonoBehaviour
 
     public void StartGen()
     {
-        controlPointGenerator = new RandomPathGenerator();        //you can change the pathgenerator here
+        controlPointGenerator = new RandomPathGenerator();        //You can change the pathgenerator here
+        terrain = GameObject.Find("TerrainManager").GetComponent<TerrainManager>();
 
         trackPoints.Clear();
         trackPoints = controlPointGenerator.GenerateTrackPoints(seed, trackLength, curviness, elevation);
@@ -68,7 +71,7 @@ public class RacetrackGenerator : MonoBehaviour
         {
             trackParts.Add(new GameObject("Sector "+ (i + 1)));
             trackParts[i].transform.SetParent(gameObject.transform);
-            trackParts[i].layer = 6;    //the track layer, necessary for the ml agents
+            trackParts[i].layer = 6;                            //the track layer, necessary for the ml agents
 
             trackParts[i].AddComponent<MeshFilter>();
             trackParts[i].AddComponent<MeshRenderer>();
@@ -78,11 +81,22 @@ public class RacetrackGenerator : MonoBehaviour
             {
                 trackParts[i].GetComponent<MeshRenderer>().material = trackMaterial;
             }
+
+
+            trackWalls.Add(new GameObject("Guide Wall " + (i + 1)));
+            trackWalls[i].transform.SetParent(gameObject.transform);
+            trackWalls[i].layer = 6;                            //the track layer, necessary for the ml agents
+
+            trackWalls[i].AddComponent<MeshFilter>();
+            trackWalls[i].AddComponent<MeshCollider>();
         }
 
-        // Create the mesh for the track surface
-        CreateRacetrackMesh(trackPoints, trackParts);
-        //CreateEnvironmentMesh(trackPoints, trackParts);
+        
+        CreateRacetrackMesh();                                  //Create the mesh for the track surface    
+
+        CreateMLGuideMesh();
+
+        //terrain.GenerateTerrain(trackPoints);                   //Terrain generating
 
         if (startLine != null)
             Destroy(startLine);
@@ -122,7 +136,7 @@ public class RacetrackGenerator : MonoBehaviour
         StartGen();
     }
 
-    private void CreateRacetrackMesh(List<Vector3> points, List<GameObject> gameObj)
+    private void CreateRacetrackMesh()
     {
         int index = 0;
         int pointsInOneSector = trackPoints.Count / trackSectors;
@@ -154,13 +168,13 @@ public class RacetrackGenerator : MonoBehaviour
                 Vector3 forward = Vector3.zero;
                 int step = (i * pointsInOneSector) + j;
 
-                if (step < points.Count - 1)
+                if (step < trackPoints.Count - 1)
                 {
-                    forward += points[step + 1] - points[step];
+                    forward += trackPoints[step + 1] - trackPoints[step];
                 }
                 else if(step < trackPoints.Count)
                 {
-                    forward += points[step] - points[step - 1];
+                    forward += trackPoints[step] - trackPoints[step - 1];
                 }
                 forward.Normalize();
 
@@ -168,24 +182,24 @@ public class RacetrackGenerator : MonoBehaviour
 
                 if (step < 2)
                 {
-                    vertices.Add(points[step] + left * trackWidth * 0.5f);
-                    vertices.Add(points[step] - left * trackWidth * 0.5f);
+                    vertices.Add(trackPoints[step] + left * trackWidth * 0.5f);  
+                    vertices.Add(trackPoints[step] - left * trackWidth * 0.5f);
                 }
                 else
                 {
-                    Vector3 oldForward = points[step - 1] - points[step - 2];
+                    Vector3 oldForward = trackPoints[step - 1] - trackPoints[step - 2];
                     float angle = Vector3.SignedAngle(oldForward, forward, Vector3.up);
 
                     float shift = Mathf.Lerp(0f, 1f, (angle + 90) / 180);
 
-                    vertices.Add(points[step] + left * trackWidth * shift);
-                    vertices.Add(points[step] - left * trackWidth * (1 - shift));
+                    vertices.Add(trackPoints[step] + left * trackWidth * shift);
+                    vertices.Add(trackPoints[step] - left * trackWidth * (1 - shift));
                 }
 
                 Vector3 a = vertices[vertices.Count - 2];
-                a.y += 3f;
+                a.y += 5f;
                 Vector3 b = vertices[vertices.Count - 1];
-                b.y += 3f;
+                b.y += 5f;
 
                 vertices.Add(a);
                 vertices.Add(b);
@@ -221,7 +235,7 @@ public class RacetrackGenerator : MonoBehaviour
                     triangles.Add(vertexIndex + 5);
                     triangles.Add(vertexIndex + 7);
                 }
-                if (step < points.Count - 1) UnityEngine.Debug.DrawLine(points[step], points[step + 1], new UnityEngine.Color(1, 0, 0), 1000);
+                //if (step < points.Count - 1) UnityEngine.Debug.DrawLine(points[step], points[step + 1], new UnityEngine.Color(1, 0, 0), 1000);
                 vertexIndex += 4;
             }
 
@@ -233,15 +247,118 @@ public class RacetrackGenerator : MonoBehaviour
             meshF.uv = uvs.ToArray();
             meshF.RecalculateNormals();
             meshF.RecalculateBounds();
-            gameObj[index].GetComponent<MeshFilter>().mesh = meshF;
-            gameObj[index++].GetComponent<MeshCollider>().sharedMesh = meshF;
+            trackParts[index].GetComponent<MeshFilter>().mesh = meshF;
+            trackParts[index++].GetComponent<MeshCollider>().sharedMesh = meshF;
         }
-
     }
 
-    private void CreateEnvironmentMesh(List<Vector3> points, List<GameObject> gameObj)
-    {   
+    private void CreateMLGuideMesh()
+    {
+        int index = 0;
+        int pointsInOneSector = trackPoints.Count / trackSectors;
+        int wallHeight = 30;                                        //change the height of the wall in both directions
 
+        for (int i = 0; i < trackSectors; i++)
+        {
+            List<Vector3> vertices = new List<Vector3>();
+            List<int> triangles = new List<int>();
+            int vertexIndex = 0;
+            int k = 0;
+
+            Vector3 lt = new Vector3();
+            Vector3 rt = new Vector3();
+
+            if (i == trackSectors - 1)
+            {
+                k = pointsInOneSector;
+            }
+            else
+            {
+                k = pointsInOneSector + 1;
+            }
+
+            for (int j = 0; j < k; j++)
+            {
+                Vector3 forward = Vector3.zero;
+                int step = (i * pointsInOneSector) + j;
+
+                if (step < trackPoints.Count - 1)
+                {
+                    forward += trackPoints[step + 1] - trackPoints[step];
+                }
+                else if (step < trackPoints.Count)
+                {
+                    forward += trackPoints[step] - trackPoints[step - 1];
+                }
+                forward.Normalize();
+
+                Vector3 left = new Vector3(-forward.z, forward.y, forward.x);
+
+                if (step < 2)
+                {
+                    lt = (trackPoints[step] + left * trackWidth * 0.5f);
+                    rt = (trackPoints[step] - left * trackWidth * 0.5f);
+                }
+                else
+                {
+                    Vector3 oldForward = trackPoints[step - 1] - trackPoints[step - 2];
+                    float angle = Vector3.SignedAngle(oldForward, forward, Vector3.up);
+
+                    float shift = Mathf.Lerp(0f, 1f, (angle + 90) / 180);
+
+                    lt = (trackPoints[step] + left * trackWidth * shift);
+                    rt = (trackPoints[step] - left * trackWidth * (1 - shift));
+                }
+
+                lt.y += wallHeight;
+                rt.y += wallHeight;
+
+                vertices.Add(lt);
+                vertices.Add(rt);
+
+                lt.y -= 2 * wallHeight;
+                rt.y -= 2 * wallHeight;
+
+                vertices.Add(lt);
+                vertices.Add(rt);
+
+                if (j < k - 1)
+                {
+                    /*triangles.Add(vertexIndex);
+                    triangles.Add(vertexIndex + 4);
+                    triangles.Add(vertexIndex + 1);
+
+                    triangles.Add(vertexIndex + 1);
+                    triangles.Add(vertexIndex + 4);
+                    triangles.Add(vertexIndex + 5);*/
+
+                    triangles.Add(vertexIndex);
+                    triangles.Add(vertexIndex + 2);
+                    triangles.Add(vertexIndex + 4);
+
+                    triangles.Add(vertexIndex + 2);
+                    triangles.Add(vertexIndex + 6);
+                    triangles.Add(vertexIndex + 4);
+
+                    triangles.Add(vertexIndex + 3);
+                    triangles.Add(vertexIndex + 1);
+                    triangles.Add(vertexIndex + 5);
+
+                    triangles.Add(vertexIndex + 3);
+                    triangles.Add(vertexIndex + 5);
+                    triangles.Add(vertexIndex + 7);
+                }
+                vertexIndex += 4;
+            }
+
+            Mesh meshF = new Mesh();
+            meshF.vertices = vertices.ToArray();
+            meshF.triangles = triangles.ToArray();
+            meshF.RecalculateNormals();
+            meshF.RecalculateBounds();
+            trackWalls[index].GetComponent<MeshFilter>().mesh = meshF;
+            trackWalls[index++].GetComponent<MeshCollider>().sharedMesh = meshF;
+        }
     }
 
     public Transform GetStartLine()

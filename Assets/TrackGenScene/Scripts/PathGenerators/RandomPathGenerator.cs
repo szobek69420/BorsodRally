@@ -38,10 +38,21 @@ public class RandomPathGenerator : PathGeneratorBase
             currentElevation = Random.Range(-elevation, elevation);
 
             Vector3 prevDir = trackPoints[i-1] - trackPoints[i-2];
-            prevDir.y = 0f;
+            //prevDir.y = 0f;
 
             Vector3 nextDir = Quaternion.Euler(0, currentRotation, 0) * prevDir;
-            nextDir.y = currentElevation;
+            //nextDir.y = currentElevation;
+
+            if (((i - 2) % 5 == 0) && i > 2)
+            {
+                currentElevation = Random.Range(-elevation, elevation);
+                for(int j = 1; j < 6; j++)
+                {
+                    Vector3 point = trackPoints[i - j];
+                    point.y = Mathf.Lerp(trackPoints[i - 5].y, trackPoints[i - 5].y + currentElevation, 0.2f * j);
+                    trackPoints[i - j] = point;
+                }
+            }
 
             trackPoints.Add((trackPoints[i - 1] + nextDir));
         }
