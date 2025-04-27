@@ -91,12 +91,11 @@ public class RacetrackGenerator : MonoBehaviour
             trackWalls[i].AddComponent<MeshCollider>();
         }
 
-        
         CreateRacetrackMesh();                                  //Create the mesh for the track surface    
 
         CreateMLGuideMesh();
 
-        //terrain.GenerateTerrain(trackPoints);                   //Terrain generating
+        terrain.GenerateTerrain(seed, trackWidth, trackPoints);                   //Terrain generating
 
         if (startLine != null)
             Destroy(startLine);
@@ -256,7 +255,7 @@ public class RacetrackGenerator : MonoBehaviour
     {
         int index = 0;
         int pointsInOneSector = trackPoints.Count / trackSectors;
-        int wallHeight = 30;                                        //change the height of the wall in both directions
+        int wallHeight = 50;                                        //change the height of the wall in both directions
 
         for (int i = 0; i < trackSectors; i++)
         {
