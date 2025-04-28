@@ -39,7 +39,7 @@ public class RacetrackGenerator : MonoBehaviour
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.R)) { ResetGen(); }
+        //if(Input.GetKeyDown(KeyCode.R)) { ResetGen(); }
     }
 
     public void FetchParameters()
@@ -255,7 +255,7 @@ public class RacetrackGenerator : MonoBehaviour
     {
         int index = 0;
         int pointsInOneSector = trackPoints.Count / trackSectors;
-        int wallHeight = 50;                                        //change the height of the wall in both directions
+        int wallHeight = 80;                                        //change the height of the wall in both directions
 
         for (int i = 0; i < trackSectors; i++)
         {

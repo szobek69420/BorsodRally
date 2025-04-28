@@ -21,7 +21,7 @@ public class RandomPathGenerator : PathGeneratorBase
         List<Vector3> trackPoints = new List<Vector3>();
         Random.InitState(seed);
         int pointDistance = 20;                                                 //the fixed distance between points
-        float diffBetweenDir = Mathf.Lerp(15f, 60f, curviness / 20);            //the maximal degrees of diff between two directions consecutively
+        float diffBetweenDir = 5f;                                              //the quantity of difference between two directions
 
         float currentRotation = 0f;    
         float currentElevation = 0f;
@@ -38,10 +38,8 @@ public class RandomPathGenerator : PathGeneratorBase
             currentElevation = Random.Range(-elevation, elevation);
 
             Vector3 prevDir = trackPoints[i-1] - trackPoints[i-2];
-            //prevDir.y = 0f;
 
-            Vector3 nextDir = Quaternion.Euler(0, currentRotation, 0) * prevDir;
-            //nextDir.y = currentElevation;
+            Vector3 nextDir = Quaternion.Euler(0, currentRotation * curviness, 0) * prevDir;
 
             if (((i - 2) % 5 == 0) && i > 2)
             {
@@ -53,6 +51,16 @@ public class RandomPathGenerator : PathGeneratorBase
                     trackPoints[i - j] = point;
                 }
             }
+
+            /*for(int j = 0; j < trackPoints.Count; j++)
+            {
+                if (Vector3.Distance(trackPoints[j], (trackPoints[i - 1] + nextDir)) < 15f)
+                {
+                    nextDir = Quaternion.Euler(0, (currentRotation * curviness) + 90f, 0) * prevDir;
+                    //break;
+                }
+            }*/
+
 
             trackPoints.Add((trackPoints[i - 1] + nextDir));
         }
