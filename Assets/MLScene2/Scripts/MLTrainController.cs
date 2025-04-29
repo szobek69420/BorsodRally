@@ -110,23 +110,24 @@ public class MLTrainController : Agent
             for(int i=0;i<distances.Length;i++)
             {
                 if (i == distances.Length - 1)//the backwards direction should be ignored
-                    sensor.AddObservation(0);
+                    sensor.AddObservation(1.0f);//1, not 0 because that would be a sudden change when starting to receive the actual values in phase2
                 else
-                    sensor.AddObservation(distances[i]);
+                    sensor.AddObservation(distances[i]/RAYCAST_MAX_DISTANCE);
             }
 
-            //normalized angles are 0
-            sensor.AddObservation(0.0f);
+            //normalized angles other than the closest one are 0
+            sensor.AddObservation(normalizedAngles[0]);
             sensor.AddObservation(0.0f);
 
             //speed is 0
             sensor.AddObservation(0.0f);
 
-            //tile is 10
+            //tilt is 0
             sensor.AddObservation(0.0f);
 
             //reward the speed
-            AddReward(speed);
+            if(Vector3.Dot(rb.velocity, transform.forward)>0.0f)
+                AddReward(speed);
         }
         else if(phase2==true)//phase 2 of the training
         {
@@ -144,24 +145,25 @@ public class MLTrainController : Agent
                 distances = Raycast();
             for (int i = 0; i < distances.Length; i++)
             {
-                if (i == distances.Length - 1)//the backwards direction should be ignored
-                    sensor.AddObservation(0);
+                if (i == distances.Length - 1)//the backwards direction should be divided by a different value
+                    sensor.AddObservation(distances[i] / RAYCAST_MAX_DISTANCE_BACKWARDS);
                 else
-                    sensor.AddObservation(distances[i]);
+                    sensor.AddObservation(distances[i] / RAYCAST_MAX_DISTANCE);
             }
 
-            //normalized angles are 0
-            sensor.AddObservation(0.0f);
+            //normalized angles other than the closest one are 0
+            sensor.AddObservation(normalizedAngles[0]);
             sensor.AddObservation(0.0f);
 
             //speed is 0
             sensor.AddObservation(0.0f);
 
-            //tile is 10
+            //tilt is 0
             sensor.AddObservation(0.0f);
 
             //reward the speed
-            AddReward(speed);
+            if (Vector3.Dot(rb.velocity, transform.forward) > 0.0f)
+                AddReward(speed);
         }
         else if (phase3 == true)//phase 3 of the training
         {
@@ -177,16 +179,19 @@ public class MLTrainController : Agent
             //wall distances
             if (distances == null)
                 distances = Raycast();
-            foreach (float distance in distances)
-                sensor.AddObservation(distance / RAYCAST_MAX_DISTANCE);
+            for (int i = 0; i < distances.Length; i++)
+            {
+                if (i == distances.Length - 1)//the backwards direction should be divided by a different value
+                    sensor.AddObservation(distances[i] / RAYCAST_MAX_DISTANCE_BACKWARDS);
+                else
+                    sensor.AddObservation(distances[i] / RAYCAST_MAX_DISTANCE);
+            }
 
             //the angle between the velocity and some of the upcoming track points
             if (normalizedAngles == null)
                 normalizedAngles = CalculateNormalizedAngles();
-            for (int i = 0; i < normalizedAngles.Length; i++)
-            {
-                sensor.AddObservation(1.0f - normalizedAngles[i]);
-            }
+            sensor.AddObservation(normalizedAngles[0]);
+            sensor.AddObservation(normalizedAngles[1]);
 
             //velocity
             sensor.AddObservation(0.002f * speed);
