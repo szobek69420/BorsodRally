@@ -9,6 +9,8 @@ public class TerrainManager : MonoBehaviour
     public int sectorSize = 64;
     public int sectorResolution = 16;
 
+    public List<GameObject> instantiatedSectors = new List<GameObject>();
+
     public void Start()
     {
         
@@ -40,7 +42,17 @@ public class TerrainManager : MonoBehaviour
                 TerrainSector sector = sectorObj.GetComponent<TerrainSector>();
                 sector.sectorCoords = coords;
                 sector.GenerateHeightmap(trackWidth, trackPoints, sectorSize, sectorResolution, seed);
+
+                instantiatedSectors.Add(sectorObj);
             }
         }
+    }
+
+    public void DeleteTerrain()
+    {
+        foreach(GameObject gayobject in instantiatedSectors)
+            Destroy(gayobject);
+
+        instantiatedSectors.Clear();
     }
 }
