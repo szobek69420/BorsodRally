@@ -375,6 +375,10 @@ PrefabInstance:
       value: car_mltrain
       objectReference: {fileID: 0}
     - target: {fileID: 7664613324904347095, guid: abb51361cce151a44a1b61695d7e18f5, type: 3}
+      propertyPath: phase1
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7664613324904347095, guid: abb51361cce151a44a1b61695d7e18f5, type: 3}
       propertyPath: MaxStep
       value: 5000
       objectReference: {fileID: 0}

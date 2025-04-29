@@ -15,13 +15,18 @@ public class MLTrainController : Agent
         new Vector3(Mathf.Sin(0.0f*Mathf.PI), 0.0f, Mathf.Cos(0.0f*Mathf.PI)),
         new Vector3(Mathf.Sin(0.25f*Mathf.PI), 0.0f, Mathf.Cos(0.25f*Mathf.PI)),
         new Vector3(Mathf.Sin(0.5f*Mathf.PI), 0.0f, Mathf.Cos(0.5f*Mathf.PI)),
-        new Vector3(Mathf.Sin(Mathf.PI), 0.0f, Mathf.Cos(Mathf.PI)) //backwards
+        new Vector3(Mathf.Sin(Mathf.PI), 0.0f, Mathf.Cos(Mathf.PI)) //backwards should be the last one
     };
     private static float RAYCAST_MAX_DISTANCE = 150.0f;
+    private static float RAYCAST_MAX_DISTANCE_BACKWARDS = 10.0f;//short so that most of the time it doesn't interfere
 
     private RacetrackGenerator track = null;
     [SerializeField] private Rigidbody rb;
     [SerializeField] private Transform raycastOrigin;
+
+    [SerializeField] private bool phase1;
+    [SerializeField] private bool phase2;
+    [SerializeField] private bool phase3;
 
     public float SteerInput { get; private set; } = 0;
     public float AccelInput { get; private set; } = 0;
@@ -51,6 +56,17 @@ public class MLTrainController : Agent
         }
     }
 
+    private void OnTriggerEnter(Collider other)
+    {
+        if(phase1==true)
+        {
+            if(other.gameObject.layer==7)//the car collided with the track walls
+            {
+                Dieded();
+            }
+        }
+    }
+
     public override void OnEpisodeBegin()
     {
         //get the track generator
@@ -76,40 +92,118 @@ public class MLTrainController : Agent
     //if the local basis is rotated, it might not work
     public override void CollectObservations(VectorSensor sensor)
     {
-        Vector3 velocity = rb.velocity;
-        float speed = velocity.magnitude;
-        bool isStationary = speed < 0.01f;
-        Vector3 velocityNormalized = isStationary ? Vector3.zero : Vector3.Normalize(velocity);
-
-        //wall distances
-        if (distances == null)
-            distances = Raycast();
-        foreach (float distance in distances)
-            sensor.AddObservation(distance / RAYCAST_MAX_DISTANCE);
-
-        //the angle between the velocity and some of the upcoming track points
-        if (normalizedAngles == null)
-            normalizedAngles = CalculateNormalizedAngles();
-        for(int i=0;i<normalizedAngles.Length;i++)
+        if (phase1 == true)//phase 1 of the training
         {
-            sensor.AddObservation(1.0f-normalizedAngles[i]);
+            /*
+            in the 1st phase of the training only the wall distances are given a value
+            the episode ends if the player touches the walls
+            */
+
+            Vector3 velocity = rb.velocity;
+            float speed = velocity.magnitude;
+            bool isStationary = speed < 0.01f;
+            Vector3 velocityNormalized = isStationary ? Vector3.zero : Vector3.Normalize(velocity);
+
+            //wall distances
+            if (distances == null)
+                distances = Raycast();
+            for(int i=0;i<distances.Length;i++)
+            {
+                if (i == distances.Length - 1)//the backwards direction should be ignored
+                    sensor.AddObservation(0);
+                else
+                    sensor.AddObservation(distances[i]);
+            }
+
+            //normalized angles are 0
+            sensor.AddObservation(0.0f);
+            sensor.AddObservation(0.0f);
+
+            //speed is 0
+            sensor.AddObservation(0.0f);
+
+            //tile is 10
+            sensor.AddObservation(0.0f);
+
+            //reward the speed
+            AddReward(speed);
         }
-
-        //velocity
-        sensor.AddObservation(0.002f * speed);
-
-        //tilt
-        sensor.AddObservation(CalculateTilt());
-
-        //add reward for going in the right direction
-        AddReward(100.0f*speed * (0.5f - Mathf.Abs(normalizedAngles[0] - 0.5f)));
-
-        //reward the progress
-        float currentProgress = track.CalculateProgress(rb.position);
-        if(lastProgress< currentProgress)
+        else if(phase2==true)//phase 2 of the training
         {
-            AddReward(10000.0f * (currentProgress - lastProgress));
-            lastProgress = currentProgress;
+            /*
+            phase 1 but the car doesn't die on wall touch and it also gets information about the backwards direction
+            */
+
+            Vector3 velocity = rb.velocity;
+            float speed = velocity.magnitude;
+            bool isStationary = speed < 0.01f;
+            Vector3 velocityNormalized = isStationary ? Vector3.zero : Vector3.Normalize(velocity);
+
+            //wall distances
+            if (distances == null)
+                distances = Raycast();
+            for (int i = 0; i < distances.Length; i++)
+            {
+                if (i == distances.Length - 1)//the backwards direction should be ignored
+                    sensor.AddObservation(0);
+                else
+                    sensor.AddObservation(distances[i]);
+            }
+
+            //normalized angles are 0
+            sensor.AddObservation(0.0f);
+            sensor.AddObservation(0.0f);
+
+            //speed is 0
+            sensor.AddObservation(0.0f);
+
+            //tile is 10
+            sensor.AddObservation(0.0f);
+
+            //reward the speed
+            AddReward(speed);
+        }
+        else if (phase3 == true)//phase 3 of the training
+        {
+            /*
+            in the 3rd phase of the training the agent gets information about the direction it should be going towards and the speed at it is going
+            */
+
+            Vector3 velocity = rb.velocity;
+            float speed = velocity.magnitude;
+            bool isStationary = speed < 0.01f;
+            Vector3 velocityNormalized = isStationary ? Vector3.zero : Vector3.Normalize(velocity);
+
+            //wall distances
+            if (distances == null)
+                distances = Raycast();
+            foreach (float distance in distances)
+                sensor.AddObservation(distance / RAYCAST_MAX_DISTANCE);
+
+            //the angle between the velocity and some of the upcoming track points
+            if (normalizedAngles == null)
+                normalizedAngles = CalculateNormalizedAngles();
+            for (int i = 0; i < normalizedAngles.Length; i++)
+            {
+                sensor.AddObservation(1.0f - normalizedAngles[i]);
+            }
+
+            //velocity
+            sensor.AddObservation(0.002f * speed);
+
+            //tilt
+            sensor.AddObservation(CalculateTilt());
+
+            //add reward for going in the right direction
+            AddReward(100.0f * speed * (0.5f - Mathf.Abs(normalizedAngles[0] - 0.5f)));
+
+            //reward the progress
+            float currentProgress = track.CalculateProgress(rb.position);
+            if (lastProgress < currentProgress)
+            {
+                AddReward(10000.0f * (currentProgress - lastProgress));
+                lastProgress = currentProgress;
+            }
         }
     }
 
@@ -159,20 +253,37 @@ public class MLTrainController : Agent
             Vector3 raycastDirection =
                 RAYCAST_DIRECTIONS[i].x * right +
                 RAYCAST_DIRECTIONS[i].z * forward;
-            RaycastHit hit;
-            if (Physics.Raycast(
-                raycastOrigin.position,
-                raycastDirection,
-                out hit,
-                RAYCAST_MAX_DISTANCE,
-                mask))
+            raycastDirection = Vector3.Normalize(new Vector3(raycastDirection.x, 0.0f, raycastDirection.z));
+
+            if(i<RAYCAST_DIRECTIONS.Length-1)//forwards directions
             {
-                distances[i] = hit.distance;
+                RaycastHit hit;
+                if (Physics.Raycast(
+                    raycastOrigin.position,
+                    raycastDirection,
+                    out hit,
+                    RAYCAST_MAX_DISTANCE,
+                    mask)
+                    )
+                    distances[i] = hit.distance;
+                else
+                    distances[i] = RAYCAST_MAX_DISTANCE;
             }
-            else
+            else//backwards direction
             {
-                distances[i] = RAYCAST_MAX_DISTANCE;
+                RaycastHit hit;
+                if (Physics.Raycast(
+                    raycastOrigin.position,
+                    raycastDirection,
+                    out hit,
+                    RAYCAST_MAX_DISTANCE_BACKWARDS,
+                    mask)
+                    )
+                    distances[i] = hit.distance;
+                else
+                    distances[i] = RAYCAST_MAX_DISTANCE_BACKWARDS;
             }
+
 
             //draw ray
             Debug.DrawLine(raycastOrigin.position, raycastOrigin.position+distances[i] * raycastDirection, Color.red, Time.fixedDeltaTime);

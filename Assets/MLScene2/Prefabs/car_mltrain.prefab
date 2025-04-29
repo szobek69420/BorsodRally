@@ -728,6 +728,9 @@ MonoBehaviour:
   MaxStep: 20000
   rb: {fileID: 4933772787959680675}
   raycastOrigin: {fileID: 9177976915857276222}
+  phase1: 1
+  phase2: 0
+  phase3: 0
 --- !u!114 &3612425816008576711
 MonoBehaviour:
   m_ObjectHideFlags: 0
