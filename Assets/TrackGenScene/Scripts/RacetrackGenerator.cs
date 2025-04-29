@@ -35,6 +35,7 @@ public class RacetrackGenerator : MonoBehaviour
     {
         //FetchParameters();
         //StartGen();
+        terrain = GameObject.Find("TerrainManager").GetComponent<TerrainManager>();
     }
 
     private void Update()
@@ -54,8 +55,8 @@ public class RacetrackGenerator : MonoBehaviour
     public void RandomizeParameters()
     {
         seed = UnityEngine.Random.Range(0, 200000);
-        trackLength = 20;//this should be the same for every ml episode
-        curviness = UnityEngine.Random.Range(1.0f, 2.5f);
+        trackLength = 40;//this should be the same for every ml episode
+        curviness = UnityEngine.Random.Range(5.0f, 10.0f);
     }
 
     //cannot set the ip and difficulty parameters
@@ -67,7 +68,6 @@ public class RacetrackGenerator : MonoBehaviour
     public void StartGen()
     {
         controlPointGenerator = new RandomPathGenerator();        //You can change the pathgenerator here
-        terrain = GameObject.Find("TerrainManager").GetComponent<TerrainManager>();
 
         trackPoints.Clear();
         trackPoints = controlPointGenerator.GenerateTrackPoints(seed, trackLength, curviness, elevation);
@@ -142,6 +142,7 @@ public class RacetrackGenerator : MonoBehaviour
         foreach (GameObject go in trackWalls)
             Destroy(go);
 
+        terrain.DeleteTerrain();
         StartGen();
     }
 
