@@ -39,7 +39,7 @@ public class RacetrackGenerator : MonoBehaviour
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.R)) { ResetGen(); }
+        //if(Input.GetKeyDown(KeyCode.R)) { ResetGen(); }
     }
 
     public void FetchParameters()
@@ -99,12 +99,11 @@ public class RacetrackGenerator : MonoBehaviour
             trackWalls[i].AddComponent<MeshCollider>();
         }
 
-        
         CreateRacetrackMesh();                                  //Create the mesh for the track surface    
 
         CreateMLGuideMesh();
 
-        //terrain.GenerateTerrain(trackPoints);                   //Terrain generating
+        terrain.GenerateTerrain(seed, trackWidth, trackPoints);                   //Terrain generating
 
         if (startLine != null)
             Destroy(startLine);
@@ -245,7 +244,7 @@ public class RacetrackGenerator : MonoBehaviour
                     triangles.Add(vertexIndex + 5);
                     triangles.Add(vertexIndex + 7);
                 }
-                //if (step < points.Count - 1) UnityEngine.Debug.DrawLine(points[step], points[step + 1], new UnityEngine.Color(1, 0, 0), 1000);
+                //if (step < trackPoints.Count - 1) UnityEngine.Debug.DrawLine(trackPoints[step], trackPoints[step + 1], new UnityEngine.Color(1, 0, 0), 1000);
                 vertexIndex += 4;
             }
 
@@ -266,7 +265,7 @@ public class RacetrackGenerator : MonoBehaviour
     {
         int index = 0;
         int pointsInOneSector = trackPoints.Count / trackSectors;
-        int wallHeight = 30;                                        //change the height of the wall in both directions
+        int wallHeight = 80;                                        //change the height of the wall in both directions
 
         for (int i = 0; i < trackSectors; i++)
         {
@@ -334,14 +333,6 @@ public class RacetrackGenerator : MonoBehaviour
 
                 if (j < k - 1)
                 {
-                    /*triangles.Add(vertexIndex);
-                    triangles.Add(vertexIndex + 4);
-                    triangles.Add(vertexIndex + 1);
-
-                    triangles.Add(vertexIndex + 1);
-                    triangles.Add(vertexIndex + 4);
-                    triangles.Add(vertexIndex + 5);*/
-
                     triangles.Add(vertexIndex);
                     triangles.Add(vertexIndex + 4);
                     triangles.Add(vertexIndex + 2);

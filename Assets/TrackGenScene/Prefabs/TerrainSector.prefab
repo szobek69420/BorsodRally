@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 1011618902450547428}
   - component: {fileID: 7312683075433675481}
   m_Layer: 0
-  m_Name: sector
+  m_Name: TerrainSector
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -111,7 +111,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 746cb7cad2e67f44d8c61aeaaf148faf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  resolution: 16
-  size: 64
   heightMultiplier: 20
   sectorCoords: {x: 0, y: 0}
