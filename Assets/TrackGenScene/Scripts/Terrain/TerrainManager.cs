@@ -5,16 +5,16 @@ using UnityEngine;
 public class TerrainManager : MonoBehaviour
 {
     public GameObject sectorPrefab;
-    public int gridSize = 5;
     public Transform trackCenter;
     public int sectorSize = 64;
+    public int sectorResolution = 16;
 
     public void Start()
     {
         
     }
 
-    public void GenerateTerrain(List<Vector3> trackPoints)
+    public void GenerateTerrain(int seed, float trackWidth, List<Vector3> trackPoints)
     {
         int minX = 10000;
         int maxX = -10000;
@@ -29,15 +29,17 @@ public class TerrainManager : MonoBehaviour
             if (trackPoints[i].z > maxZ) maxZ = (int)trackPoints[i].z;
         }
 
-        for (int z = (minZ - 100) / sectorSize; z <= (maxZ + 100) / sectorSize; z++)
+        int step = sectorSize - (sectorSize / sectorResolution);
+
+        for (int z = (minZ - 100); z < (maxZ + 100); z += step)
         {
-            for (int x = (minX - 100) / sectorSize; x <= (maxX + 100) / sectorSize; x++)
+            for (int x = (minX - 100); x < (maxX + 100); x += step)
             {
                 Vector2 coords = new Vector2(x, z);
                 GameObject sectorObj = Instantiate(sectorPrefab, Vector3.zero, Quaternion.identity, transform);
                 TerrainSector sector = sectorObj.GetComponent<TerrainSector>();
                 sector.sectorCoords = coords;
-                sector.GenerateHeightmap(trackCenter.position);
+                sector.GenerateHeightmap(trackWidth, trackPoints, sectorSize, sectorResolution, seed);
             }
         }
     }
