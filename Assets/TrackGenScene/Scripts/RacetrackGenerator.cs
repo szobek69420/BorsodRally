@@ -234,7 +234,7 @@ public class RacetrackGenerator : MonoBehaviour
                     triangles.Add(vertexIndex + 5);
                     triangles.Add(vertexIndex + 7);
                 }
-                //if (step < points.Count - 1) UnityEngine.Debug.DrawLine(points[step], points[step + 1], new UnityEngine.Color(1, 0, 0), 1000);
+                //if (step < trackPoints.Count - 1) UnityEngine.Debug.DrawLine(trackPoints[step], trackPoints[step + 1], new UnityEngine.Color(1, 0, 0), 1000);
                 vertexIndex += 4;
             }
 
@@ -323,14 +323,6 @@ public class RacetrackGenerator : MonoBehaviour
 
                 if (j < k - 1)
                 {
-                    /*triangles.Add(vertexIndex);
-                    triangles.Add(vertexIndex + 4);
-                    triangles.Add(vertexIndex + 1);
-
-                    triangles.Add(vertexIndex + 1);
-                    triangles.Add(vertexIndex + 4);
-                    triangles.Add(vertexIndex + 5);*/
-
                     triangles.Add(vertexIndex);
                     triangles.Add(vertexIndex + 2);
                     triangles.Add(vertexIndex + 4);

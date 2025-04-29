@@ -38,7 +38,7 @@ public class TerrainSector : MonoBehaviour
                 float noise = Mathf.PerlinNoise((worldX * 0.1f) + seed, (worldZ * 0.1f) + seed);
                 float falloff = Mathf.Clamp01(distanceFromTrack / 100f);
                 //float falloff = EvaluateFalloffFromTrack(distanceFromTrack);
-                Debug.Log(falloff);
+                //Debug.Log(falloff);
                 float height = noise * heightMultiplier * falloff;
 
                 if (distanceFromTrack < trackWidth * 1.5)

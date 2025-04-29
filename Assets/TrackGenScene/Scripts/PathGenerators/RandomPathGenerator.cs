@@ -43,25 +43,13 @@ public class RandomPathGenerator : PathGeneratorBase
 
             if (((i - 2) % 5 == 0) && i > 2)
             {
-                currentElevation = Random.Range(-elevation, elevation);
-                for(int j = 1; j < 6; j++)
+                for (int j = 1; j < 6; j++)
                 {
                     Vector3 point = trackPoints[i - j];
-                    point.y = Mathf.Lerp(trackPoints[i - 5].y, trackPoints[i - 5].y + currentElevation, 0.2f * j);
+                    point.y = Mathf.Lerp(trackPoints[i - 5].y + currentElevation, trackPoints[i - 5].y, 0.2f * j);
                     trackPoints[i - j] = point;
                 }
             }
-
-            /*for(int j = 0; j < trackPoints.Count; j++)
-            {
-                if (Vector3.Distance(trackPoints[j], (trackPoints[i - 1] + nextDir)) < 15f)
-                {
-                    nextDir = Quaternion.Euler(0, (currentRotation * curviness) + 90f, 0) * prevDir;
-                    //break;
-                }
-            }*/
-
-
             trackPoints.Add((trackPoints[i - 1] + nextDir));
         }
         return trackPoints;
