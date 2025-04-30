@@ -8,8 +8,10 @@ using System.Diagnostics;
 
 public class RacetrackGenerator : MonoBehaviour
 {
-    private const int START_LINE_INDEX = 15;
-    private const int FINISH_LINE_INDEX = 15;
+    [SerializeField] private int START_LINE_INDEX = 15;
+    [SerializeField] private int FINISH_LINE_INDEX = 15;
+
+    [SerializeField] private bool generateEnvironment = true;
 
     public int seed = 42;                                              // Seed for generation
     public int trackLength = 30;                                       // Number of track segments
@@ -103,7 +105,8 @@ public class RacetrackGenerator : MonoBehaviour
 
         CreateMLGuideMesh();
 
-        terrain.GenerateTerrain(seed, trackWidth, trackPoints);                   //Terrain generating
+        if(generateEnvironment)
+            terrain.GenerateTerrain(seed, trackWidth, trackPoints);                   //Terrain generating
 
         if (startLine != null)
             Destroy(startLine);

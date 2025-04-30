@@ -151,6 +151,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a432006eaddb3894db8fa4a23b3ceae8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  START_LINE_INDEX: 150
+  FINISH_LINE_INDEX: 15
+  generateEnvironment: 0
   seed: 42
   trackLength: 10
   trackWidth: 15
@@ -207,9 +210,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sectorPrefab: {fileID: 6673843550659780996, guid: b137da4d91f212b41a3bd73cf8e3b877, type: 3}
-  gridSize: 5
   trackCenter: {fileID: 371521282}
   sectorSize: 64
+  sectorResolution: 16
+  instantiatedSectors: []
 --- !u!4 &637618257
 Transform:
   m_ObjectHideFlags: 0
@@ -377,6 +381,10 @@ PrefabInstance:
     - target: {fileID: 7664613324904347095, guid: abb51361cce151a44a1b61695d7e18f5, type: 3}
       propertyPath: phase1
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7664613324904347095, guid: abb51361cce151a44a1b61695d7e18f5, type: 3}
+      propertyPath: phase2
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7664613324904347095, guid: abb51361cce151a44a1b61695d7e18f5, type: 3}
       propertyPath: MaxStep
