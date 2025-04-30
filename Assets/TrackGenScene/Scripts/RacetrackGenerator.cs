@@ -35,6 +35,7 @@ public class RacetrackGenerator : MonoBehaviour
     {
         //FetchParameters();
         //StartGen();
+        terrain = GameObject.Find("TerrainManager").GetComponent<TerrainManager>();
     }
 
     private void Update()
@@ -51,6 +52,13 @@ public class RacetrackGenerator : MonoBehaviour
         curviness = PlayerPrefs.GetFloat("curviness"+processId);
     }
 
+    public void RandomizeParameters()
+    {
+        seed = UnityEngine.Random.Range(0, 200000);
+        trackLength = 40;//this should be the same for every ml episode
+        curviness = UnityEngine.Random.Range(5.0f, 10.0f);
+    }
+
     //cannot set the ip and difficulty parameters
     public LobbyTrackInfo SerializeParameters()
     {
@@ -60,12 +68,12 @@ public class RacetrackGenerator : MonoBehaviour
     public void StartGen()
     {
         controlPointGenerator = new RandomPathGenerator();        //You can change the pathgenerator here
-        terrain = GameObject.Find("TerrainManager").GetComponent<TerrainManager>();
 
         trackPoints.Clear();
         trackPoints = controlPointGenerator.GenerateTrackPoints(seed, trackLength, curviness, elevation);
 
         trackParts.Clear();
+        trackWalls.Clear();
 
         for(int i = 0; i < trackSectors; i++)
         {
@@ -85,7 +93,7 @@ public class RacetrackGenerator : MonoBehaviour
 
             trackWalls.Add(new GameObject("Guide Wall " + (i + 1)));
             trackWalls[i].transform.SetParent(gameObject.transform);
-            trackWalls[i].layer = 6;                            //the track layer, necessary for the ml agents
+            trackWalls[i].layer = 7;                            //the track layer, necessary for the ml agents
 
             trackWalls[i].AddComponent<MeshFilter>();
             trackWalls[i].AddComponent<MeshCollider>();
@@ -130,8 +138,11 @@ public class RacetrackGenerator : MonoBehaviour
         UnityEngine.Debug.Log("Reset");
 
         foreach(GameObject go in trackParts)
-            DestroyImmediate(go);
+            Destroy(go);
+        foreach (GameObject go in trackWalls)
+            Destroy(go);
 
+        terrain.DeleteTerrain();
         StartGen();
     }
 
@@ -324,20 +335,20 @@ public class RacetrackGenerator : MonoBehaviour
                 if (j < k - 1)
                 {
                     triangles.Add(vertexIndex);
-                    triangles.Add(vertexIndex + 2);
                     triangles.Add(vertexIndex + 4);
+                    triangles.Add(vertexIndex + 2);
 
                     triangles.Add(vertexIndex + 2);
+                    triangles.Add(vertexIndex + 4);
                     triangles.Add(vertexIndex + 6);
-                    triangles.Add(vertexIndex + 4);
 
                     triangles.Add(vertexIndex + 3);
+                    triangles.Add(vertexIndex + 5);
                     triangles.Add(vertexIndex + 1);
-                    triangles.Add(vertexIndex + 5);
 
                     triangles.Add(vertexIndex + 3);
-                    triangles.Add(vertexIndex + 5);
                     triangles.Add(vertexIndex + 7);
+                    triangles.Add(vertexIndex + 5);
                 }
                 vertexIndex += 4;
             }
