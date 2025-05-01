@@ -20,7 +20,7 @@ public class MLTrainController : Agent
     private static float RAYCAST_MAX_DISTANCE = 150.0f;
     private static float RAYCAST_MAX_DISTANCE_BACKWARDS = 10.0f;//short so that most of the time it doesn't interfere
 
-    private RacetrackGenerator track = null;
+    [SerializeField] RacetrackGenerator track;
     [SerializeField] private Rigidbody rb;
     [SerializeField] private Transform raycastOrigin;
 
@@ -70,10 +70,6 @@ public class MLTrainController : Agent
 
     public override void OnEpisodeBegin()
     {
-        //get the track generator
-        if (!GameObject.Find("TrackManager").TryGetComponent<RacetrackGenerator>(out track))
-            Debug.LogError("Couldn't find the RacetrackGenerator");
-
         //reset the track
         track.RandomizeParameters();
         track.ResetGen();
@@ -130,10 +126,7 @@ public class MLTrainController : Agent
             sensor.AddObservation(0.0f);
 
             //reward the speed
-            if (Vector3.Dot(rb.velocity, transform.forward) > 0.0f)
-                AddReward(speed);
-            else
-                AddReward(-speed);
+            AddReward(Vector3.Dot(rb.velocity, transform.forward) - 20.0f);
 
             //reward the progress
             float currentProgress = track.CalculateProgress(rb.position);
@@ -176,10 +169,7 @@ public class MLTrainController : Agent
             sensor.AddObservation(0.0f);
 
             //reward the speed
-            if (Vector3.Dot(rb.velocity, transform.forward) > 0.0f)
-                AddReward(speed);
-            else
-                AddReward(-speed);
+            AddReward(Vector3.Dot(rb.velocity, transform.forward) - 20.0f);
 
             //reward the progress
             float currentProgress = track.CalculateProgress(rb.position);
@@ -222,10 +212,7 @@ public class MLTrainController : Agent
             sensor.AddObservation(0.0f);
 
             //reward the speed
-            if (Vector3.Dot(rb.velocity, transform.forward) > 0.0f)
-                AddReward(speed);
-            else
-                AddReward(-speed);
+            AddReward(Vector3.Dot(rb.velocity, transform.forward) - 20.0f);
 
             //reward the progress
             float currentProgress = track.CalculateProgress(rb.position);
@@ -417,7 +404,7 @@ public class MLTrainController : Agent
             normalizedAngles[i] = normalizedAngle;
 
             //draw the direction to the track point
-            Debug.DrawLine(raycastOrigin.position, track.TrackPoints[upcomingTrackPoints[i]], Color.green, Time.fixedDeltaTime);
+            Debug.DrawLine(raycastOrigin.position, track.gameObject.transform.position+track.TrackPoints[upcomingTrackPoints[i]], Color.green, Time.fixedDeltaTime);
         }
 
         return normalizedAngles;
