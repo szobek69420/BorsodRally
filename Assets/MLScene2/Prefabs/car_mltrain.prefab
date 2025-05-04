@@ -662,7 +662,7 @@ MonoBehaviour:
   rearWheelColliders:
   - {fileID: 26972985676790929}
   - {fileID: 4362241985167921365}
-  MAX_ACCELERATING_FORCE: 4000
+  MAX_ACCELERATING_FORCE: 2000
   MAX_BRAKING_FORCE: 8000
   MAX_STEER_ANGLE: 20
 --- !u!114 &4885285142150876549
@@ -725,12 +725,14 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 20000
+  MaxStep: 10000
+  track: {fileID: 0}
   rb: {fileID: 4933772787959680675}
   raycastOrigin: {fileID: 9177976915857276222}
   phase1: 1
   phase2: 0
   phase3: 0
+  phase4: 0
 --- !u!114 &3612425816008576711
 MonoBehaviour:
   m_ObjectHideFlags: 0
