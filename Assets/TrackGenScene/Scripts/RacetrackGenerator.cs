@@ -55,8 +55,8 @@ public class RacetrackGenerator : MonoBehaviour
     public void RandomizeParameters()
     {
         seed = UnityEngine.Random.Range(0, 200000);
-        trackLength = 40;//this should be the same for every ml episode
-        curviness = UnityEngine.Random.Range(5.0f, 10.0f);
+        trackLength = 80;//this should be the same for every ml episode
+        curviness = UnityEngine.Random.Range(5.0f, 15.0f);
     }
 
     //cannot set the ip and difficulty parameters
