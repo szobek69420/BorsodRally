@@ -59,7 +59,7 @@ public class MLTrainController : Agent
 
     private void OnTriggerEnter(Collider other)
     {
-        if(phase1==true)
+        if(phase1||phase2)
         {
             if(other.gameObject.layer==7)//the car collided with the track walls
             {
@@ -139,7 +139,10 @@ public class MLTrainController : Agent
         else if (phase2 == true)//phase 2 of the training
         {
             /*
-            phase 2 is phase 1, but the agent gets information about the direction of the track
+            phase 2 is phase 1, but the agent gets information about 
+            the direction of the track, 
+            the distance from backwards
+            the car should also be faster than in phase 1 (so that it won't immediately follow the same strategy it learnt in phase 1)
             */
 
             Vector3 velocity = rb.velocity;
@@ -153,7 +156,7 @@ public class MLTrainController : Agent
             for (int i = 0; i < distances.Length; i++)
             {
                 if (i == distances.Length - 1)//the backwards direction should be ignored
-                    sensor.AddObservation(1.0f);//1, not 0 because that would be a sudden change when starting to receive the actual values in phase2
+                    sensor.AddObservation(distances[i]/RAYCAST_MAX_DISTANCE_BACKWARDS);//1, not 0 because that would be a sudden change when starting to receive the actual values in phase2
                 else
                     sensor.AddObservation(distances[i] / RAYCAST_MAX_DISTANCE);
             }
