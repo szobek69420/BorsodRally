@@ -53,13 +53,13 @@ public class MLTrainController : Agent
     {
         if(other.gameObject.layer==7)//the car collided with the track walls
         {
-            AddReward(-100.0f*Time.fixedDeltaTime);
+            AddReward(-100.0f);
         }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if(phase1||phase2)
+        if(phase1||phase2||phase3)
         {
             if(other.gameObject.layer==7)//the car collided with the track walls
             {
@@ -185,7 +185,10 @@ public class MLTrainController : Agent
         else if(phase3==true)//phase 3 of the training
         {
             /*
-            phase 3 is phase 2 but the car doesn't die on wall touch and it also gets information about the backwards direction
+            phase 3 is phase 2 but:
+            it also gets more information about the track direction,
+            the tilt of the car
+            and the speed
             */
 
             Vector3 velocity = rb.velocity;
@@ -204,15 +207,15 @@ public class MLTrainController : Agent
                     sensor.AddObservation(distances[i] / RAYCAST_MAX_DISTANCE);
             }
 
-            //normalized angles other than the closest one are 0
+            //normalized angles
             sensor.AddObservation(normalizedAngles[0]);
-            sensor.AddObservation(0.5f);
+            sensor.AddObservation(normalizedAngles[1]);
 
-            //speed is 0
-            sensor.AddObservation(0.0f);
+            //speed
+            sensor.AddObservation(0.01f*speed);
 
-            //tilt is 0
-            sensor.AddObservation(0.0f);
+            //tilt
+            sensor.AddObservation(CalculateTilt());
 
             //reward the speed
             AddReward(Vector3.Dot(rb.velocity, transform.forward) - 20.0f);
