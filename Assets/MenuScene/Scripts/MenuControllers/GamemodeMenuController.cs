@@ -305,7 +305,7 @@ public class GamemodeMenuController : MenuController
             client.Client.ReceiveTimeout = 100;
 
 
-            long lastMessageTime = 0;
+            long lastMessageTime = 1000;
             int scanCount = 0;
             Stopwatch timer= new Stopwatch();
             timer.Start();
