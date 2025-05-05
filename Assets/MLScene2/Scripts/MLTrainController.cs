@@ -20,13 +20,14 @@ public class MLTrainController : Agent
     private static float RAYCAST_MAX_DISTANCE = 150.0f;
     private static float RAYCAST_MAX_DISTANCE_BACKWARDS = 10.0f;//short so that most of the time it doesn't interfere
 
-    private RacetrackGenerator track = null;
+    [SerializeField] RacetrackGenerator track;
     [SerializeField] private Rigidbody rb;
     [SerializeField] private Transform raycastOrigin;
 
     [SerializeField] private bool phase1;
     [SerializeField] private bool phase2;
     [SerializeField] private bool phase3;
+    [SerializeField] private bool phase4;
 
     public float SteerInput { get; private set; } = 0;
     public float AccelInput { get; private set; } = 0;
@@ -42,7 +43,7 @@ public class MLTrainController : Agent
         normalizedAngles = CalculateNormalizedAngles();
 
         //check if the car is falling
-        if (Mathf.Abs(rb.velocity.y) > 20.0f)
+        if (Mathf.Abs(rb.velocity.y) > 10.0f)
         {
             Dieded();
         }
@@ -52,13 +53,13 @@ public class MLTrainController : Agent
     {
         if(other.gameObject.layer==7)//the car collided with the track walls
         {
-            AddReward(-10.0f);
+            AddReward(-100.0f);
         }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if(phase1==true)
+        if(phase1||phase2||phase3)
         {
             if(other.gameObject.layer==7)//the car collided with the track walls
             {
@@ -69,10 +70,6 @@ public class MLTrainController : Agent
 
     public override void OnEpisodeBegin()
     {
-        //get the track generator
-        if (!GameObject.Find("TrackManager").TryGetComponent<RacetrackGenerator>(out track))
-            Debug.LogError("Couldn't find the RacetrackGenerator");
-
         //reset the track
         track.RandomizeParameters();
         track.ResetGen();
@@ -81,11 +78,14 @@ public class MLTrainController : Agent
 
         //set the position of the car
         Transform startLine=track.GetStartLine();
-        transform.position = startLine.position + 3.0f * Vector3.up;
-        transform.rotation = startLine.rotation;
+        transform.position = startLine.position + 3.0f * Vector3.up+Random.Range(-1.5f, 1.5f)*startLine.right;
+        transform.rotation = Quaternion.Euler(
+            startLine.rotation.eulerAngles.x,
+            startLine.rotation.eulerAngles.y + Random.Range(-30.0f, 30.0f),
+            startLine.rotation.eulerAngles.z); ;
 
         //reset velocity
-        rb.velocity = 20.0f*transform.forward;
+        rb.velocity = 5.0f*transform.forward;
         rb.angularVelocity = Vector3.zero;
     }
 
@@ -110,28 +110,39 @@ public class MLTrainController : Agent
             for(int i=0;i<distances.Length;i++)
             {
                 if (i == distances.Length - 1)//the backwards direction should be ignored
-                    sensor.AddObservation(0);
+                    sensor.AddObservation(1.0f);//1, not 0 because that would be a sudden change when starting to receive the actual values in phase2
                 else
-                    sensor.AddObservation(distances[i]);
+                    sensor.AddObservation(distances[i]/RAYCAST_MAX_DISTANCE);
             }
 
-            //normalized angles are 0
-            sensor.AddObservation(0.0f);
-            sensor.AddObservation(0.0f);
+            //normalized angles are 0.5f
+            sensor.AddObservation(0.5f);
+            sensor.AddObservation(0.5f);
 
             //speed is 0
             sensor.AddObservation(0.0f);
 
-            //tile is 10
+            //tilt is 0
             sensor.AddObservation(0.0f);
 
             //reward the speed
-            AddReward(speed);
+            AddReward(Vector3.Dot(rb.velocity, transform.forward) - 20.0f);
+
+            //reward the progress
+            float currentProgress = track.CalculateProgress(rb.position);
+            if (lastProgress < currentProgress)
+            {
+                AddReward(10000.0f * (currentProgress - lastProgress));
+                lastProgress = currentProgress;
+            }
         }
-        else if(phase2==true)//phase 2 of the training
+        else if (phase2 == true)//phase 2 of the training
         {
             /*
-            phase 1 but the car doesn't die on wall touch and it also gets information about the backwards direction
+            phase 2 is phase 1, but the agent gets information about 
+            the direction of the track, 
+            the distance from backwards
+            the car should also be faster than in phase 1 (so that it won't immediately follow the same strategy it learnt in phase 1)
             */
 
             Vector3 velocity = rb.velocity;
@@ -145,28 +156,39 @@ public class MLTrainController : Agent
             for (int i = 0; i < distances.Length; i++)
             {
                 if (i == distances.Length - 1)//the backwards direction should be ignored
-                    sensor.AddObservation(0);
+                    sensor.AddObservation(distances[i]/RAYCAST_MAX_DISTANCE_BACKWARDS);//1, not 0 because that would be a sudden change when starting to receive the actual values in phase2
                 else
-                    sensor.AddObservation(distances[i]);
+                    sensor.AddObservation(distances[i] / RAYCAST_MAX_DISTANCE);
             }
 
-            //normalized angles are 0
-            sensor.AddObservation(0.0f);
-            sensor.AddObservation(0.0f);
+            //normalized angles other than the closest one are 0
+            sensor.AddObservation(normalizedAngles[0]);
+            sensor.AddObservation(0.5f);
 
             //speed is 0
             sensor.AddObservation(0.0f);
 
-            //tile is 10
+            //tilt is 0
             sensor.AddObservation(0.0f);
 
             //reward the speed
-            AddReward(speed);
+            AddReward(Vector3.Dot(rb.velocity, transform.forward) - 20.0f);
+
+            //reward the progress
+            float currentProgress = track.CalculateProgress(rb.position);
+            if (lastProgress < currentProgress)
+            {
+                AddReward(10000.0f * (currentProgress - lastProgress));
+                lastProgress = currentProgress;
+            }
         }
-        else if (phase3 == true)//phase 3 of the training
+        else if(phase3==true)//phase 3 of the training
         {
             /*
-            in the 3rd phase of the training the agent gets information about the direction it should be going towards and the speed at it is going
+            phase 3 is phase 2 but:
+            it also gets more information about the track direction,
+            the tilt of the car
+            and the speed
             */
 
             Vector3 velocity = rb.velocity;
@@ -177,16 +199,62 @@ public class MLTrainController : Agent
             //wall distances
             if (distances == null)
                 distances = Raycast();
-            foreach (float distance in distances)
-                sensor.AddObservation(distance / RAYCAST_MAX_DISTANCE);
+            for (int i = 0; i < distances.Length; i++)
+            {
+                if (i == distances.Length - 1)//the backwards direction should be divided by a different value
+                    sensor.AddObservation(distances[i] / RAYCAST_MAX_DISTANCE_BACKWARDS);
+                else
+                    sensor.AddObservation(distances[i] / RAYCAST_MAX_DISTANCE);
+            }
+
+            //normalized angles
+            sensor.AddObservation(normalizedAngles[0]);
+            sensor.AddObservation(normalizedAngles[1]);
+
+            //speed
+            sensor.AddObservation(0.01f*speed);
+
+            //tilt
+            sensor.AddObservation(CalculateTilt());
+
+            //reward the speed
+            AddReward(Vector3.Dot(rb.velocity, transform.forward) - 20.0f);
+
+            //reward the progress
+            float currentProgress = track.CalculateProgress(rb.position);
+            if (lastProgress < currentProgress)
+            {
+                AddReward(10000.0f * (currentProgress - lastProgress));
+                lastProgress = currentProgress;
+            }
+        }
+        else if (phase4 == true)//phase 4 of the training
+        {
+            /*
+            in the 4th phase of the training the agent gets information about the direction it should be going towards and the speed at it is going
+            */
+
+            Vector3 velocity = rb.velocity;
+            float speed = velocity.magnitude;
+            bool isStationary = speed < 0.01f;
+            Vector3 velocityNormalized = isStationary ? Vector3.zero : Vector3.Normalize(velocity);
+
+            //wall distances
+            if (distances == null)
+                distances = Raycast();
+            for (int i = 0; i < distances.Length; i++)
+            {
+                if (i == distances.Length - 1)//the backwards direction should be divided by a different value
+                    sensor.AddObservation(distances[i] / RAYCAST_MAX_DISTANCE_BACKWARDS);
+                else
+                    sensor.AddObservation(distances[i] / RAYCAST_MAX_DISTANCE);
+            }
 
             //the angle between the velocity and some of the upcoming track points
             if (normalizedAngles == null)
                 normalizedAngles = CalculateNormalizedAngles();
-            for (int i = 0; i < normalizedAngles.Length; i++)
-            {
-                sensor.AddObservation(1.0f - normalizedAngles[i]);
-            }
+            sensor.AddObservation(normalizedAngles[0]);
+            sensor.AddObservation(normalizedAngles[1]);
 
             //velocity
             sensor.AddObservation(0.002f * speed);
@@ -233,7 +301,7 @@ public class MLTrainController : Agent
 
     public void Dieded()
     {
-        AddReward(-1000.0f);
+        AddReward(-2000.0f);
         EndEpisode();
     }
 
@@ -315,13 +383,17 @@ public class MLTrainController : Agent
     //the normalized angles between the velocity and some upcoming track points
     float[] CalculateNormalizedAngles()
     {
-        Vector3 velocityNormalized = rb.velocity.normalized;
+        Vector3 velocityNormalized;
+        if(rb.velocity.sqrMagnitude<1.0f)
+            velocityNormalized=transform.forward;
+        else
+            velocityNormalized = rb.velocity.normalized;
         Vector3 horizontalVelocityNormalized = new Vector3(velocityNormalized.x, 0.0f, velocityNormalized.z).normalized;
 
-        int currentTrackPoint = track.GetNearestTrackPointIndex(rb.position);
+        int currentTrackPoint = track.GetNearestTrackPointIndex(rb.position-track.transform.position);
 
         int[] upcomingTrackPoints = new int[2];
-        upcomingTrackPoints[0] = Mathf.Clamp(currentTrackPoint + 40, currentTrackPoint, track.TrackPoints.Count - 1);
+        upcomingTrackPoints[0] = Mathf.Clamp(currentTrackPoint + 30, currentTrackPoint, track.TrackPoints.Count - 1);
         upcomingTrackPoints[1] = Mathf.Clamp(currentTrackPoint + 80, currentTrackPoint, track.TrackPoints.Count - 1);
 
         float[] normalizedAngles = new float[2];
@@ -329,20 +401,20 @@ public class MLTrainController : Agent
         for (int i = 0; i < upcomingTrackPoints.Length; i++)
         {
             Vector3 trackPointDirection = track.TrackPoints[upcomingTrackPoints[i]] - track.TrackPoints[currentTrackPoint];
+            trackPointDirection.y = 0.0f;
             trackPointDirection = Vector3.Normalize(trackPointDirection);
 
             float normalizedAngle = Mathf.Atan2(
-                    Vector3.Dot(trackPointDirection, horizontalVelocityNormalized),
-                    Vector3.Dot(Vector3.Cross(Vector3.up, trackPointDirection), horizontalVelocityNormalized)
+                    Vector3.Dot(Vector3.Cross(Vector3.up, trackPointDirection), horizontalVelocityNormalized),
+                    Vector3.Dot(trackPointDirection, horizontalVelocityNormalized)
                     );
-            normalizedAngle /= Mathf.PI;
-            normalizedAngle = 0.5f * normalizedAngle + 0.5f;
-            normalizedAngle = Mathf.Clamp(normalizedAngle, 0.0f, 1.0f);
+            normalizedAngle /= 0.5f*Mathf.PI;
+            normalizedAngle = 0.5f * Mathf.Clamp(normalizedAngle, -1.0f, 1.0f) + 0.5f;
 
             normalizedAngles[i] = normalizedAngle;
 
             //draw the direction to the track point
-            Debug.DrawLine(raycastOrigin.position, track.TrackPoints[upcomingTrackPoints[i]], Color.green, Time.fixedDeltaTime);
+            Debug.DrawLine(raycastOrigin.position, track.gameObject.transform.position+track.TrackPoints[upcomingTrackPoints[i]], Color.green, Time.fixedDeltaTime);
         }
 
         return normalizedAngles;

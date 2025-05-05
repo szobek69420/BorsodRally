@@ -8,8 +8,11 @@ using System.Diagnostics;
 
 public class RacetrackGenerator : MonoBehaviour
 {
-    private const int START_LINE_INDEX = 15;
-    private const int FINISH_LINE_INDEX = 15;
+    [SerializeField] private int START_LINE_INDEX = 15;
+    [SerializeField] private int FINISH_LINE_INDEX = 15;
+
+    [SerializeField] private TerrainManager terrain;
+    [SerializeField] private bool generateEnvironment = true;
 
     public int seed = 42;                                              // Seed for generation
     public int trackLength = 30;                                       // Number of track segments
@@ -24,8 +27,6 @@ public class RacetrackGenerator : MonoBehaviour
     private List<GameObject> trackParts = new List<GameObject>();      // List to hold track sections
     private List<GameObject> trackWalls = new List<GameObject>();      // List to hold guide walls for ML cars 
 
-    private TerrainManager terrain;
-
     private GameObject startLine=null;
     private GameObject finishLine=null;
 
@@ -35,7 +36,6 @@ public class RacetrackGenerator : MonoBehaviour
     {
         //FetchParameters();
         //StartGen();
-        terrain = GameObject.Find("TerrainManager").GetComponent<TerrainManager>();
     }
 
     private void Update()
@@ -55,8 +55,8 @@ public class RacetrackGenerator : MonoBehaviour
     public void RandomizeParameters()
     {
         seed = UnityEngine.Random.Range(0, 200000);
-        trackLength = 40;//this should be the same for every ml episode
-        curviness = UnityEngine.Random.Range(5.0f, 10.0f);
+        trackLength = 80;//this should be the same for every ml episode
+        curviness = UnityEngine.Random.Range(5.0f, 15.0f);
     }
 
     //cannot set the ip and difficulty parameters
@@ -79,6 +79,7 @@ public class RacetrackGenerator : MonoBehaviour
         {
             trackParts.Add(new GameObject("Sector "+ (i + 1)));
             trackParts[i].transform.SetParent(gameObject.transform);
+            trackParts[i].transform.localPosition= Vector3.zero;//so that more tracks can be generated simultaneously
             trackParts[i].layer = 6;                            //the track layer, necessary for the ml agents
 
             trackParts[i].AddComponent<MeshFilter>();
@@ -93,6 +94,7 @@ public class RacetrackGenerator : MonoBehaviour
 
             trackWalls.Add(new GameObject("Guide Wall " + (i + 1)));
             trackWalls[i].transform.SetParent(gameObject.transform);
+            trackWalls[i].transform.localPosition = Vector3.zero;//so that more tracks can be generated simultaneously
             trackWalls[i].layer = 7;                            //the track layer, necessary for the ml agents
 
             trackWalls[i].AddComponent<MeshFilter>();
@@ -103,7 +105,8 @@ public class RacetrackGenerator : MonoBehaviour
 
         CreateMLGuideMesh();
 
-        terrain.GenerateTerrain(seed, trackWidth, trackPoints);                   //Terrain generating
+        if(generateEnvironment)
+            terrain.GenerateTerrain(seed, trackWidth, trackPoints);                   //Terrain generating
 
         if (startLine != null)
             Destroy(startLine);
@@ -114,7 +117,7 @@ public class RacetrackGenerator : MonoBehaviour
         Vector3 forw = Vector3.Normalize(trackPoints[START_LINE_INDEX] - trackPoints[START_LINE_INDEX - 1]);
         startLine.transform.rotation = Quaternion.LookRotation(forw);
         BoxCollider strL = startLine.GetComponent<BoxCollider>();
-        strL.transform.position = trackPoints[START_LINE_INDEX];
+        strL.transform.localPosition = trackPoints[START_LINE_INDEX];
         strL.size = new Vector3(trackWidth, 10, 2);
         strL.isTrigger = true;
 
@@ -127,7 +130,7 @@ public class RacetrackGenerator : MonoBehaviour
         forw = Vector3.Normalize(trackPoints[trackPoints.Count - FINISH_LINE_INDEX] - trackPoints[trackPoints.Count - FINISH_LINE_INDEX - 1]);
         finishLine.transform.rotation=Quaternion.LookRotation(forw);
         BoxCollider fnshL = finishLine.GetComponent<BoxCollider>();
-        fnshL.transform.position = trackPoints[trackPoints.Count - FINISH_LINE_INDEX];
+        fnshL.transform.localPosition = trackPoints[trackPoints.Count - FINISH_LINE_INDEX];
         fnshL.size = new Vector3(trackWidth, 10, 2);
         fnshL.isTrigger = true;
 

@@ -44,6 +44,8 @@ public class TerrainManager : MonoBehaviour
                 sector.GenerateHeightmap(trackWidth, trackPoints, sectorSize, sectorResolution, seed);
 
                 instantiatedSectors.Add(sectorObj);
+                sectorObj.transform.SetParent(transform);
+                sectorObj.transform.localPosition = Vector3.zero; //so that multiple terrains can be generated at the same time
             }
         }
     }
