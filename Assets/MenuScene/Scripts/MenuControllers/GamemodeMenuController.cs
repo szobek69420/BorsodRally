@@ -285,6 +285,13 @@ public class GamemodeMenuController : MenuController
 
     private void SearchForAvailableLobbies()
     {
+        IPAddress localAddress, broadcastAddress;
+        if(!LocalAddressQuerier.GetLocalAddress(out localAddress, out broadcastAddress))
+        {
+            UnityEngine.Debug.LogError("Couldn't find a suitable interface");
+            return;
+        }
+
         using (UdpClient client = new UdpClient())//so that the socket is yeeted automatically
         {
             int port = 42069;
@@ -293,7 +300,7 @@ public class GamemodeMenuController : MenuController
             {
                 try
                 {
-                    localEP = new IPEndPoint(IPAddress.Any, port);
+                    localEP = new IPEndPoint(localAddress, port);
                     client.Client.Bind(localEP);
                     break;
                 }
@@ -330,9 +337,9 @@ public class GamemodeMenuController : MenuController
                     }
 
                     //scan the network
-                    byte[] joinMsg = Encoding.ASCII.GetBytes("yo i wanna join "+scanCount.ToString());
+                    byte[] joinMsg = Encoding.ASCII.GetBytes("yo i wanna join&&"+scanCount.ToString());
                     for (int i=42666;i<42671;i++)//only scans the first 5 possible addresses
-                        client.Send(joinMsg, joinMsg.Length, new IPEndPoint(IPAddress.Broadcast, i));
+                        client.Send(joinMsg, joinMsg.Length, new IPEndPoint(broadcastAddress, i));
                 }
 
                 IPEndPoint remoteEP=null;

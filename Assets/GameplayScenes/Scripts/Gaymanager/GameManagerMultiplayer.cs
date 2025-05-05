@@ -531,10 +531,11 @@ public class GameManagerMultiplayer : GameManagerBase
 				{
 					byte[] request = client.Receive(ref remoteEP);
 					string requestString = Encoding.ASCII.GetString(request);
+					string[] requestSubstrings = requestString.Split("&&");
 
-					if (requestString.Substring(0, 16).Equals("yo i wanna join "))//it is a request from a searcher thread
+					if (requestSubstrings[0].Equals("yo i wanna join")&&requestSubstrings.Length==2)//it is a request from a searcher thread
 					{
-						int requestScanCount = System.Convert.ToInt32(requestString.Substring(16));
+						int requestScanCount = System.Convert.ToInt32(requestSubstrings[1]);
 
 						LobbyScanInfo replyData = new LobbyScanInfo(
 							new AvailableLobby(new IPEndPoint(hostAddress, port), ownerName, joinedPlayers.Count, 4),

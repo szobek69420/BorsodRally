@@ -4,6 +4,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using System.Net;
 
 public class MainMenuController : MenuController
 {
@@ -26,6 +27,10 @@ public class MainMenuController : MenuController
         inputField_name.onSubmit.AddListener((string sugus) => { NameInputFieldOnSubmit(); });
 
         Show();
+
+        IPAddress local, broadcast;
+        LocalAddressQuerier.GetLocalAddress(out local, out broadcast);
+        Debug.Log(local.ToString()+" "+broadcast.ToString());
     }
 
     public override void Show()

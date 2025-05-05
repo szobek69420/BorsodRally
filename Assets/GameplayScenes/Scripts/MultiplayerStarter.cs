@@ -10,6 +10,7 @@ using UnityEngine;
 public class MultiplayerStarter : MonoBehaviour
 {
     public IPAddress localAddress = null;
+    public IPAddress broadcastAddress = null;
     public ushort localPort = 0;
 
     private void Start()
@@ -19,11 +20,19 @@ public class MultiplayerStarter : MonoBehaviour
         if (PlayerPrefs.HasKey("isHost"+processId) && PlayerPrefs.GetInt("isHost"+processId) != 0)
         {
             //get local address and port
-            localAddress=GetLocalAddress();
-            localPort = (ushort)Random.Range(50000, 60000);
+            if(LocalAddressQuerier.GetLocalAddress(out localAddress, out broadcastAddress))
+            {
+                localPort = (ushort)Random.Range(50000, 60000);
+            }
+            else
+            {
+                localAddress = IPAddress.Any;
+                broadcastAddress = IPAddress.Broadcast;
+                localPort = 0;
+            }
 
             //set the unity transport address to the local address
-            UnityTransport ut=this.gameObject.GetComponent<UnityTransport>();
+            UnityTransport ut = this.gameObject.GetComponent<UnityTransport>();
             ut.SetConnectionData(localAddress.ToString(), localPort);
 
             //zsa
@@ -42,26 +51,5 @@ public class MultiplayerStarter : MonoBehaviour
             //zsa
             this.gameObject.GetComponent<NetworkManager>().StartClient();
         }
-    }
-
-    //connects to a DNS server to find the interface the machine is using
-    private IPAddress GetLocalAddress()
-    {
-        IPAddress localAddress = null;
-
-        try
-        {
-            UdpClient addressObtainer = new UdpClient(42042);
-            addressObtainer.Connect(new IPEndPoint(IPAddress.Parse("4.2.2.2"), 60000));
-            IPEndPoint localEndpoint = addressObtainer.Client.LocalEndPoint as IPEndPoint;
-            localAddress = localEndpoint.Address;
-            addressObtainer.Close();
-        }
-        catch (SocketException se)
-        {
-            localAddress = IPAddress.Any;
-        }
-
-        return localAddress;
     }
 }
