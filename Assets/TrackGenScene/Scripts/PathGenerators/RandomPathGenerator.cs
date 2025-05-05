@@ -4,18 +4,6 @@ using UnityEngine;
 
 public class RandomPathGenerator : PathGeneratorBase
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
     protected override List<Vector3> GenerateControlPoints(int seed, int length, float curviness, float elevation)
     {
         List<Vector3> trackPoints = new List<Vector3>();
@@ -50,7 +38,26 @@ public class RandomPathGenerator : PathGeneratorBase
                     trackPoints[i - j] = point;
                 }
             }
+
             trackPoints.Add((trackPoints[i - 1] + nextDir));
+
+            for (int j = 0; j < trackPoints.Count - 2; j++)
+            {
+                Vector3 point1 = trackPoints[i];
+                Vector3 point2 = trackPoints[j];
+
+                point1.y = 0;
+                point2.y = 0;
+
+                /*while (Vector3.Distance(point1, point2) < pointDistance * 1.5)
+                {
+                    trackPoints[i] = trackPoints[i - 1] + (Quaternion.Euler(0, -currentRotation * curviness, 0) * nextDir);
+                    point1 = trackPoints[i];
+                    point1.y = 0;
+                    Debug.Log("okurwaraketa");
+                    //Debug.Log("okurwaraketa");
+                }*/ 
+            }
         }
         return trackPoints;
     }
