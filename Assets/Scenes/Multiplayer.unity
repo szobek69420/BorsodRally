@@ -593,7 +593,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   START_LINE_INDEX: 15
   FINISH_LINE_INDEX: 15
-  terrain: {fileID: 0}
+  terrain: {fileID: 918762313}
   generateEnvironment: 1
   seed: 42
   trackLength: 10
