@@ -662,7 +662,7 @@ MonoBehaviour:
   rearWheelColliders:
   - {fileID: 26972985676790929}
   - {fileID: 4362241985167921365}
-  MAX_ACCELERATING_FORCE: 2000
+  MAX_ACCELERATING_FORCE: 3000
   MAX_BRAKING_FORCE: 8000
   MAX_STEER_ANGLE: 20
 --- !u!114 &4885285142150876549
@@ -677,6 +677,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 716fcd230bd606149aa563cb6a8347a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  carComponents: {fileID: 0}
+  shouldAutomaticallyUnflip: 0
   agent: {fileID: 7664613324904347095}
   carController: {fileID: 8006221429379302038}
 --- !u!114 &9157635448985457421
@@ -696,7 +698,7 @@ MonoBehaviour:
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 2
-      BranchSizes: 06000000
+      BranchSizes: 04000000
     VectorActionSize: 
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
