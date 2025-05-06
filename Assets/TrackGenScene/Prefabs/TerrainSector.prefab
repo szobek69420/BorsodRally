@@ -113,5 +113,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sectorCoords: {x: 0, y: 0}
   treePrefab: {fileID: 356387117125710236, guid: 38aae0b7111ab0240a985b280768b2e8, type: 3}
-  treeProbability: 0.02
-  heightMultiplier: 30
+  suprisePrefab: {fileID: 8191331969191084402, guid: b5ab66fc966c0e043a974313fd4af28c, type: 3}
+  treeProbability: 0.01
+  supriseProbability: 0.001
+  heightMultiplier: 50

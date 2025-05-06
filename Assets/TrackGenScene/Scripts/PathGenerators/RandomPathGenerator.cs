@@ -10,6 +10,7 @@ public class RandomPathGenerator : PathGeneratorBase
         Random.InitState(seed);
         int pointDistance = 20;                                                 //the fixed distance between points
         float diffBetweenDir = 5f;                                              //the quantity of difference between two directions
+        float maxTrackHeight = 25f;
 
         float currentRotation = 0f;    
         float currentElevation = 0f;
@@ -31,6 +32,12 @@ public class RandomPathGenerator : PathGeneratorBase
 
             if (((i - 2) % 5 == 0) && i > 2)
             {
+                if (trackPoints[i - 1].y + currentElevation > maxTrackHeight ||
+                        trackPoints[i - 1].y + currentElevation < -maxTrackHeight)
+                {
+                    currentElevation *= -1;
+                }
+
                 for (int j = 1; j < 6; j++)
                 {
                     Vector3 point = trackPoints[i - j];

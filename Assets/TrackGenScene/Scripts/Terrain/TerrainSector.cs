@@ -8,8 +8,10 @@ public class TerrainSector : MonoBehaviour
 {
     public Vector2 sectorCoords;
     public GameObject treePrefab;
+    public GameObject suprisePrefab;
     private List<GameObject> treeList = new List<GameObject>();
     [SerializeField] private float treeProbability = 0.01f;
+    [SerializeField] private float supriseProbability = 0.001f;
     [SerializeField] private float heightMultiplier = 50f;
 
     public void GenerateHeightmap(float trackWidth, List<Vector3> trackPoints, int sectorSize, int resolution, int seed)
@@ -35,7 +37,9 @@ public class TerrainSector : MonoBehaviour
 
                 for (int j = 0; j < trackPoints.Count; j++) 
                 {
-                    dis = Vector3.Distance(point, trackPoints[j]);
+                    Vector3 point2 = trackPoints[j];
+                    point2.y = 0;
+                    dis = Vector3.Distance(point, point2);
 
                     if (distanceFromTrack > dis) { distanceFromTrack = dis; index = j; }
                 }
@@ -44,12 +48,12 @@ public class TerrainSector : MonoBehaviour
                 float falloff = EvaluateFalloffFromTrack(distanceFromTrack);
                 point.y = noise * heightMultiplier * falloff;
 
-                if (distanceFromTrack < trackWidth * 2.5)
+                if (distanceFromTrack < trackWidth * 3)
                 {
                     float targetHeight = trackPoints[index].y - 1f;
-                    float t = Mathf.InverseLerp(trackWidth * 2.5f, trackWidth / 2, distanceFromTrack);
+                    float t = Mathf.InverseLerp(trackWidth * 3f, trackWidth / 2, distanceFromTrack);
 
-                    if (distanceFromTrack < trackWidth)
+                    if (distanceFromTrack < trackWidth * 1.1f)
                     {
                         point.y = targetHeight;
                     }
@@ -61,6 +65,12 @@ public class TerrainSector : MonoBehaviour
                             GameObject tree = GameObject.Instantiate(treePrefab, transform);
                             tree.transform.localPosition = point;
                             treeList.Add(tree);
+                        }
+                        else if(Random.Range(0.0f, 1.0f) < supriseProbability)
+                        {
+                            GameObject surprise = GameObject.Instantiate(suprisePrefab, transform);
+                            surprise.transform.localPosition = point;
+                            treeList.Add(surprise);
                         }
                     }
                 }
@@ -97,7 +107,7 @@ public class TerrainSector : MonoBehaviour
 
     float EvaluateFalloffFromTrack(float distance)
     {
-        float maxDist = 200f; 
+        float maxDist = 100f; 
         float t = Mathf.Clamp01(distance / maxDist);
         return Mathf.SmoothStep(0.2f, 1f, t);
     }
