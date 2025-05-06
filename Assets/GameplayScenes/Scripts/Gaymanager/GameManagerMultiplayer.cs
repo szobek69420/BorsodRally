@@ -422,6 +422,10 @@ public class GameManagerMultiplayer : GameManagerBase
 
 					//set orientation
 					players[j].GetComponent<IngameCarComponents>().SetCurrentOrientation(cos[i]);
+
+					RacerPlayerMultiplayerClient rpmc = null;
+					if (players[j].TryGetComponent<RacerPlayerMultiplayerClient>(out rpmc))
+						rpmc.Velocity = new Vector3(cos[i].velocityX, cos[i].velocityY, cos[i].velocityZ);
 				}
 			}
 
