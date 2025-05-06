@@ -50,6 +50,12 @@ public class MLTrainController : Agent
         }
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.R))
+            EndEpisode();
+    }
+
     private void OnTriggerStay(Collider other)
     {
         if(other.gameObject.layer==7)//the car collided with the track walls

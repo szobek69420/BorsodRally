@@ -33,6 +33,7 @@ public class LocalAddressQuerier
 
                 localAddress = new IPAddress(ipBytes);
                 broadcastAddress = new IPAddress(broadcastBytes);
+                Debug.Log(localAddress.ToString()+" "+broadcastAddress.ToString());
                 return true;
             }
         }
