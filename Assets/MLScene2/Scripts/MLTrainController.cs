@@ -34,6 +34,7 @@ public class MLTrainController : Agent
     public float BrakeInput { get; private set; } = 0;
 
     private float lastProgress = 0.0f;
+    private float startTime = 0.0f;
     private float[] distances=null;
     private float[] normalizedAngles = null;
 
@@ -59,7 +60,7 @@ public class MLTrainController : Agent
 
     private void OnTriggerEnter(Collider other)
     {
-        if(phase1||phase2||phase3)
+        if(phase1||phase2)
         {
             if(other.gameObject.layer==7)//the car collided with the track walls
             {
@@ -75,6 +76,7 @@ public class MLTrainController : Agent
         track.ResetGen();
 
         lastProgress = 0.0f;
+        startTime = Time.time;
 
         //set the position of the car
         Transform startLine=track.GetStartLine();
@@ -125,8 +127,10 @@ public class MLTrainController : Agent
             //tilt is 0
             sensor.AddObservation(0.0f);
 
-            //reward the speed
-            AddReward(Vector3.Dot(rb.velocity, transform.forward) - 20.0f);
+            //reward the speed and punish standing in one place
+            AddReward(0.5f*Vector3.Dot(rb.velocity, transform.forward) - 10.0f);
+            if (speed < 3.0f)
+                AddReward(-30.0f);
 
             //reward the progress
             float currentProgress = track.CalculateProgress(rb.position);
@@ -138,12 +142,7 @@ public class MLTrainController : Agent
         }
         else if (phase2 == true)//phase 2 of the training
         {
-            /*
-            phase 2 is phase 1, but the agent gets information about 
-            the direction of the track, 
-            the distance from backwards
-            the car should also be faster than in phase 1 (so that it won't immediately follow the same strategy it learnt in phase 1)
-            */
+            //the car should be faster here than in phase1
 
             Vector3 velocity = rb.velocity;
             float speed = velocity.magnitude;
@@ -156,29 +155,27 @@ public class MLTrainController : Agent
             for (int i = 0; i < distances.Length; i++)
             {
                 if (i == distances.Length - 1)//the backwards direction should be ignored
-                    sensor.AddObservation(distances[i]/RAYCAST_MAX_DISTANCE_BACKWARDS);//1, not 0 because that would be a sudden change when starting to receive the actual values in phase2
+                    sensor.AddObservation(1.0f);//1, not 0 because that would be a sudden change when starting to receive the actual values in phase2
                 else
                     sensor.AddObservation(distances[i] / RAYCAST_MAX_DISTANCE);
             }
 
-            //normalized angles other than the closest one are 0
+            //normalized angles
             sensor.AddObservation(normalizedAngles[0]);
             sensor.AddObservation(0.5f);
 
             //speed is 0
-            sensor.AddObservation(0.0f);
+            sensor.AddObservation(0.01f*speed);
 
             //tilt is 0
             sensor.AddObservation(0.0f);
 
-            //reward the speed
-            AddReward(Vector3.Dot(rb.velocity, transform.forward) - 20.0f);
 
-            //reward the progress
+            //reward the progress with discounting
             float currentProgress = track.CalculateProgress(rb.position);
             if (lastProgress < currentProgress)
             {
-                AddReward(10000.0f * (currentProgress - lastProgress));
+                AddReward((100000.0f/(1.0f+0.01f*(Time.time-startTime))) * (currentProgress - lastProgress));
                 lastProgress = currentProgress;
             }
         }
@@ -218,7 +215,7 @@ public class MLTrainController : Agent
             sensor.AddObservation(CalculateTilt());
 
             //reward the speed
-            AddReward(Vector3.Dot(rb.velocity, transform.forward) - 20.0f);
+            AddReward(Vector3.Dot(rb.velocity, transform.forward) - 50.0f);
 
             //reward the progress
             float currentProgress = track.CalculateProgress(rb.position);
@@ -257,13 +254,10 @@ public class MLTrainController : Agent
             sensor.AddObservation(normalizedAngles[1]);
 
             //velocity
-            sensor.AddObservation(0.002f * speed);
+            sensor.AddObservation(0.01f * speed);
 
             //tilt
             sensor.AddObservation(CalculateTilt());
-
-            //add reward for going in the right direction
-            AddReward(100.0f * speed * (0.5f - Mathf.Abs(normalizedAngles[0] - 0.5f)));
 
             //reward the progress
             float currentProgress = track.CalculateProgress(rb.position);
@@ -279,9 +273,7 @@ public class MLTrainController : Agent
     {
         SteerInput = actions.ContinuousActions[0];
         AccelInput = actions.ContinuousActions[1];
-        BrakeInput = 0.2f * actions.DiscreteActions[0];
-
-        AddReward(-BrakeInput);
+        BrakeInput = 0.333f * actions.DiscreteActions[0];
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)
@@ -291,7 +283,7 @@ public class MLTrainController : Agent
         continuous[1] = Input.GetAxisRaw("Vertical");
 
         ActionSegment<int> discrete = actionsOut.DiscreteActions;
-        discrete[0] = Input.GetKey(KeyCode.Space) ? 5 : 0;
+        discrete[0] = Input.GetKey(KeyCode.Space) ? 3 : 0;
     }
 
     public void GoalReached()
