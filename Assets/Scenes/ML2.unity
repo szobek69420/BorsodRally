@@ -627,10 +627,10 @@ PrefabInstance:
     - target: {fileID: 8752362463528098317, guid: 5824c42cc57ba5f4ea1d2f2a081c8059, type: 3}
       propertyPath: m_Model
       value: 
-      objectReference: {fileID: 5022602860645237092, guid: e8d7f1f2221506746807c2d188b65c35, type: 3}
+      objectReference: {fileID: 5022602860645237092, guid: e5df986cd41f9e94f9ba48ad3e83d21b, type: 3}
     - target: {fileID: 8752362463528098317, guid: 5824c42cc57ba5f4ea1d2f2a081c8059, type: 3}
       propertyPath: m_BehaviorType
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5824c42cc57ba5f4ea1d2f2a081c8059, type: 3}

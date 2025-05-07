@@ -66,7 +66,7 @@ public class MLTrainController : Agent
 
     private void OnTriggerEnter(Collider other)
     {
-        if(phase1||phase2)
+        if(phase1||phase2||phase3)
         {
             if(other.gameObject.layer==7)//the car collided with the track walls
             {
@@ -187,12 +187,7 @@ public class MLTrainController : Agent
         }
         else if(phase3==true)//phase 3 of the training
         {
-            /*
-            phase 3 is phase 2 but:
-            it also gets more information about the track direction,
-            the tilt of the car
-            and the speed
-            */
+            //the car should be faster here than in phase1
 
             Vector3 velocity = rb.velocity;
             float speed = velocity.magnitude;
@@ -204,8 +199,8 @@ public class MLTrainController : Agent
                 distances = Raycast();
             for (int i = 0; i < distances.Length; i++)
             {
-                if (i == distances.Length - 1)//the backwards direction should be divided by a different value
-                    sensor.AddObservation(distances[i] / RAYCAST_MAX_DISTANCE_BACKWARDS);
+                if (i == distances.Length - 1)//the backwards direction should be ignored
+                    sensor.AddObservation(1.0f);//1, not 0 because that would be a sudden change when starting to receive the actual values in phase2
                 else
                     sensor.AddObservation(distances[i] / RAYCAST_MAX_DISTANCE);
             }
@@ -215,19 +210,17 @@ public class MLTrainController : Agent
             sensor.AddObservation(normalizedAngles[1]);
 
             //speed
-            sensor.AddObservation(0.01f*speed);
+            sensor.AddObservation(0.01f * speed);
 
             //tilt
             sensor.AddObservation(CalculateTilt());
 
-            //reward the speed
-            AddReward(Vector3.Dot(rb.velocity, transform.forward) - 50.0f);
 
-            //reward the progress
+            //reward the progress with discounting
             float currentProgress = track.CalculateProgress(rb.position);
             if (lastProgress < currentProgress)
             {
-                AddReward(10000.0f * (currentProgress - lastProgress));
+                AddReward((100000.0f / (1.0f + 0.01f * (Time.time - startTime))) * (currentProgress - lastProgress));
                 lastProgress = currentProgress;
             }
         }
