@@ -46,7 +46,7 @@ public class MLTrainController : Agent
         //check if the car is falling
         if (Mathf.Abs(rb.velocity.y) > 10.0f)
         {
-            Dieded();
+            Dieded(-2000.0f);
         }
     }
 
@@ -66,12 +66,14 @@ public class MLTrainController : Agent
 
     private void OnTriggerEnter(Collider other)
     {
-        if(phase1||phase2||phase3)
+        if(other.gameObject.layer==7)
         {
-            if(other.gameObject.layer==7)//the car collided with the track walls
-            {
-                Dieded();
-            }
+            if (phase1)
+                Dieded(-2000.0f);
+            else if (phase2)
+                Dieded(0.0f);
+            else if (phase3)
+                AddReward(-500.0f);
         }
     }
 
@@ -181,7 +183,7 @@ public class MLTrainController : Agent
             float currentProgress = track.CalculateProgress(rb.position);
             if (lastProgress < currentProgress)
             {
-                AddReward((100000.0f/(1.0f+0.01f*(Time.time-startTime))) * (currentProgress - lastProgress));
+                AddReward((100000.0f/(1.0f+0.02f*(Time.time-startTime))) * (currentProgress - lastProgress));
                 lastProgress = currentProgress;
             }
         }
@@ -220,7 +222,7 @@ public class MLTrainController : Agent
             float currentProgress = track.CalculateProgress(rb.position);
             if (lastProgress < currentProgress)
             {
-                AddReward((100000.0f / (1.0f + 0.01f * (Time.time - startTime))) * (currentProgress - lastProgress));
+                AddReward((100000.0f / (1.0f + 0.02f * (Time.time - startTime))) * (currentProgress - lastProgress));
                 lastProgress = currentProgress;
             }
         }
@@ -290,9 +292,9 @@ public class MLTrainController : Agent
         EndEpisode();
     }
 
-    public void Dieded()
+    public void Dieded(float reward)
     {
-        AddReward(-2000.0f);
+        AddReward(reward);
         EndEpisode();
     }
 
