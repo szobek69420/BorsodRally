@@ -525,9 +525,12 @@ public class GameManagerMultiplayer : GameManagerBase
 				{
 					port++;
 				}
-			}
 
-			while (true)
+				try { client.Close(); } catch { }
+			}
+            UnityEngine.Debug.Log("logus " + client.Client.LocalEndPoint.ToString());
+
+            while (true)
 			{
 				IPEndPoint remoteEP = new IPEndPoint(IPAddress.Any, 0);
 
@@ -536,6 +539,8 @@ public class GameManagerMultiplayer : GameManagerBase
 					byte[] request = client.Receive(ref remoteEP);
 					string requestString = Encoding.ASCII.GetString(request);
 					string[] requestSubstrings = requestString.Split("&&");
+
+					Debug.Log("nigga " + requestString);
 
 					if (requestSubstrings[0].Equals("yo i wanna join")&&requestSubstrings.Length==2)//it is a request from a searcher thread
 					{

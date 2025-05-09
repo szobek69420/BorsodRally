@@ -309,9 +309,15 @@ public class GamemodeMenuController : MenuController
                 {
                     port++;
                 }
+
+                try
+                {
+                    client.Close();
+                }
+                catch (Exception e) { }
             }
             client.Client.ReceiveTimeout = 100;
-
+            UnityEngine.Debug.Log("sugus " + client.Client.LocalEndPoint.ToString());
 
             long lastMessageTime = 1000;
             int scanCount = 0;
