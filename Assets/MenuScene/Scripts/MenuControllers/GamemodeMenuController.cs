@@ -63,8 +63,10 @@ public class GamemodeMenuController : MenuController
     [SerializeField] private GameObject lobbyInfoPrefabs;
     private List<GameObject> instantiatedLobbyInfos = new List<GameObject>();
 
-    [SerializeField] private Button button_chooseInterface;
-    [SerializeField] private TMP_Text text_interface;
+    [SerializeField] private Button button_chooseInterfaceJoin;
+    [SerializeField] private TMP_Text text_interfaceJoin;
+    [SerializeField] private Button button_chooseInterfaceHost;
+    [SerializeField] private TMP_Text text_interfaceHost;
     private LocalAddressQuerier.NetworkInterfaceInfo[] activeInterfaces = null;
     private int usedInterfaceIndex = 0;
 
@@ -84,7 +86,8 @@ public class GamemodeMenuController : MenuController
         button_launchSingle.onClick.AddListener(() => { PlayClickSound(); StartSingleplayerButtonFunction(); });
         button_launchMultiHost.onClick.AddListener(() => { PlayClickSound(); StartMultiplayerHostButtonFunction(); });
 
-        button_chooseInterface.onClick.AddListener(() => { PlayClickSound(); ChangeInterfaceButtonFunction(); });
+        button_chooseInterfaceJoin.onClick.AddListener(() => { PlayClickSound(); ChangeInterfaceButtonJoinFunction(); });
+        button_chooseInterfaceHost.onClick.AddListener(() => { PlayClickSound(); ChangeInterfaceButtonHostFunction(); });
 
         StartCoroutine(LobbyInfoUpdater());
     }
@@ -226,6 +229,10 @@ public class GamemodeMenuController : MenuController
         PlayerPrefs.SetFloat("curviness" + processId, curviness);
         PlayerPrefs.SetInt("difficulty" + processId, difficulty);
         PlayerPrefs.SetInt("isHost" + processId, 69);
+        if(activeInterfaces != null&&activeInterfaces.Length > 0)
+            PlayerPrefs.SetString("hostAddress" + processId, activeInterfaces[usedInterfaceIndex].Address.ToString());
+        else
+            PlayerPrefs.SetString("hostAddress" + processId, IPAddress.Any.ToString());
 
         PlayerPrefs.SetString("name" + processId, PlayerPrefs.GetString("name"));
 
@@ -275,10 +282,19 @@ public class GamemodeMenuController : MenuController
 
     public void HostButtonFunction()
     {
+        KillLobbySearcherThread();
+
+        if (!LocalAddressQuerier.GetLocalAddresses(out activeInterfaces))
+            UnityEngine.Debug.Log("No available network interface");
+        else
+        {
+            usedInterfaceIndex = 0;
+
+            ChangeInterfaceButtonHostFunction();
+        }
+
         canvas_multiPlayerJoin.enabled = false;
         canvas_multiPlayerHost.enabled = true;
-
-        KillLobbySearcherThread();
     }
 
     public void JoinButtonFunction()
@@ -289,11 +305,23 @@ public class GamemodeMenuController : MenuController
         StartLobbySearcherThread();
     }
 
-    public void ChangeInterfaceButtonFunction()
+    public void ChangeInterfaceButtonJoinFunction()
     {
         usedInterfaceIndex++; //no need to clamp, the startlobbysearcherthread does it
         KillLobbySearcherThread();
         StartLobbySearcherThread();
+    }
+
+    public void ChangeInterfaceButtonHostFunction()
+    {
+        if (activeInterfaces == null || activeInterfaces.Length == 0)
+            return;
+
+        usedInterfaceIndex++;
+        if(usedInterfaceIndex>=activeInterfaces.Length)
+            usedInterfaceIndex%=activeInterfaces.Length;
+
+        text_interfaceHost.text = activeInterfaces[usedInterfaceIndex].Name;
     }
 
     private void SearchForAvailableLobbies()
@@ -415,7 +443,7 @@ public class GamemodeMenuController : MenuController
         if(!LocalAddressQuerier.GetLocalAddresses(out activeInterfaces))
         {
             UnityEngine.Debug.LogError("No usable network interfaces bozo");
-            text_interface.text = "no interface";
+            text_interfaceJoin.text = "no interface";
             return;
         }
 
@@ -423,7 +451,7 @@ public class GamemodeMenuController : MenuController
             usedInterfaceIndex = 0;
         else if (usedInterfaceIndex >= activeInterfaces.Length)
             usedInterfaceIndex %= activeInterfaces.Length;
-        text_interface.text = activeInterfaces[usedInterfaceIndex].Name;
+        text_interfaceJoin.text = activeInterfaces[usedInterfaceIndex].Name;
 
         //start a lobby searcher thread
         lobbySearcherThread = new Thread(SearchForAvailableLobbies);
