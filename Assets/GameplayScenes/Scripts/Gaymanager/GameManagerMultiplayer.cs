@@ -516,7 +516,7 @@ public class GameManagerMultiplayer : GameManagerBase
 			{
 				try
 				{
-					localEP = new IPEndPoint(IPAddress.Any, port);
+					localEP = new IPEndPoint(hostAddress, port);
 					client.Client.ReceiveTimeout = RECEIVE_TIMEOUT;
 					client.Client.Bind(localEP);
 					break;
