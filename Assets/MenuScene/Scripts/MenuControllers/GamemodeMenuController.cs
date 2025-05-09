@@ -317,6 +317,7 @@ public class GamemodeMenuController : MenuController
                 catch (Exception e) { }
             }
             client.Client.ReceiveTimeout = 100;
+            client.Client.EnableBroadcast = true;
             UnityEngine.Debug.Log("sugus " + client.Client.LocalEndPoint.ToString());
 
             long lastMessageTime = 1000;

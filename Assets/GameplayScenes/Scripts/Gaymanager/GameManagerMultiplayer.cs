@@ -517,7 +517,6 @@ public class GameManagerMultiplayer : GameManagerBase
 				try
 				{
 					localEP = new IPEndPoint(hostAddress, port);
-					client.Client.ReceiveTimeout = RECEIVE_TIMEOUT;
 					client.Client.Bind(localEP);
 					break;
 				}
@@ -528,6 +527,9 @@ public class GameManagerMultiplayer : GameManagerBase
 
 				try { client.Close(); } catch { }
 			}
+
+            client.Client.EnableBroadcast = true;
+            client.Client.ReceiveTimeout = RECEIVE_TIMEOUT;
             UnityEngine.Debug.Log("logus " + client.Client.LocalEndPoint.ToString());
 
             while (true)
