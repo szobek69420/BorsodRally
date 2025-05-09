@@ -169,7 +169,10 @@ public class GameManagerMultiplayer : GameManagerBase
 				instantiatedLobbyElements.Add(instance);
 			}
 
+			if(IsHost)
+                ui.text_hostAddress.text="Hosting on: "+hostAddress.ToString();
             ui.text_waitingForHost.gameObject.SetActive(!IsHost);
+            ui.text_hostAddress.gameObject.SetActive(IsHost);
             ui.button_startGame.gameObject.SetActive(IsHost);
         }
     }

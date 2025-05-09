@@ -63,6 +63,10 @@ public class GamemodeMenuController : MenuController
     [SerializeField] private GameObject lobbyInfoPrefabs;
     private List<GameObject> instantiatedLobbyInfos = new List<GameObject>();
 
+    [SerializeField] private Button button_chooseInterface;
+    [SerializeField] private TMP_Text text_interface;
+    private LocalAddressQuerier.NetworkInterfaceInfo[] activeInterfaces = null;
+    private int usedInterfaceIndex = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -79,6 +83,8 @@ public class GamemodeMenuController : MenuController
 
         button_launchSingle.onClick.AddListener(() => { PlayClickSound(); StartSingleplayerButtonFunction(); });
         button_launchMultiHost.onClick.AddListener(() => { PlayClickSound(); StartMultiplayerHostButtonFunction(); });
+
+        button_chooseInterface.onClick.AddListener(() => { PlayClickSound(); ChangeInterfaceButtonFunction(); });
 
         StartCoroutine(LobbyInfoUpdater());
     }
@@ -238,7 +244,7 @@ public class GamemodeMenuController : MenuController
             byte[] message= Encoding.ASCII.GetBytes("i am approaching");
 
             UdpClient client = new UdpClient();
-            client.Client.Bind(new IPEndPoint(IPAddress.Any, UnityEngine.Random.Range(55000, 60000)));
+            client.Client.Bind(new IPEndPoint(activeInterfaces[usedInterfaceIndex].Address, UnityEngine.Random.Range(55000, 60000)));
             client.Send(message, message.Length, lobbyInfo.ip);
 
             IPEndPoint remoteEp = null;
@@ -283,15 +289,15 @@ public class GamemodeMenuController : MenuController
         StartLobbySearcherThread();
     }
 
+    public void ChangeInterfaceButtonFunction()
+    {
+        usedInterfaceIndex++; //no need to clamp, the startlobbysearcherthread does it
+        KillLobbySearcherThread();
+        StartLobbySearcherThread();
+    }
+
     private void SearchForAvailableLobbies()
     {
-        IPAddress localAddress, broadcastAddress;
-        if(!LocalAddressQuerier.GetLocalAddress(out localAddress, out broadcastAddress))
-        {
-            UnityEngine.Debug.LogError("Couldn't find a suitable interface");
-            return;
-        }
-
         using (UdpClient client = new UdpClient())//so that the socket is yeeted automatically
         {
             int port = 42069;
@@ -300,7 +306,7 @@ public class GamemodeMenuController : MenuController
             {
                 try
                 {
-                    localEP = new IPEndPoint(localAddress, port);
+                    localEP = new IPEndPoint(activeInterfaces[usedInterfaceIndex].Address, port);
                     //localEP = new IPEndPoint(IPAddress.Parse("172.23.196.171"), port);
                     client.Client.Bind(localEP);
                     break;
@@ -348,7 +354,7 @@ public class GamemodeMenuController : MenuController
                     byte[] joinMsg = Encoding.ASCII.GetBytes("yo i wanna join&&"+scanCount.ToString());
                     for (int i=42666;i<42671;i++)//only scans the first 5 possible addresses
                         //client.Send(joinMsg, joinMsg.Length, new IPEndPoint(IPAddress.Parse("172.23.217.247"), i));
-                        client.Send(joinMsg, joinMsg.Length, new IPEndPoint(broadcastAddress, i));
+                        client.Send(joinMsg, joinMsg.Length, new IPEndPoint(activeInterfaces[usedInterfaceIndex].BroadcastAddress, i));
                 }
 
                 IPEndPoint remoteEP=null;
@@ -405,6 +411,19 @@ public class GamemodeMenuController : MenuController
             return;
 
         availableLobbies.Clear();
+
+        if(!LocalAddressQuerier.GetLocalAddresses(out activeInterfaces))
+        {
+            UnityEngine.Debug.LogError("No usable network interfaces bozo");
+            text_interface.text = "no interface";
+            return;
+        }
+
+        if (usedInterfaceIndex < 0)
+            usedInterfaceIndex = 0;
+        else if (usedInterfaceIndex >= activeInterfaces.Length)
+            usedInterfaceIndex %= activeInterfaces.Length;
+        text_interface.text = activeInterfaces[usedInterfaceIndex].Name;
 
         //start a lobby searcher thread
         lobbySearcherThread = new Thread(SearchForAvailableLobbies);

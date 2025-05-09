@@ -19,9 +19,13 @@ public class MultiplayerStarter : MonoBehaviour
 
         if (PlayerPrefs.HasKey("isHost"+processId) && PlayerPrefs.GetInt("isHost"+processId) != 0)
         {
+            LocalAddressQuerier.NetworkInterfaceInfo[] interfaces;
             //get local address and port
-            if(LocalAddressQuerier.GetLocalAddress(out localAddress, out broadcastAddress))
+            if(LocalAddressQuerier.GetLocalAddresses(out interfaces))
             {
+                localAddress = interfaces[0].Address;
+                broadcastAddress = interfaces[0].BroadcastAddress;
+
                 localPort = (ushort)Random.Range(50000, 60000);
             }
             else
