@@ -1,0 +1,32 @@
+final1:
+	input:
+		6 distances
+		2 normalized angles
+		speed
+		tilt
+	output:
+		steering - continuous
+		throttle - continuous
+		brake - discrete 6 values
+
+final2:
+	input:
+		6 distances
+		2 normalized angles
+		speed
+		tilt
+	output:
+		steering - continuous
+		throttle - continuous
+		brake - discrete 4 values
+
+final3:
+	input:
+		6 distances
+		2 normalized angles
+		speed
+		tilt
+	output:
+		steering - continuous
+		forwards/backwards - discrete 2 values
+

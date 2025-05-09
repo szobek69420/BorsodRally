@@ -273,11 +273,30 @@ public class MLTrainController : Agent
     public override void OnActionReceived(ActionBuffers actions)
     {
         SteerInput = actions.ContinuousActions[0];
-        AccelInput = actions.ContinuousActions[1];
-        BrakeInput = 0.333f * actions.DiscreteActions[0];
+
+        switch(actions.DiscreteActions[0])
+        {
+            case 0:
+                if (Vector3.Dot(rb.velocity, transform.forward) > 1.0f)//going forwards
+                {
+                    AccelInput = 0.0f;
+                    BrakeInput = 1.0f;
+                }
+                else //going backwards
+                {
+                    AccelInput = -1.0f;
+                    BrakeInput = 0.0f;
+                }
+                break;
+
+            default:
+                AccelInput = 1.0f;
+                BrakeInput = 0.0f;
+                break;
+        }
     }
 
-    public override void Heuristic(in ActionBuffers actionsOut)
+    /*public override void Heuristic(in ActionBuffers actionsOut)
     {
         ActionSegment<float> continuous = actionsOut.ContinuousActions;
         continuous[0] = Input.GetAxisRaw("Horizontal");
@@ -285,7 +304,7 @@ public class MLTrainController : Agent
 
         ActionSegment<int> discrete = actionsOut.DiscreteActions;
         discrete[0] = Input.GetKey(KeyCode.Space) ? 3 : 0;
-    }
+    }*/
 
     public void GoalReached()
     {

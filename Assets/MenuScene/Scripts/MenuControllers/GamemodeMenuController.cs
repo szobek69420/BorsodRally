@@ -300,8 +300,8 @@ public class GamemodeMenuController : MenuController
             {
                 try
                 {
-                    //localEP = new IPEndPoint(localAddress, port);
-                    localEP = new IPEndPoint(IPAddress.Parse("172.23.196.171"), port);
+                    localEP = new IPEndPoint(localAddress, port);
+                    //localEP = new IPEndPoint(IPAddress.Parse("172.23.196.171"), port);
                     client.Client.Bind(localEP);
                     break;
                 }
@@ -340,8 +340,8 @@ public class GamemodeMenuController : MenuController
                     //scan the network
                     byte[] joinMsg = Encoding.ASCII.GetBytes("yo i wanna join&&"+scanCount.ToString());
                     for (int i=42666;i<42671;i++)//only scans the first 5 possible addresses
-                        client.Send(joinMsg, joinMsg.Length, new IPEndPoint(IPAddress.Parse("172.23.217.247"), i));
-                        //client.Send(joinMsg, joinMsg.Length, new IPEndPoint(broadcastAddress, i));
+                        //client.Send(joinMsg, joinMsg.Length, new IPEndPoint(IPAddress.Parse("172.23.217.247"), i));
+                        client.Send(joinMsg, joinMsg.Length, new IPEndPoint(broadcastAddress, i));
                 }
 
                 IPEndPoint remoteEP=null;
