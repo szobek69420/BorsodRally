@@ -47,7 +47,6 @@ public abstract class MLTrainStrategyBase : MonoBehaviour
     public virtual void OnOnTriggerEnter(Collider other) { }
     public virtual void OnEpisodeBegin() { }
     public abstract void CollectObservations(VectorSensor sensor);
-    public abstract void OnActionReceived(ActionBuffers actions, out float steerInput, out float accelInput, out float brakeInput);
 
 
     //functions for sensor values ------------------------------------------------------------------
