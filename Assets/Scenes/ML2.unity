@@ -234,7 +234,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 459604254003218894, guid: 5824c42cc57ba5f4ea1d2f2a081c8059, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 459604254003218895, guid: 5824c42cc57ba5f4ea1d2f2a081c8059, type: 3}
       propertyPath: m_RootOrder
@@ -295,7 +295,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 459604254003218894, guid: 5824c42cc57ba5f4ea1d2f2a081c8059, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 459604254003218895, guid: 5824c42cc57ba5f4ea1d2f2a081c8059, type: 3}
       propertyPath: m_RootOrder
@@ -356,7 +356,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 459604254003218894, guid: 5824c42cc57ba5f4ea1d2f2a081c8059, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 459604254003218895, guid: 5824c42cc57ba5f4ea1d2f2a081c8059, type: 3}
       propertyPath: m_RootOrder
@@ -417,7 +417,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 459604254003218894, guid: 5824c42cc57ba5f4ea1d2f2a081c8059, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 459604254003218895, guid: 5824c42cc57ba5f4ea1d2f2a081c8059, type: 3}
       propertyPath: m_RootOrder
@@ -563,7 +563,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   followee: {fileID: 624778457}
-  offset: {x: 0, y: 5, z: -10}
+  offset: {x: 0, y: 2, z: -7}
   lookAtFollowee: 1
 --- !u!1001 &459604254580355956
 PrefabInstance:
@@ -618,6 +618,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 459604254003218895, guid: 5824c42cc57ba5f4ea1d2f2a081c8059, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6011819368827873465, guid: 5824c42cc57ba5f4ea1d2f2a081c8059, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8752362463528098317, guid: 5824c42cc57ba5f4ea1d2f2a081c8059, type: 3}
+      propertyPath: m_Model
+      value: 
+      objectReference: {fileID: 5022602860645237092, guid: 7b8010ca577b5b44cb75cbcd412a5b35, type: 3}
+    - target: {fileID: 8752362463528098317, guid: 5824c42cc57ba5f4ea1d2f2a081c8059, type: 3}
+      propertyPath: m_BehaviorType
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []

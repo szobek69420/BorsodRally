@@ -169,7 +169,10 @@ public class GameManagerMultiplayer : GameManagerBase
 				instantiatedLobbyElements.Add(instance);
 			}
 
+			if(IsHost)
+                ui.text_hostAddress.text="Hosting on: "+hostAddress.ToString();
             ui.text_waitingForHost.gameObject.SetActive(!IsHost);
+            ui.text_hostAddress.gameObject.SetActive(IsHost);
             ui.button_startGame.gameObject.SetActive(IsHost);
         }
     }
@@ -516,8 +519,7 @@ public class GameManagerMultiplayer : GameManagerBase
 			{
 				try
 				{
-					localEP = new IPEndPoint(IPAddress.Any, port);
-					client.Client.ReceiveTimeout = RECEIVE_TIMEOUT;
+					localEP = new IPEndPoint(hostAddress, port);
 					client.Client.Bind(localEP);
 					break;
 				}
@@ -525,9 +527,15 @@ public class GameManagerMultiplayer : GameManagerBase
 				{
 					port++;
 				}
+
+				try { client.Close(); } catch { }
 			}
 
-			while (true)
+            client.Client.EnableBroadcast = true;
+            client.Client.ReceiveTimeout = RECEIVE_TIMEOUT;
+            UnityEngine.Debug.Log("logus " + client.Client.LocalEndPoint.ToString());
+
+            while (true)
 			{
 				IPEndPoint remoteEP = new IPEndPoint(IPAddress.Any, 0);
 
@@ -536,6 +544,8 @@ public class GameManagerMultiplayer : GameManagerBase
 					byte[] request = client.Receive(ref remoteEP);
 					string requestString = Encoding.ASCII.GetString(request);
 					string[] requestSubstrings = requestString.Split("&&");
+
+					Debug.Log("nigga " + requestString);
 
 					if (requestSubstrings[0].Equals("yo i wanna join")&&requestSubstrings.Length==2)//it is a request from a searcher thread
 					{
