@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using UnityEngine;
 
 public class TerrainManager : MonoBehaviour
@@ -38,14 +39,26 @@ public class TerrainManager : MonoBehaviour
             for (int x = (minX - 100); x < (maxX + 100); x += step)
             {
                 Vector2 coords = new Vector2(x, z);
-                GameObject sectorObj = Instantiate(sectorPrefab, Vector3.zero, Quaternion.identity, transform);
-                TerrainSector sector = sectorObj.GetComponent<TerrainSector>();
-                sector.sectorCoords = coords;
-                sector.GenerateHeightmap(trackWidth, trackPoints, sectorSize, sectorResolution, seed);
+                float distance = 10000;
 
-                instantiatedSectors.Add(sectorObj);
-                sectorObj.transform.SetParent(transform);
-                sectorObj.transform.localPosition = Vector3.zero; //so that multiple terrains can be generated at the same time
+                for (int i = 0; i < trackPoints.Count; i++) 
+                {
+                    Vector2 point1 = new Vector2(trackPoints[i].x, trackPoints[i].z);
+                    Vector2 point2 = new Vector2(coords.x + (step / 2), coords.y + (step / 2));
+                    if (Vector2.Distance(point1, point2) < distance) distance = Vector2.Distance(point1, point2);
+                }
+
+                if (distance < 100)
+                {
+                    GameObject sectorObj = Instantiate(sectorPrefab, Vector3.zero, Quaternion.identity, transform);
+                    TerrainSector sector = sectorObj.GetComponent<TerrainSector>();
+                    sector.sectorCoords = coords;
+                    sector.GenerateHeightmap(trackWidth, trackPoints, sectorSize, sectorResolution, seed);
+
+                    instantiatedSectors.Add(sectorObj);
+                    sectorObj.transform.SetParent(transform);
+                    sectorObj.transform.localPosition = Vector3.zero; //so that multiple terrains can be generated at the same time
+                }
             }
         }
     }

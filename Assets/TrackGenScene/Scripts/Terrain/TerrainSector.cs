@@ -2,11 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class TerrainSector : MonoBehaviour
 {
-    public float heightMultiplier = 10f;
     public Vector2 sectorCoords;
+    public GameObject treePrefab;
+    public GameObject suprisePrefab;
+    private List<GameObject> treeList = new List<GameObject>();
+    [SerializeField] private float treeProbability = 0.01f;
+    [SerializeField] private float supriseProbability = 0.001f;
+    [SerializeField] private float heightMultiplier = 50f;
 
     public void GenerateHeightmap(float trackWidth, List<Vector3> trackPoints, int sectorSize, int resolution, int seed)
     {
@@ -31,22 +37,45 @@ public class TerrainSector : MonoBehaviour
 
                 for (int j = 0; j < trackPoints.Count; j++) 
                 {
-                    dis = Vector3.Distance(point, trackPoints[j]);
+                    Vector3 point2 = trackPoints[j];
+                    point2.y = 0;
+                    dis = Vector3.Distance(point, point2);
 
                     if (distanceFromTrack > dis) { distanceFromTrack = dis; index = j; }
                 }
-                float noise = Mathf.PerlinNoise((worldX * 0.1f) + seed, (worldZ * 0.1f) + seed);
-                float falloff = Mathf.Clamp01(distanceFromTrack / 100f);
-                //float falloff = EvaluateFalloffFromTrack(distanceFromTrack);
-                //Debug.Log(falloff);
-                float height = noise * heightMultiplier * falloff;
 
-                if (distanceFromTrack < trackWidth * 1.5)
+                float noise = Mathf.PerlinNoise((worldX * 0.1f) + seed, (worldZ * 0.1f) + seed);
+                float falloff = EvaluateFalloffFromTrack(distanceFromTrack);
+                point.y = noise * heightMultiplier * falloff;
+
+                if (distanceFromTrack < trackWidth * 3)
                 {
-                    height = trackPoints[index].y - 0.75f;
+                    float targetHeight = trackPoints[index].y - 1f;
+                    float t = Mathf.InverseLerp(trackWidth * 3f, trackWidth / 2, distanceFromTrack);
+
+                    if (distanceFromTrack < trackWidth * 1.1f)
+                    {
+                        point.y = targetHeight;
+                    }
+                    else
+                    {
+                        point.y = Mathf.Lerp(noise * heightMultiplier * falloff, targetHeight, t);
+                        if (Random.Range(0.0f, 1.0f) < treeProbability)
+                        {
+                            GameObject tree = GameObject.Instantiate(treePrefab, transform);
+                            tree.transform.localPosition = point;
+                            treeList.Add(tree);
+                        }
+                        else if(Random.Range(0.0f, 1.0f) < supriseProbability)
+                        {
+                            GameObject surprise = GameObject.Instantiate(suprisePrefab, transform);
+                            surprise.transform.localPosition = point;
+                            treeList.Add(surprise);
+                        }
+                    }
                 }
 
-                vertices[i] = new Vector3(worldX, height, worldZ);
+                vertices[i] = point;
                 uvs[i] = new Vector2((float)x / (resolution - 1), (float)y / (resolution - 1));
             }
         }
@@ -78,11 +107,9 @@ public class TerrainSector : MonoBehaviour
 
     float EvaluateFalloffFromTrack(float distance)
     {
-        float falloffStart = 0f;
-        float falloffEnd = 100f;  
-
-        float t = Mathf.InverseLerp(falloffStart, falloffEnd, distance);
-        return Mathf.Pow(t, 2); // adjust curve sharpness
+        float maxDist = 100f; 
+        float t = Mathf.Clamp01(distance / maxDist);
+        return Mathf.SmoothStep(0.2f, 1f, t);
     }
 }
 

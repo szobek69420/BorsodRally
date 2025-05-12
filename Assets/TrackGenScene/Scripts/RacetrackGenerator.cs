@@ -68,6 +68,7 @@ public class RacetrackGenerator : MonoBehaviour
     public void StartGen()
     {
         controlPointGenerator = new RandomPathGenerator();        //You can change the pathgenerator here
+        terrain = GameObject.Find("TerrainManager").GetComponent<TerrainManager>();
 
         trackPoints.Clear();
         trackPoints = controlPointGenerator.GenerateTrackPoints(seed, trackLength, curviness, elevation);
@@ -101,9 +102,10 @@ public class RacetrackGenerator : MonoBehaviour
             trackWalls[i].AddComponent<MeshCollider>();
         }
 
+        trackWidth += 2;
         CreateRacetrackMesh();                                  //Create the mesh for the track surface    
-
-        CreateMLGuideMesh();
+        trackWidth -= 2;
+        CreateMLGuideMesh();                                    //Create mesh for track walls 
 
         if(generateEnvironment)
             terrain.GenerateTerrain(seed, trackWidth, trackPoints);                   //Terrain generating
@@ -133,7 +135,6 @@ public class RacetrackGenerator : MonoBehaviour
         fnshL.transform.localPosition = trackPoints[trackPoints.Count - FINISH_LINE_INDEX];
         fnshL.size = new Vector3(trackWidth, 10, 2);
         fnshL.isTrigger = true;
-
     }
         
     public void ResetGen()
@@ -366,7 +367,7 @@ public class RacetrackGenerator : MonoBehaviour
         }
     }
 
-    public Transform GetStartLine()
+public Transform GetStartLine()
     {
         return startLine?.transform;
     }
