@@ -18,7 +18,7 @@ public abstract class MLTrainStrategyBase : MonoBehaviour
         new Vector3(Mathf.Sin(Mathf.PI), 0.0f, Mathf.Cos(Mathf.PI)) //backwards should be the last one
     };
     protected static float RAYCAST_MAX_DISTANCE = 150.0f;
-    protected static float RAYCAST_MAX_DISTANCE_BACKWARDS = 10.0f;//short so that most of the time it doesn't interfere
+    protected static float RAYCAST_MAX_DISTANCE_BACKWARDS = 15.0f;//short so that most of the time it doesn't interfere
 
     protected float lastProgress = 0.0f;
     protected float startTime = 0.0f;
@@ -37,13 +37,10 @@ public abstract class MLTrainStrategyBase : MonoBehaviour
         normalizedAngles = CalculateNormalizedAngles();
         tilt= CalculateTilt();
 
-        //check if the car is falling
-        if (Mathf.Abs(controller.rb.velocity.y) > 10.0f)
-        {
-            controller.Dieded(-2000.0f);
-        }
+        OnFixedUpdate();
     }
 
+    protected virtual void OnFixedUpdate() { }
     public virtual void OnOnTriggerEnter(Collider other) { }
     public virtual void OnEpisodeBegin() { }
     public abstract void CollectObservations(VectorSensor sensor);

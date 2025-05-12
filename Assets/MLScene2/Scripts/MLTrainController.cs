@@ -98,11 +98,6 @@ public class MLTrainController : Agent
         discrete[0] = Input.GetKey(KeyCode.Space) ? 3 : 0;
     }*/
 
-    public void GoalReached()
-    {
-        EndEpisode();
-    }
-
     public void Dieded(float reward)
     {
         AddReward(reward);

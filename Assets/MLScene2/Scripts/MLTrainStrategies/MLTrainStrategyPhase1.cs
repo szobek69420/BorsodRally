@@ -7,6 +7,15 @@ using UnityEngine.EventSystems;
 
 public class MLTrainStrategyPhase1 : MLTrainStrategyBase
 {
+    protected override void OnFixedUpdate()
+    {
+        //check if the car is falling
+        if (Mathf.Abs(controller.rb.velocity.y) > 10.0f)
+        {
+            controller.Dieded(-2000.0f);
+        }
+    }
+
     public override void OnEpisodeBegin()
     {
         //reset the track
@@ -78,5 +87,7 @@ public class MLTrainStrategyPhase1 : MLTrainStrategyBase
     {
         if (other.gameObject.layer == 7)
             controller.Dieded(-2000.0f);
+        else if (other.gameObject.CompareTag("FinishLine"))
+            controller.Dieded(2000.0f);
     }
 }
