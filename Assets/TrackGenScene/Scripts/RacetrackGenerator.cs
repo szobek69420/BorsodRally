@@ -367,7 +367,7 @@ public class RacetrackGenerator : MonoBehaviour
         }
     }
 
-    public Transform GetStartLine()
+public Transform GetStartLine()
     {
         return startLine?.transform;
     }
