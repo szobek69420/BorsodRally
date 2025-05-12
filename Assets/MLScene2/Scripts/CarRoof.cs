@@ -10,6 +10,6 @@ public class CarRoof : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.layer == 6)//track
-            agent.Dieded();
+            agent.Dieded(-2000.0f);
     }
 }

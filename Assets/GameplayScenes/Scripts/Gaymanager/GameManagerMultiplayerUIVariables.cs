@@ -12,6 +12,7 @@ public class GameManagerMultiplayerUIVariables : MonoBehaviour
     public Canvas canvas_lobby;
     public RectTransform lobbyElement_origin;
     public TMP_Text text_waitingForHost;
+    public TMP_Text text_hostAddress;
     public Button button_startGame;
 
     //countdown things

@@ -27,10 +27,6 @@ public class MainMenuController : MenuController
         inputField_name.onSubmit.AddListener((string sugus) => { NameInputFieldOnSubmit(); });
 
         Show();
-
-        IPAddress local, broadcast;
-        LocalAddressQuerier.GetLocalAddress(out local, out broadcast);
-        Debug.Log(local.ToString()+" "+broadcast.ToString());
     }
 
     public override void Show()

@@ -6,9 +6,25 @@ using UnityEngine;
 
 public class LocalAddressQuerier
 {
-    //returns true if the query was gg-ful
-    public static bool GetLocalAddress(out IPAddress localAddress, out IPAddress broadcastAddress)
+    public class NetworkInterfaceInfo
     {
+        public string Name { get; private set; } = "default";
+        public IPAddress Address { get; private set; } = IPAddress.None;
+        public IPAddress BroadcastAddress { get; private set; } = IPAddress.None;
+
+        public NetworkInterfaceInfo(string name, IPAddress address, IPAddress broadcastAddress)
+        {
+            Name = name;
+            Address = address;
+            BroadcastAddress = broadcastAddress;
+        }
+    }
+
+    //returns true if the query was gg-ful
+    public static bool GetLocalAddresses(out NetworkInterfaceInfo[] networkInterfaces)
+    {
+        List<NetworkInterfaceInfo> infos = new List<NetworkInterfaceInfo>();
+
         NetworkInterface[] interfaces = NetworkInterface.GetAllNetworkInterfaces();
         foreach (NetworkInterface ni in interfaces)
         {
@@ -16,6 +32,10 @@ public class LocalAddressQuerier
                 continue;
 
             IPInterfaceProperties properties = ni.GetIPProperties();
+
+            IPAddress localAddress = null;
+            IPAddress broadcastAddress = null;
+
             foreach (UnicastIPAddressInformation unicastAddress in properties.UnicastAddresses)
             {
                 if (unicastAddress.IPv4Mask == null)//only ipv4 addresses
@@ -33,12 +53,23 @@ public class LocalAddressQuerier
 
                 localAddress = new IPAddress(ipBytes);
                 broadcastAddress = new IPAddress(broadcastBytes);
-                return true;
             }
+
+            if (localAddress == null || broadcastAddress == null)
+                continue;
+
+            infos.Add(new NetworkInterfaceInfo(ni.Name, localAddress, broadcastAddress));
         }
 
-        localAddress = null;
-        broadcastAddress = null;
-        return false;
+        if(infos.Count==0)
+        {
+            networkInterfaces = null;
+            return false;
+        }
+        else
+        {
+            networkInterfaces = infos.ToArray();
+            return true;
+        }
     }
 }

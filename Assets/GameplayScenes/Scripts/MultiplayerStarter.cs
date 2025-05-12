@@ -10,7 +10,6 @@ using UnityEngine;
 public class MultiplayerStarter : MonoBehaviour
 {
     public IPAddress localAddress = null;
-    public IPAddress broadcastAddress = null;
     public ushort localPort = 0;
 
     private void Start()
@@ -19,15 +18,16 @@ public class MultiplayerStarter : MonoBehaviour
 
         if (PlayerPrefs.HasKey("isHost"+processId) && PlayerPrefs.GetInt("isHost"+processId) != 0)
         {
+            LocalAddressQuerier.NetworkInterfaceInfo[] interfaces;
             //get local address and port
-            if(LocalAddressQuerier.GetLocalAddress(out localAddress, out broadcastAddress))
+            if(PlayerPrefs.HasKey("hostAddress"+processId))
             {
+                localAddress = IPAddress.Parse(PlayerPrefs.GetString("hostAddress" + processId));
                 localPort = (ushort)Random.Range(50000, 60000);
             }
             else
             {
                 localAddress = IPAddress.Any;
-                broadcastAddress = IPAddress.Broadcast;
                 localPort = 0;
             }
 
