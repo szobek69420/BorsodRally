@@ -14,6 +14,7 @@ public class RandomPathGenerator : PathGeneratorBase
 
         float currentRotation = 0f;    
         float currentElevation = 0f;
+
         float rotFromStart = 0f;
 
         trackPoints.Add(new Vector3(0f, 0f, 0f));                               
@@ -49,7 +50,7 @@ public class RandomPathGenerator : PathGeneratorBase
 
             trackPoints.Add((trackPoints[i - 1] + nextDir));
 
-            for (int j = 0; j < trackPoints.Count - 2; j++)
+            for (int j = 1; j < trackPoints.Count - 4; j++)
             {
                 Vector3 point1 = trackPoints[i];
                 Vector3 point2 = trackPoints[j];
@@ -61,24 +62,39 @@ public class RandomPathGenerator : PathGeneratorBase
 
                 int counter = 0;
 
-                while (Vector3.Distance(point1, point2) < (pointDistance * 1.2f))
-                {
-                    if (rotFromStart < 0) currentRotation = Mathf.Abs(currentRotation);
-                    else currentRotation = -1 * Mathf.Abs(currentRotation);
+                bool trDeg = rotFromStart > 0;
+                bool dirDeg = Vector3.SignedAngle(trackPoints[i] - trackPoints[i - 1], trackPoints[j] - trackPoints[i - 1], Vector3.down) > 0;
 
-                    nextDir = Quaternion.Euler(0, currentRotation, 0) * nextDir;
-                    Vector3 newPoint= trackPoints[i - 1] + nextDir;
+                if (trDeg && dirDeg) currentRotation = -1 * Mathf.Abs(currentRotation);
+                else if (trDeg && !dirDeg) currentRotation = -1 * Mathf.Abs(currentRotation);
+                else if (!trDeg && dirDeg) currentRotation = Mathf.Abs(currentRotation);
+                else if (!trDeg && !dirDeg) currentRotation = Mathf.Abs(currentRotation);
+
+                while (Vector3.Distance(point1, point2) < (pointDistance * 2f))
+                {
+                    Debug.Log(Vector3.SignedAngle(trackPoints[i] - trackPoints[i - 1], trackPoints[j] - trackPoints[i - 1], Vector3.down));
+                    Debug.Log(trackPoints[i] - trackPoints[i - 1]);
+                    Debug.Log(trackPoints[j] - trackPoints[i - 1]);
+                    Debug.DrawLine(trackPoints[i], trackPoints[i - 1], Color.red, 10000);
+                    Debug.DrawLine(trackPoints[j], trackPoints[i - 1], Color.red, 10000);
+                    Debug.Log(rotFromStart);    
+                    Debug.Log(currentRotation);
+
+                    nextDir = Quaternion.Euler(0f, -currentRotation, 0f) * nextDir;
+
+                    Vector3 newPoint = trackPoints[i - 1] + nextDir;
                     newPoint.y = y;
                     trackPoints[i] = newPoint;
                     point1 = trackPoints[i];
                     point1.y = 0;
 
-                    if (counter > 100) break;
+                    if (counter > 200) break;
                     counter++;
                 }
             }
-            rotFromStart += Vector3.SignedAngle(prevDir, nextDir, Vector3.up);
-            //Debug.Log(rotFromStart);
+            rotFromStart += Vector3.SignedAngle(prevDir, nextDir, Vector3.down);
+            if (rotFromStart > 360) rotFromStart -= 360;
+            if (rotFromStart < -360) rotFromStart += 360;
         }
         return trackPoints;
     }

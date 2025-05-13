@@ -324,6 +324,19 @@ public class RacetrackGenerator : MonoBehaviour
                     rt = (trackPoints[step] - left * trackWidth * (1 - shift));
                 }
 
+                if (j > 0)
+                {
+                    Vector2 v1 = new Vector2(trackPoints[step - 1].x, trackPoints[step - 1].z);
+                    Vector2 v2 = new Vector2(trackPoints[step].x, trackPoints[step].z);
+                    Vector2 v3 = new Vector2(vertices[vertices.Count - 4].x, vertices[vertices.Count - 4].z);
+                    Vector2 v4 = new Vector2(vertices[vertices.Count - 3].x, vertices[vertices.Count - 3].z);
+                    Vector2 v5 = new Vector2(lt.x, lt.z);
+                    Vector2 v6 = new Vector2(rt.x, rt.z);
+
+                    if (DoIntersect(v1, v3, v2, v5)) lt = vertices[vertices.Count - 4];
+                    if (DoIntersect(v1, v4, v2, v6)) rt = vertices[vertices.Count - 3];
+                }
+
                 lt.y += wallHeight;
                 rt.y += wallHeight;
 
@@ -367,7 +380,45 @@ public class RacetrackGenerator : MonoBehaviour
         }
     }
 
-public Transform GetStartLine()
+    public static bool DoIntersect(Vector2 p1, Vector2 q1, Vector2 p2, Vector2 q2)
+    {
+        int o1 = Orientation(p1, q1, p2);
+        int o2 = Orientation(p1, q1, q2);
+        int o3 = Orientation(p2, q2, p1);
+        int o4 = Orientation(p2, q2, q1);
+
+        if (o1 != o2 && o3 != o4)
+        {
+            return true;
+        }
+
+        if (o1 == 0 && OnSegment(p1, p2, q1)) return true;
+
+        if (o2 == 0 && OnSegment(p1, q2, q1)) return true;
+
+        if (o3 == 0 && OnSegment(p2, p1, q2)) return true;
+
+        if (o4 == 0 && OnSegment(p2, q1, q2)) return true;
+
+        return false;
+    }
+
+    private static int Orientation(Vector2 p, Vector2 q, Vector2 r)
+    {
+        float val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
+
+        if (Mathf.Abs(val) < 1e-9f) return 0;
+
+        return (val > 0) ? 1 : 2;
+    }
+
+    private static bool OnSegment(Vector2 p, Vector2 q, Vector2 r)
+    {
+        return (q.x <= Mathf.Max(p.x, r.x) && q.x >= Mathf.Min(p.x, r.x) &&
+                q.y <= Mathf.Max(p.y, r.y) && q.y >= Mathf.Min(p.y, r.y));
+    }
+
+    public Transform GetStartLine()
     {
         return startLine?.transform;
     }
