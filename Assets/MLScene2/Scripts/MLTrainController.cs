@@ -7,6 +7,7 @@ using Unity.MLAgents;
 using Unity.Barracuda;
 using System;
 using Unity.VisualScripting;
+using UnityEngine.EventSystems;
 
 public class MLTrainController : Agent
 {
@@ -63,13 +64,28 @@ public class MLTrainController : Agent
 
     public override void OnActionReceived(ActionBuffers actions)
     {
-        float steer, accel, brake;
+        SteerInput = actions.ContinuousActions[0];
 
-        strategy.OnActionReceived(actions, out steer, out accel, out brake);
+        switch (actions.DiscreteActions[0])
+        {
+            case 0:
+                if (Vector3.Dot(rb.velocity, transform.forward) > 1.0f)//going forwards
+                {
+                    AccelInput = 0.0f;
+                    BrakeInput = 1.0f;
+                }
+                else //going backwards
+                {
+                    AccelInput = -1.0f;
+                    BrakeInput = 0.0f;
+                }
+                break;
 
-        SteerInput = steer;
-        AccelInput = accel;
-        BrakeInput = brake;
+            default:
+                AccelInput = 1.0f;
+                BrakeInput = 0.0f;
+                break;
+        }
     }
 
     /*public override void Heuristic(in ActionBuffers actionsOut)
@@ -81,11 +97,6 @@ public class MLTrainController : Agent
         ActionSegment<int> discrete = actionsOut.DiscreteActions;
         discrete[0] = Input.GetKey(KeyCode.Space) ? 3 : 0;
     }*/
-
-    public void GoalReached()
-    {
-        EndEpisode();
-    }
 
     public void Dieded(float reward)
     {

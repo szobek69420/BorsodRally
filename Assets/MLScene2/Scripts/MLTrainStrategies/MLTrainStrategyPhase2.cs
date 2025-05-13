@@ -6,6 +6,15 @@ using UnityEngine;
 
 public class MLTrainStrategyPhase2 : MLTrainStrategyBase
 {
+    protected override void OnFixedUpdate()
+    {
+        //check if the car is falling
+        if (Mathf.Abs(controller.rb.velocity.y) > 10.0f)
+        {
+            controller.Dieded(-2000.0f);
+        }
+    }
+
     public override void OnEpisodeBegin()
     {
         //reset the track
@@ -70,35 +79,11 @@ public class MLTrainStrategyPhase2 : MLTrainStrategyBase
             controller.AddReward(-50.0f);
     }
 
-    public override void OnActionReceived(ActionBuffers actions, out float steerInput, out float accelInput, out float brakeInput)
-    {
-        steerInput = actions.ContinuousActions[0];
-
-        switch (actions.DiscreteActions[0])
-        {
-            case 0:
-                if (Vector3.Dot(controller.rb.velocity, transform.forward) > 1.0f)//going forwards
-                {
-                    accelInput = 0.0f;
-                    brakeInput = 1.0f;
-                }
-                else //going backwards
-                {
-                    accelInput = -1.0f;
-                    brakeInput = 0.0f;
-                }
-                break;
-
-            default:
-                accelInput = 1.0f;
-                brakeInput = 0.0f;
-                break;
-        }
-    }
-
     public override void OnOnTriggerEnter(Collider other)
     {
         if (other.gameObject.layer == 7)
             controller.Dieded(0.0f);
+        else if (other.gameObject.CompareTag("FinishLine"))
+            controller.Dieded(2000.0f);
     }
 }

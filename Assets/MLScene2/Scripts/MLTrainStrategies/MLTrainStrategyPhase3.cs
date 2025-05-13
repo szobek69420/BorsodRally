@@ -7,6 +7,15 @@ using UnityEngine;
 
 public class MLTrainStrategyPhase3 : MLTrainStrategyBase
 {
+    protected override void OnFixedUpdate()
+    {
+        //check if the car is falling
+        if (Mathf.Abs(controller.rb.velocity.y) > 10.0f)
+        {
+            controller.Dieded(-2000.0f);
+        }
+    }
+
     public override void OnEpisodeBegin()
     {
         //reset the track
@@ -38,12 +47,7 @@ public class MLTrainStrategyPhase3 : MLTrainStrategyBase
 
         //wall distances
         for (int i = 0; i < distances.Length; i++)
-        {
-            if (i == distances.Length - 1)//the backwards direction should be ignored
-                sensor.AddObservation(1.0f);//1, not 0 because that would be a sudden change when starting to receive the actual values in phase2
-            else
-                sensor.AddObservation(distances[i]);
-        }
+            sensor.AddObservation(distances[i]);
 
         //normalized angles
         sensor.AddObservation(normalizedAngles[0]);
@@ -64,39 +68,16 @@ public class MLTrainStrategyPhase3 : MLTrainStrategyBase
             lastProgress = currentProgress;
         }
 
-        //reward being fast
-        controller.AddReward(Mathf.Pow(0.05f * speed, 2.0f));
-    }
-
-    public override void OnActionReceived(ActionBuffers actions, out float steerInput, out float accelInput, out float brakeInput)
-    {
-        steerInput = actions.ContinuousActions[0];
-
-        switch (actions.DiscreteActions[0])
-        {
-            case 0:
-                if (Vector3.Dot(controller.rb.velocity, transform.forward) > 1.0f)//going forwards
-                {
-                    accelInput = 0.0f;
-                    brakeInput = 1.0f;
-                }
-                else //going backwards
-                {
-                    accelInput = -1.0f;
-                    brakeInput = 0.0f;
-                }
-                break;
-
-            default:
-                accelInput = 1.0f;
-                brakeInput = 0.0f;
-                break;
-        }
+        //punish being slow and reward being speedy
+        if (Mathf.Abs(Vector3.Dot(transform.forward, controller.rb.velocity)) < 2.0f)
+            controller.AddReward(Mathf.Abs(Vector3.Dot(transform.forward, controller.rb.velocity))-40.0f);
     }
 
     public override void OnOnTriggerEnter(Collider other)
     {
         if (other.gameObject.layer == 7)
-            controller.AddReward(-500.0f);
+            controller.Dieded(0.0f);
+        else if (other.gameObject.CompareTag("FinishLine"))
+            controller.Dieded(2000.0f);
     }
 }
