@@ -27,6 +27,7 @@ public class GamemodeMenuController : MenuController
     [SerializeField] private Canvas canvas_multiPlayerParent;
     [SerializeField] private Canvas canvas_multiPlayerHost;
     [SerializeField] private Canvas canvas_multiPlayerJoin;
+    [SerializeField] private Canvas canvas_multiPlayerDirectJoin;
 
     //gamemode things
     [SerializeField] private Button button_singleplayer;
@@ -63,6 +64,14 @@ public class GamemodeMenuController : MenuController
     [SerializeField] private GameObject lobbyInfoPrefabs;
     private List<GameObject> instantiatedLobbyInfos = new List<GameObject>();
 
+    [SerializeField] private Button button_multiplayerDirectJoin;
+    [SerializeField] private TMP_InputField inputField_joinAddress;
+    [SerializeField] private Button button_launchDirectJoin;
+
+    private object directJoinSynchronizer=new object();
+    private LobbyTrackInfo directJoinTrackInfo = null;
+
+    //multiplayer interface selectors
     [SerializeField] private Button button_chooseInterfaceJoin;
     [SerializeField] private TMP_Text text_interfaceJoin;
     [SerializeField] private Button button_chooseInterfaceHost;
@@ -82,12 +91,16 @@ public class GamemodeMenuController : MenuController
 
         button_multiplayerHost.onClick.AddListener(() => { HostButtonFunction(); PlayClickSound(); });
         button_multiplayerJoin.onClick.AddListener(() => { JoinButtonFunction(); PlayClickSound(); });
+        button_multiplayerDirectJoin.onClick.AddListener(() => { DirectJoinButtonFunction(); PlayClickSound(); });
 
         button_launchSingle.onClick.AddListener(() => { PlayClickSound(); StartSingleplayerButtonFunction(); });
         button_launchMultiHost.onClick.AddListener(() => { PlayClickSound(); StartMultiplayerHostButtonFunction(); });
+        button_launchDirectJoin.onClick.AddListener(() => { PlayClickSound(); StartDirectJoinButtonFunction(); });
 
         button_chooseInterfaceJoin.onClick.AddListener(() => { PlayClickSound(); ChangeInterfaceButtonJoinFunction(); });
         button_chooseInterfaceHost.onClick.AddListener(() => { PlayClickSound(); ChangeInterfaceButtonHostFunction(); });
+
+        inputField_joinAddress.onValueChanged.AddListener((string sus) => { JoinAddressInputFieldOnValueChangedFunction(); });
 
         StartCoroutine(LobbyInfoUpdater());
     }
@@ -242,8 +255,6 @@ public class GamemodeMenuController : MenuController
 
     public void StartMultiplayerJoinButtonFunction(AvailableLobby lobbyInfo)
     {
-        KillLobbySearcherThread();
-
         //query the track parameters from the host
         LobbyTrackInfo lti = null;
         try
@@ -252,6 +263,7 @@ public class GamemodeMenuController : MenuController
 
             UdpClient client = new UdpClient();
             client.Client.Bind(new IPEndPoint(activeInterfaces[usedInterfaceIndex].Address, UnityEngine.Random.Range(55000, 60000)));
+            client.Client.ReceiveTimeout = 500;
             client.Send(message, message.Length, lobbyInfo.ip);
 
             IPEndPoint remoteEp = null;
@@ -263,6 +275,8 @@ public class GamemodeMenuController : MenuController
         {
             return;
         }
+
+        KillLobbySearcherThread();
 
         //set the track parameters for the game scene
         int processId = Process.GetCurrentProcess().Id;
@@ -294,23 +308,36 @@ public class GamemodeMenuController : MenuController
         }
 
         canvas_multiPlayerJoin.enabled = false;
+        canvas_multiPlayerDirectJoin.enabled = false;
         canvas_multiPlayerHost.enabled = true;
     }
 
     public void JoinButtonFunction()
     {
         canvas_multiPlayerHost.enabled = false;
+        canvas_multiPlayerDirectJoin.enabled = false;
         canvas_multiPlayerJoin.enabled = true;
 
         StartLobbySearcherThread();
     }
 
-    public void ChangeInterfaceButtonJoinFunction()
+    public void DirectJoinButtonFunction()
     {
-        usedInterfaceIndex++; //no need to clamp, the startlobbysearcherthread does it
+        //kill lobby searcher thread just in case
         KillLobbySearcherThread();
-        StartLobbySearcherThread();
+
+        //query active interfaces
+        LocalAddressQuerier.GetLocalAddresses(out activeInterfaces);
+
+        //trigger recolouring
+        inputField_joinAddress.text = "";
+        inputField_joinAddress.text = "0.0.0.0";
+
+        canvas_multiPlayerHost.enabled = false;
+        canvas_multiPlayerJoin.enabled = false;
+        canvas_multiPlayerDirectJoin.enabled = true;
     }
+
 
     public void ChangeInterfaceButtonHostFunction()
     {
@@ -324,6 +351,143 @@ public class GamemodeMenuController : MenuController
         text_interfaceHost.text = activeInterfaces[usedInterfaceIndex].Name;
     }
 
+    public void StartDirectJoinButtonFunction()
+    {
+        //check if the given address is valid
+        IPAddress address;
+        LocalAddressQuerier.NetworkInterfaceInfo chosenInterface = null;
+
+        if (!IPAddress.TryParse(inputField_joinAddress.text, out address))
+            return;
+
+        if (activeInterfaces == null || activeInterfaces.Length == 0)
+            return;
+        foreach (var interspar in activeInterfaces)
+        {
+            if (!interspar.IsAddressOnSameNetwork(address))
+                continue;
+
+            chosenInterface = interspar;
+            break;
+        }
+        if (chosenInterface == null)
+            return;
+
+        //create the join query threads (one thread per possible host port)
+        directJoinTrackInfo = null;
+        List<Thread> threads = new List<Thread>();
+
+        for (int i = 42666; i < 42671; i++)
+        {
+            Thread thread = new Thread(new ParameterizedThreadStart(this.StartDirectJoinButtonFunctionThreadFunc));
+            thread.Start((new IPEndPoint[2] {new IPEndPoint(chosenInterface.Address, 0),new IPEndPoint(address, i)}) as object);
+            threads.Add(thread);
+        }
+
+        foreach(var thread in threads)
+            thread.Join();
+
+        //check if there was a great success
+        if (directJoinTrackInfo == null)
+        {
+            return;
+        }
+
+        //set the track parameters for the game scene
+        int processId = Process.GetCurrentProcess().Id;
+        PlayerPrefs.SetInt("length" + processId, directJoinTrackInfo.length);
+        PlayerPrefs.SetInt("seed" + processId, directJoinTrackInfo.seed);
+        PlayerPrefs.SetFloat("curviness" + processId, directJoinTrackInfo.curviness);
+        PlayerPrefs.SetInt("difficulty" + processId, directJoinTrackInfo.difficulty);
+        PlayerPrefs.SetInt("isHost" + processId, 0);
+        PlayerPrefs.SetString("hostAddress" + processId, directJoinTrackInfo.ip.Address.ToString());
+        PlayerPrefs.SetInt("hostPort" + processId, directJoinTrackInfo.ip.Port);
+
+        PlayerPrefs.SetString("name" + processId, PlayerPrefs.GetString("name"));
+
+        //load scene
+        SceneManager.LoadScene("Multiplayer");
+    }
+
+    private void StartDirectJoinButtonFunctionThreadFunc(object param)
+    {
+        IPEndPoint[] addresses=param as IPEndPoint[];
+        IPAddress clientAddress = addresses[0].Address;
+        IPEndPoint hostAddress = addresses[1];
+
+        LobbyTrackInfo lti = null;
+        
+        using (UdpClient udpClient = new UdpClient())
+        {
+            //try to bind to a port
+            int triesLeft = 10;
+            System.Random random = new System.Random();
+            while (true)
+            {
+                triesLeft--;
+                try { udpClient.Client.Bind(new IPEndPoint(clientAddress, random.Next(50000, 60000))); }
+                catch (Exception e) { if (triesLeft <= 0) return; continue; }
+                break;
+            }
+
+            //send and receive message
+            try
+            {
+                byte[] messageBytes = Encoding.ASCII.GetBytes("i am approaching");
+                udpClient.Client.ReceiveTimeout = 500;
+                udpClient.Send(messageBytes, messageBytes.Length, hostAddress);
+
+                IPEndPoint remoteEp = null;
+                byte[] response = udpClient.Receive(ref remoteEp);
+                lti = LobbyTrackInfo.ParseString(Encoding.ASCII.GetString(response));
+            }
+            catch (Exception e)
+            {
+                return;
+            }
+
+            //packet received
+            if (lti == null)
+                return;
+
+            lock(directJoinSynchronizer)
+            {
+                directJoinTrackInfo = lti;
+            }
+        }
+    }
+
+    public void ChangeInterfaceButtonJoinFunction()
+    {
+        usedInterfaceIndex++; //no need to clamp, the startlobbysearcherthread does it
+        KillLobbySearcherThread();
+        StartLobbySearcherThread();
+    }
+
+    private void JoinAddressInputFieldOnValueChangedFunction()
+    {
+        bool validAddress = false;
+        IPAddress address;
+        
+        //check if it is a valid address
+        if (!IPAddress.TryParse(inputField_joinAddress.text, out address))
+            goto SetJoinAddressInputFieldColour;
+        
+        //check if the address is on the same network as us
+        if(activeInterfaces==null || activeInterfaces.Length == 0)
+            goto SetJoinAddressInputFieldColour;
+
+        foreach(var interspar in  activeInterfaces)
+            validAddress = validAddress||interspar.IsAddressOnSameNetwork(address);
+
+        SetJoinAddressInputFieldColour:
+        if (validAddress)
+            inputField_joinAddress.textComponent.color = Color.white;
+        else
+            inputField_joinAddress.textComponent.color = Color.red;
+    }
+
+    //lobby searcher thread things------------------------------------------
     private void SearchForAvailableLobbies()
     {
         using (UdpClient client = new UdpClient())//so that the socket is yeeted automatically

@@ -545,8 +545,6 @@ public class GameManagerMultiplayer : GameManagerBase
 					string requestString = Encoding.ASCII.GetString(request);
 					string[] requestSubstrings = requestString.Split("&&");
 
-					Debug.Log("nigga " + requestString);
-
 					if (requestSubstrings[0].Equals("yo i wanna join")&&requestSubstrings.Length==2)//it is a request from a searcher thread
 					{
 						int requestScanCount = System.Convert.ToInt32(requestSubstrings[1]);
@@ -558,7 +556,7 @@ public class GameManagerMultiplayer : GameManagerBase
 						byte[] reply = Encoding.ASCII.GetBytes(replyData.ToString());
 						client.Send(reply, reply.Length, remoteEP);
 					}
-					else if(requestString.Equals("i am approaching"))
+					else if(requestString.Equals("i am approaching")&&joinedPlayers.Count<4)
 					{
 						LobbyTrackInfo lti = track.SerializeParameters();
 						lti.ip = new IPEndPoint(hostAddress, hostPort);
