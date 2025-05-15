@@ -37,6 +37,7 @@ public class MultiplayerStarter : MonoBehaviour
 
             //zsa
             this.gameObject.GetComponent<NetworkManager>().StartHost();
+            this.gameObject.GetComponent<GameManagerMultiplayerSpawner>().OnServerStarted();
         }
         else
         {

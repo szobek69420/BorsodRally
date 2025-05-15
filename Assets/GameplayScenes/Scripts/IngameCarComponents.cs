@@ -66,9 +66,6 @@ public class IngameCarComponents : MonoBehaviour
             }
         }
 
-        if (o2.networkTime > time)
-            Debug.Log("roblox");
-
         //remove unnecessary orientations
         for(int j=0;j< interpolationBuffer.Count-2;j++)
         {
@@ -103,6 +100,39 @@ public class IngameCarComponents : MonoBehaviour
         wheelFr.localPosition = wheelFrPos; wheelFr.localRotation = wheelFrRot;
         wheelRl.localPosition = wheelRlPos; wheelRl.localRotation = wheelRlRot;
         wheelRr.localPosition = wheelRrPos; wheelRr.localRotation = wheelRrRot;
+    }
+
+    public Vector3 InterpolateVelocity(float serverTime, float delay)
+    {
+        float time = serverTime - delay;
+
+        //get the car orientations
+        if (interpolationBuffer.Count < 2)
+            return Vector3.zero;
+        for (int j = 0; j < interpolationBuffer.Count; j++)
+        {
+            if (j == interpolationBuffer.Count - 2 ||
+                (interpolationBuffer[j].networkTime <= time && interpolationBuffer[j + 1].networkTime > time))
+            {
+                float i= (time- interpolationBuffer[j].networkTime)/(interpolationBuffer[j+1].networkTime-interpolationBuffer[j].networkTime);
+
+                return Vector3.Lerp(
+                    new Vector3(
+                        interpolationBuffer[j].velocityX,
+                        interpolationBuffer[j].velocityY,
+                        interpolationBuffer[j].velocityZ
+                        ),
+                    new Vector3(
+                        interpolationBuffer[j+1].velocityX,
+                        interpolationBuffer[j+1].velocityY,
+                        interpolationBuffer[j+1].velocityZ
+                        ),
+                    i
+                    );
+            }
+        }
+
+        return Vector3.zero;
     }
 
     //adds the car orientation to the interpolation buffer

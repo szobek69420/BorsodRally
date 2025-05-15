@@ -249,9 +249,9 @@ public class GameManagerMultiplayer : GameManagerBase
 	protected override void ReturnToMenu()
 	{
 		NetworkManager networkManager = GameObject.Find("NetworkManager").GetComponent<NetworkManager>();
-        networkManager.DisconnectClient(OwnerClientId);
-        if (IsHost)
-            networkManager.Shutdown();
+        networkManager.Shutdown();
+		Destroy(networkManager.gameObject);
+		Singleton = null;
 
         SceneManager.LoadScene("MenuScene");
 	}
@@ -430,10 +430,6 @@ public class GameManagerMultiplayer : GameManagerBase
 
 					//set orientation
 					players[j].GetComponent<IngameCarComponents>().AddOrientationToBuffer(cos[i]);
-
-					RacerPlayerMultiplayerClient rpmc = null;
-					if (players[j].TryGetComponent<RacerPlayerMultiplayerClient>(out rpmc))
-						rpmc.Velocity = new Vector3(cos[i].velocityX, cos[i].velocityY, cos[i].velocityZ);
 				}
 			}
 
