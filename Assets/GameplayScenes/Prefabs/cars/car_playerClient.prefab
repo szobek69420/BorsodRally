@@ -44,7 +44,6 @@ GameObject:
   - component: {fileID: 6945146456193871513}
   - component: {fileID: 6514388723873646335}
   - component: {fileID: -1177483181900307077}
-  - component: {fileID: -6630514033326906941}
   m_Layer: 0
   m_Name: car_playerClient
   m_TagString: Untagged
@@ -102,6 +101,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   carComponents: {fileID: 6945146456193871513}
+  shouldAutomaticallyUnflip: 0
   cameraOffset: {x: 0, y: 2, z: -5}
 --- !u!114 &-1177483181900307077
 MonoBehaviour:
@@ -116,18 +116,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: 69
---- !u!114 &-6630514033326906941
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2387794842492819682}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 503d7994ee14fe04b91bba432e8cdc53, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &2488378262331758373
 GameObject:
   m_ObjectHideFlags: 0
