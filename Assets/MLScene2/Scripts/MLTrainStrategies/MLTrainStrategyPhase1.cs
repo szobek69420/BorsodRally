@@ -69,6 +69,9 @@ public class MLTrainStrategyPhase1 : MLTrainStrategyBase
         //tilt is 0
         sensor.AddObservation(0.0f);
 
+        //distance from next car is 1
+        sensor.AddObservation(1.0f);
+
         //reward the speed and punish standing in one place
         controller.AddReward(0.5f * Vector3.Dot(controller.rb.velocity, transform.forward) - 10.0f);
         if (speed < 3.0f)

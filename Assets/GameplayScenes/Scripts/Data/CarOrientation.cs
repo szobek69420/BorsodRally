@@ -30,6 +30,9 @@ public struct CarOrientation : INetworkSerializable
     public float velocityX, velocityY, velocityZ;
     public float angularVelocityX, angularVelocityY, angularVelocityZ;
 
+    //network time
+    public float networkTime;
+
     public CarOrientation(int placeHolder)//use this if the car is not in use
     {
         id = CAR_NOT_USED;
@@ -51,9 +54,11 @@ public struct CarOrientation : INetworkSerializable
 
         velocityX = 0; velocityY = 0; velocityZ = 0;
         angularVelocityX = 0; angularVelocityY = 0; angularVelocityZ = 0;
+
+        networkTime = 0;
     }
 
-    public CarOrientation(int ownerId, Transform car, Transform wheelFl, Transform wheelFr, Transform wheelRl, Transform wheelRr, Vector3 velocity, Vector3 angularVelocity)
+    public CarOrientation(int ownerId, Transform car, Transform wheelFl, Transform wheelFr, Transform wheelRl, Transform wheelRr, Vector3 velocity, Vector3 angularVelocity, float networkTime)
     {
         id = ownerId;
 
@@ -110,6 +115,9 @@ public struct CarOrientation : INetworkSerializable
         angularVelocityX = angularVelocity.x;
         angularVelocityY = angularVelocity.y;
         angularVelocityZ = angularVelocity.z;
+
+        //network time
+        this.networkTime = networkTime;
     }
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -160,5 +168,7 @@ public struct CarOrientation : INetworkSerializable
         serializer.SerializeValue(ref angularVelocityX);
         serializer.SerializeValue(ref angularVelocityY);
         serializer.SerializeValue(ref angularVelocityZ);
+
+        serializer.SerializeValue(ref networkTime);
     }
 }

@@ -20,6 +20,7 @@ public class GameManagerMultiplayer : GameManagerBase
     [SerializeField] private GameObject carPrefab_playerClient;
     [SerializeField] private GameObject carPrefab_opponentClient;
 
+	private NetworkManager networkManager = null;
     private GameManagerMultiplayerUIVariables ui = null;
 
 	string ownerName = null;
@@ -55,8 +56,11 @@ public class GameManagerMultiplayer : GameManagerBase
 		else
             GetSingletonServerRpc(GameObject.Find("NetworkManager").GetComponent<NetworkManager>().LocalClientId);
 
+		//get the network manager
+		networkManager = GameObject.Find("NetworkManager").GetComponent<NetworkManager>();
+
         //get the ui elements
-        ui = GameObject.Find("NetworkManager").GetComponent<GameManagerMultiplayerUIVariables>();
+        ui = networkManager?.gameObject.GetComponent<GameManagerMultiplayerUIVariables>();
 
         //register the player
         int processId = System.Diagnostics.Process.GetCurrentProcess().Id;
@@ -384,7 +388,8 @@ public class GameManagerMultiplayer : GameManagerBase
 		for(int i=0;i<joinedPlayers.Count&&i<players.Count;i++)
 		{
 			CarOrientation co = players[i].GetComponent<IngameCarComponents>().GetOrientation();
-			co.id = joinedPlayers[i].id;
+			co.id = joinedPlayers[i].id; //set the player id
+			co.networkTime = networkManager.ServerTime.TimeAsFloat; //timestamp it
 			orientations.Add(co);
 		}
 
@@ -424,7 +429,7 @@ public class GameManagerMultiplayer : GameManagerBase
 					found = true;
 
 					//set orientation
-					players[j].GetComponent<IngameCarComponents>().SetCurrentOrientation(cos[i]);
+					players[j].GetComponent<IngameCarComponents>().AddOrientationToBuffer(cos[i]);
 
 					RacerPlayerMultiplayerClient rpmc = null;
 					if (players[j].TryGetComponent<RacerPlayerMultiplayerClient>(out rpmc))
@@ -448,6 +453,7 @@ public class GameManagerMultiplayer : GameManagerBase
 
 				racist.GetComponent<RacerId>().id = cos[i].id;//set id
 				racist.GetComponent<IngameCarComponents>().SetOrientation(cos[i]);//set orientation
+				racist.GetComponent<IngameCarComponents>().AddOrientationToBuffer(cos[i]);//set orientation
 
 				players.Add(racist);
 			}
@@ -533,7 +539,6 @@ public class GameManagerMultiplayer : GameManagerBase
 
             client.Client.EnableBroadcast = true;
             client.Client.ReceiveTimeout = RECEIVE_TIMEOUT;
-            UnityEngine.Debug.Log("logus " + client.Client.LocalEndPoint.ToString());
 
             while (true)
 			{

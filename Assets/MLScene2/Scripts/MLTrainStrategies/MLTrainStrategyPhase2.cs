@@ -65,6 +65,9 @@ public class MLTrainStrategyPhase2 : MLTrainStrategyBase
         //tilt is 0
         sensor.AddObservation(0.0f);
 
+        //distance from next car is 1
+        sensor.AddObservation(1.0f);
+
 
         //reward the progress with discounting
         float currentProgress = controller.track.CalculateProgress(controller.rb.position);

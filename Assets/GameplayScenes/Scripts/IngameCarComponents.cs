@@ -16,88 +16,98 @@ public class IngameCarComponents : MonoBehaviour
 
     public Rigidbody rb;
 
-
-    private CarOrientation currentOrientation = new CarOrientation(69);
-    private float currentOrientationTime = 0.0f;//the Time.time value at setting the currentOrientation
+    private List<CarOrientation> interpolationBuffer = new List<CarOrientation>();
 
     //sets the ownerId to 0
     public CarOrientation GetOrientation()
     {
-        return new CarOrientation(0, car, wheelFl, wheelFr, wheelRl, wheelRr, rb.velocity, rb.angularVelocity);
+        return new CarOrientation(0, car, wheelFl, wheelFr, wheelRl, wheelRr, rb.velocity, rb.angularVelocity, 0.0f);
     }
 
     public void SetOrientation(CarOrientation co)
     {
-        SetCurrentOrientation(co);
+        car.transform.position = new Vector3(co.carPosX, co.carPosY, co.carPosZ);
+        car.transform.rotation = Quaternion.Euler(co.carRotX, co.carRotY, co.carRotZ);
 
-        car.transform.position = new Vector3(currentOrientation.carPosX, currentOrientation.carPosY, currentOrientation.carPosZ);
-        car.transform.rotation = Quaternion.Euler(currentOrientation.carRotX, currentOrientation.carRotY, currentOrientation.carRotZ);
+        wheelFl.transform.localPosition = new Vector3(co.wheelFlPosX, co.wheelFlPosY, co.wheelFlPosZ);
+        wheelFr.transform.localPosition = new Vector3(co.wheelFrPosX, co.wheelFrPosY, co.wheelFrPosZ);
+        wheelRl.transform.localPosition = new Vector3(co.wheelRlPosX, co.wheelRlPosY, co.wheelRlPosZ);
+        wheelRr.transform.localPosition = new Vector3(co.wheelRrPosX, co.wheelRrPosY, co.wheelRrPosZ);
 
-        wheelFl.transform.localPosition = new Vector3(currentOrientation.wheelFlPosX, currentOrientation.wheelFlPosY, currentOrientation.wheelFlPosZ);
-        wheelFr.transform.localPosition = new Vector3(currentOrientation.wheelFrPosX, currentOrientation.wheelFrPosY, currentOrientation.wheelFrPosZ);
-        wheelRl.transform.localPosition = new Vector3(currentOrientation.wheelRlPosX, currentOrientation.wheelRlPosY, currentOrientation.wheelRlPosZ);
-        wheelRr.transform.localPosition = new Vector3(currentOrientation.wheelRrPosX, currentOrientation.wheelRrPosY, currentOrientation.wheelRrPosZ);
-
-        wheelFl.transform.localRotation = Quaternion.Euler(currentOrientation.wheelFlRotX, currentOrientation.wheelFlRotY, currentOrientation.wheelFlRotZ);
-        wheelFr.transform.localRotation = Quaternion.Euler(currentOrientation.wheelFrRotX, currentOrientation.wheelFrRotY, currentOrientation.wheelFrRotZ);
-        wheelRl.transform.localRotation = Quaternion.Euler(currentOrientation.wheelRlRotX, currentOrientation.wheelRlRotY, currentOrientation.wheelRlRotZ);
-        wheelRr.transform.localRotation = Quaternion.Euler(currentOrientation.wheelRrRotX, currentOrientation.wheelRrRotY, currentOrientation.wheelRrRotZ);
+        wheelFl.transform.localRotation = Quaternion.Euler(co.wheelFlRotX, co.wheelFlRotY, co.wheelFlRotZ);
+        wheelFr.transform.localRotation = Quaternion.Euler(co.wheelFrRotX, co.wheelFrRotY, co.wheelFrRotZ);
+        wheelRl.transform.localRotation = Quaternion.Euler(co.wheelRlRotX, co.wheelRlRotY, co.wheelRlRotZ);
+        wheelRr.transform.localRotation = Quaternion.Euler(co.wheelRrRotX, co.wheelRrRotY, co.wheelRrRotZ);
 
         //if (rb != null)
         //    rb.velocity = new Vector3(currentOrientation.velocityX, currentOrientation.velocityY, currentOrientation.velocityZ);
     }
 
-    public void ExtrapolateOrientation()
+    //interpolates between two orientations in the interpolation buffer
+    //the (serverTime-delay) must be greater than in the last call
+    public void InterpolateOrientation(float serverTime, float delay)
     {
-        const float CORRECTION_LERP_STRENGTH = 0.2f;
-       
-        #region LongCalc
-        Vector3 estimatedCarPos = new Vector3(currentOrientation.carPosX, currentOrientation.carPosY, currentOrientation.carPosZ)+
-            (Time.time-currentOrientationTime)*new Vector3(currentOrientation.velocityX, currentOrientation.velocityY, currentOrientation.velocityZ);
-        
-        Vector3 helper=new Vector3(currentOrientation.angularVelocityX, currentOrientation.angularVelocityY, currentOrientation.angularVelocityZ);
-        Quaternion estimatedCarRot = 
-            Quaternion.AngleAxis(
-                (Time.time - currentOrientationTime)*Mathf.Rad2Deg*helper.magnitude,
-                helper.normalized
-            ) *
-            Quaternion.Euler(currentOrientation.carRotX, currentOrientation.carRotY, currentOrientation.carRotZ);
+        float time = serverTime - delay;
+        CarOrientation o1, o2;
+        o1= new CarOrientation();//the constructor calls are here to make intellisense shut up
+        o2= new CarOrientation();
 
+        //get the car orientations
+        if (interpolationBuffer.Count < 2)
+            return;
+        for (int j = 0; j < interpolationBuffer.Count; j++)
+        {
+            if (j == interpolationBuffer.Count - 2||
+                (interpolationBuffer[j].networkTime<=time&& interpolationBuffer[j + 1].networkTime > time))
+            {
+                o1= interpolationBuffer[j];
+                o2= interpolationBuffer[j + 1];
+                break;
+            }
+        }
 
-        Vector3 estimatedWheelFlPos= new Vector3(currentOrientation.wheelFlPosX, currentOrientation.wheelFlPosY, currentOrientation.wheelFlPosZ);
-        Quaternion estimatedWheelFlRot = Quaternion.Euler(currentOrientation.wheelFlRotX, currentOrientation.wheelFlRotY, currentOrientation.wheelFlRotZ);
+        if (o2.networkTime > time)
+            Debug.Log("roblox");
 
-        Vector3 estimatedWheelFrPos = new Vector3(currentOrientation.wheelFrPosX, currentOrientation.wheelFrPosY, currentOrientation.wheelFrPosZ);
-        Quaternion estimatedWheelFrRot = Quaternion.Euler(currentOrientation.wheelFrRotX, currentOrientation.wheelFrRotY, currentOrientation.wheelFrRotZ);
+        //remove unnecessary orientations
+        for(int j=0;j< interpolationBuffer.Count-2;j++)
+        {
+            if(time<interpolationBuffer[j].networkTime)//get the first orientation that is not yet reached and remove every orientation before that, except for the last one
+            {
+                for (int k = j - 2; k >= 0; k--)
+                    interpolationBuffer.RemoveAt(k);
+                break;
+            }
+        }
 
-        Vector3 estimatedWheelRlPos = new Vector3(currentOrientation.wheelRlPosX, currentOrientation.wheelRlPosY, currentOrientation.wheelRlPosZ);
-        Quaternion estimatedWheelRlRot = Quaternion.Euler(currentOrientation.wheelRlRotX, currentOrientation.wheelRlRotY, currentOrientation.wheelRlRotZ);
+        float i = (time-o1.networkTime)/(o2.networkTime - o1.networkTime); //interpolation coefficient
 
-        Vector3 estimatedWheelRrPos = new Vector3(currentOrientation.wheelRrPosX, currentOrientation.wheelRrPosY, currentOrientation.wheelRrPosZ);
-        Quaternion estimatedWheelRrRot = Quaternion.Euler(currentOrientation.wheelRrRotX, currentOrientation.wheelRrRotY, currentOrientation.wheelRrRotZ);
-        #endregion
+        //interpolate
+        Vector3 carPos, wheelFlPos, wheelFrPos, wheelRlPos, wheelRrPos;
+        Quaternion carRot, wheelFlRot, wheelFrRot, wheelRlRot, wheelRrRot;
 
-        if ((car.transform.position - estimatedCarPos).sqrMagnitude > SQR_EPSILON)
-            car.transform.position = Vector3.Lerp(car.transform.position, estimatedCarPos, CORRECTION_LERP_STRENGTH);
-        else car.transform.position = estimatedCarPos;
-        if (Quaternion.Dot(car.transform.rotation, estimatedCarRot) < 1-EPSILON)
-            car.transform.rotation = Quaternion.Lerp(car.transform.rotation, estimatedCarRot, CORRECTION_LERP_STRENGTH);
-        else car.transform.rotation = estimatedCarRot;
+        carPos = Vector3.Lerp(new Vector3(o1.carPosX, o1.carPosY, o1.carPosZ), new Vector3(o2.carPosX, o2.carPosY, o2.carPosZ), i);
+        wheelFlPos = Vector3.Lerp(new Vector3(o1.wheelFlPosX, o1.wheelFlPosY, o1.wheelFlPosZ), new Vector3(o2.wheelFlPosX, o2.wheelFlPosY, o2.wheelFlPosZ), i);
+        wheelFrPos = Vector3.Lerp(new Vector3(o1.wheelFrPosX, o1.wheelFrPosY, o1.wheelFrPosZ), new Vector3(o2.wheelFrPosX, o2.wheelFrPosY, o2.wheelFrPosZ), i);
+        wheelRlPos = Vector3.Lerp(new Vector3(o1.wheelRlPosX, o1.wheelRlPosY, o1.wheelRlPosZ), new Vector3(o2.wheelRlPosX, o2.wheelRlPosY, o2.wheelRlPosZ), i);
+        wheelRrPos = Vector3.Lerp(new Vector3(o1.wheelRrPosX, o1.wheelRrPosY, o1.wheelRrPosZ), new Vector3(o2.wheelRrPosX, o2.wheelRrPosY, o2.wheelRrPosZ), i);
 
-        wheelFl.transform.localPosition = estimatedWheelFlPos;
-        wheelFr.transform.localPosition = estimatedWheelFrPos;
-        wheelRl.transform.localPosition = estimatedWheelRlPos;
-        wheelRr.transform.localPosition = estimatedWheelRrPos;
+        carRot = Quaternion.Lerp(Quaternion.Euler(o1.carRotX, o1.carRotY, o1.carRotZ), Quaternion.Euler(o2.carRotX, o2.carRotY, o2.carRotZ), i);
+        wheelFlRot = Quaternion.Lerp(Quaternion.Euler(o1.wheelFlRotX, o1.wheelFlRotY, o1.wheelFlRotZ), Quaternion.Euler(o2.wheelFlRotX, o2.wheelFlRotY, o2.wheelFlRotZ), i);
+        wheelFrRot = Quaternion.Lerp(Quaternion.Euler(o1.wheelFrRotX, o1.wheelFrRotY, o1.wheelFrRotZ), Quaternion.Euler(o2.wheelFrRotX, o2.wheelFrRotY, o2.wheelFrRotZ), i);
+        wheelRlRot = Quaternion.Lerp(Quaternion.Euler(o1.wheelRlRotX, o1.wheelRlRotY, o1.wheelRlRotZ), Quaternion.Euler(o2.wheelRlRotX, o2.wheelRlRotY, o2.wheelRlRotZ), i);
+        wheelRrRot = Quaternion.Lerp(Quaternion.Euler(o1.wheelRrRotX, o1.wheelRrRotY, o1.wheelRrRotZ), Quaternion.Euler(o2.wheelRrRotX, o2.wheelRrRotY, o2.wheelRrRotZ), i);
 
-        wheelFl.transform.localRotation = estimatedWheelFlRot;
-        wheelFr.transform.localRotation = estimatedWheelFrRot;
-        wheelRl.transform.localRotation = estimatedWheelRlRot;
-        wheelRr.transform.localRotation = estimatedWheelRrRot;
+        car.position = carPos; car.rotation = carRot;
+        wheelFl.localPosition = wheelFlPos; wheelFl.localRotation = wheelFlRot;
+        wheelFr.localPosition = wheelFrPos; wheelFr.localRotation = wheelFrRot;
+        wheelRl.localPosition = wheelRlPos; wheelRl.localRotation = wheelRlRot;
+        wheelRr.localPosition = wheelRrPos; wheelRr.localRotation = wheelRrRot;
     }
 
-    public void SetCurrentOrientation(CarOrientation co)
+    //adds the car orientation to the interpolation buffer
+    public void AddOrientationToBuffer(CarOrientation co)
     {
-        currentOrientation = co;
-        currentOrientationTime = Time.time;
+        interpolationBuffer.Add(co);
     }
 }
