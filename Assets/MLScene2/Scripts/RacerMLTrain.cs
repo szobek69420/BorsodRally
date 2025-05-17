@@ -22,7 +22,7 @@ public class RacerMLTrain : RacerBase
 
     protected override void RacerOnFinish()
     {
-        agent.GoalReached();
+        
     }
 
     private void ApplyBrakes()

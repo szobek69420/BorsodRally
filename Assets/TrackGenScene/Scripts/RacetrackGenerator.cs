@@ -139,7 +139,7 @@ public class RacetrackGenerator : MonoBehaviour
         
     public void ResetGen()
     {
-        UnityEngine.Debug.Log("Reset");
+        //UnityEngine.Debug.Log("Reset");
 
         foreach(GameObject go in trackParts)
             Destroy(go);

@@ -40,6 +40,10 @@ public class IngameCarController : MonoBehaviour
         ApplyGas();
         ApplyBrakes();
         ApplySteering();
+    }
+
+    private void Update()
+    {
         UpdateWheelPositions();
     }
 
@@ -77,8 +81,12 @@ public class IngameCarController : MonoBehaviour
 
             frontWheelColliders[i].GetWorldPose(out position, out rotation);
 
-            frontWheels[i].position = position;
-            frontWheels[i].rotation= rotation;
+            //transform to local
+            position = frontWheels[i].parent.InverseTransformPoint(position);
+            rotation = Quaternion.Inverse(frontWheels[i].parent.rotation) * rotation;
+
+            frontWheels[i].localPosition = Vector3.Lerp(frontWheels[i].localPosition, position, 0.5f);
+            frontWheels[i].localRotation = Quaternion.Lerp(frontWheels[i].localRotation, rotation, 0.5f);
         }
 
         for (int i = 0; i < rearWheelColliders.Length; i++)
@@ -88,8 +96,12 @@ public class IngameCarController : MonoBehaviour
 
             rearWheelColliders[i].GetWorldPose(out position, out rotation);
 
-            rearWheels[i].position = position;
-            rearWheels[i].rotation = rotation;
+            //transform to local
+            position = rearWheels[i].parent.InverseTransformPoint(position);
+            rotation = Quaternion.Inverse(rearWheels[i].parent.rotation) * rotation;
+            
+            rearWheels[i].localPosition = Vector3.Lerp(rearWheels[i].localPosition, position, 0.5f);
+            rearWheels[i].localRotation = Quaternion.Lerp(rearWheels[i].localRotation, rotation, 0.5f);
         }
     }
 }

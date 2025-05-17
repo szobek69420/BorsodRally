@@ -1,14 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 //it is the racer that is piloted by the client
 public class RacerPlayerMultiplayerClient : RacerBase
 {
 	[SerializeField] private Vector3 cameraOffset;
-
-	private Vector3 cameraVelocity=Vector3.zero;
 	public Vector3 Velocity { get; set; }=Vector3.zero;
+
+	private Vector3 previousCameraOffset=Vector3.zero;
+	private Quaternion previousCameraRotation=Quaternion.identity;
 
 	protected override void RacerUpdate()
 	{
@@ -23,12 +25,17 @@ public class RacerPlayerMultiplayerClient : RacerBase
                 ApplySteering()
                 )
             );
+
     }
 
 	protected override void RacerFixedUpdate()
 	{
-		cameraVelocity = Vector3.Lerp(cameraVelocity, Velocity, 0.3f);
-        UpdateCameraPosition();
+		//update orientation and velocity
+		NetworkManager networkManager = GameObject.Find("NetworkManager").GetComponent<NetworkManager>();
+        carComponents.InterpolateOrientation(networkManager.ServerTime.TimeAsFloat, 0.05f);
+        Velocity = carComponents.InterpolateVelocity(networkManager.ServerTime.TimeAsFloat, 0.05f);
+        
+		UpdateCameraPosition();
 	}
 
 	protected override void RacerOnFinish()
@@ -53,45 +60,37 @@ public class RacerPlayerMultiplayerClient : RacerBase
 
 	private void UpdateCameraPosition()
 	{
-		Vector3 velocity = cameraVelocity;
-		Vector3 position = Vector3.zero;
-		Quaternion rotation = Quaternion.identity;
+		Vector3 velocity = Velocity;
+		Vector3 horizontalVelocity = new Vector3(velocity.x, 0.0f, velocity.z);
+		Vector3 offset;
+		Quaternion rotation;
 
-		if (velocity.magnitude < 1.0f)
+		if (horizontalVelocity.magnitude < 1.0f)
 		{
-			position =
-				transform.position +
+			offset =
 				cameraOffset.z * transform.forward +
 				cameraOffset.x * transform.right +
 				cameraOffset.y * Vector3.up;
-			rotation = Quaternion.LookRotation(transform.position + transform.up - position);
+			rotation = Quaternion.LookRotation(transform.up-offset);
 		}
 		else
 		{
-			Vector3 forward = velocity;
-			forward.y = 0.0f;
-			forward = Vector3.Normalize(forward);
+			Vector3 forward = horizontalVelocity.normalized;
 			Vector3 right = Vector3.Normalize(Vector3.Cross(Vector3.up, forward));
 
-			position =
-			   transform.position +
+			float speedCoeff = 1.0f + 0.01f * horizontalVelocity.magnitude;
+            offset =
 			   cameraOffset.z * forward +
 			   cameraOffset.x * right +
 			   cameraOffset.y * Vector3.up;
-			rotation = Quaternion.LookRotation(transform.position + transform.up - position);
+			offset=new Vector3(speedCoeff*offset.x, offset.y, speedCoeff*offset.z);
+			rotation = Quaternion.LookRotation(transform.up - offset);
 		}
 
+		previousCameraOffset = Vector3.Lerp(previousCameraOffset, offset, 0.2f);
+		previousCameraRotation = Quaternion.Lerp(previousCameraRotation, rotation, 0.2f);
 
-		Camera.main.transform.position = Vector3.Lerp(
-					Camera.main.transform.position,
-					position,
-					0.2f
-					);
-
-		Camera.main.transform.rotation = Quaternion.Lerp(
-			Camera.main.transform.rotation,
-			rotation,
-			0.2f
-			);
+		Camera.main.transform.position = transform.position+previousCameraOffset;
+		Camera.main.transform.rotation = previousCameraRotation;
 	}
 }
