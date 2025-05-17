@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: b02366332538a8942b44975e351f59de
+guid: 4ad30d7745e23534cafd36bf3c99f7fb
 ModelImporter:
   serializedVersion: 21300
   internalIDToNameTable: []
@@ -7,8 +7,8 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: Material.001
-    second: {fileID: 2100000, guid: e76ffd5f9c6301e46a7906815aa0a2d5, type: 2}
+      name: NIGGA
+    second: {fileID: 2100000, guid: 09fc26e19478cca4daf0a959715b29f9, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

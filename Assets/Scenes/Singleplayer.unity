@@ -360,7 +360,11 @@ MonoBehaviour:
   trackCenter: {fileID: 2010014582}
   sectorSize: 64
   sectorResolution: 16
+  lightPrefab: {fileID: 475693209097803461, guid: fff7efabd8e4db341974a236c4674c99, type: 3}
+  treePrefab: {fileID: 356387117125710236, guid: 38aae0b7111ab0240a985b280768b2e8, type: 3}
+  spectatorPrefab: {fileID: 8191331969191084402, guid: b5ab66fc966c0e043a974313fd4af28c, type: 3}
   instantiatedSectors: []
+  environmentParts: []
 --- !u!4 &213816278
 Transform:
   m_ObjectHideFlags: 0
@@ -1785,7 +1789,7 @@ MonoBehaviour:
   seed: 42
   trackLength: 10
   trackWidth: 15
-  curviness: 4
+  curviness: 1
   elevation: 15
   trackMaterial: {fileID: 2100000, guid: 094d6b0ee2449f24ab3437c44e904d6b, type: 2}
 --- !u!1 &2124138217

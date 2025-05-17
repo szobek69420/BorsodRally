@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
@@ -10,12 +11,12 @@ public class TerrainManager : MonoBehaviour
     public int sectorSize = 64;
     public int sectorResolution = 16;
 
-    public List<GameObject> instantiatedSectors = new List<GameObject>();
+    public GameObject lightPrefab;
+    public GameObject treePrefab;
+    public GameObject spectatorPrefab;
 
-    public void Start()
-    {
-        
-    }
+    public List<GameObject> instantiatedSectors = new List<GameObject>();
+    public List<GameObject> environmentParts = new List<GameObject>();
 
     public void GenerateTerrain(int seed, float trackWidth, List<Vector3> trackPoints)
     {
@@ -61,6 +62,7 @@ public class TerrainManager : MonoBehaviour
                 }
             }
         }
+        PopulateTerrain(trackWidth, trackPoints);
     }
 
     public void DeleteTerrain()
@@ -69,5 +71,30 @@ public class TerrainManager : MonoBehaviour
             Destroy(gayobject);
 
         instantiatedSectors.Clear();
+    }
+
+    private void PopulateTerrain(float trackWidth, List<Vector3> trackPoints)
+    {
+        for(int i = 1; i < trackPoints.Count; i++)
+        {
+            if (i % 80 == 0)
+            {
+                Vector3 point1 = trackPoints[i];
+                Vector3 dir = trackPoints[i] - trackPoints[i - 15];
+                dir = Quaternion.Euler(0f, 90f, 0f) * Vector3.ClampMagnitude(dir, trackWidth / 1.5f);
+
+                point1 -= dir;
+                point1.y -= 1;
+                Quaternion rotation = Quaternion.LookRotation(point1 - trackPoints[i]);
+                GameObject lightL = Instantiate(lightPrefab, point1, rotation);
+                environmentParts.Add(lightL);
+                
+                point1 += 2 * dir;
+                //point1.y -= 1;
+                rotation = Quaternion.LookRotation(point1 - trackPoints[i]);
+                GameObject lightR = Instantiate(lightPrefab, point1, rotation);
+                environmentParts.Add(lightR);    
+            }
+        }
     }
 }

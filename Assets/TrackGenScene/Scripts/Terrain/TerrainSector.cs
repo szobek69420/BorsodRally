@@ -62,13 +62,14 @@ public class TerrainSector : MonoBehaviour
                         point.y = Mathf.Lerp(noise * heightMultiplier * falloff, targetHeight, t);
                         if (Random.Range(0.0f, 1.0f) < treeProbability)
                         {
-                            GameObject tree = GameObject.Instantiate(treePrefab, transform);
+                            GameObject tree = Instantiate(treePrefab, transform);
                             tree.transform.localPosition = point;
                             treeList.Add(tree);
                         }
                         else if(Random.Range(0.0f, 1.0f) < supriseProbability)
                         {
-                            GameObject surprise = GameObject.Instantiate(suprisePrefab, transform);
+                            Quaternion rotation = Quaternion.LookRotation(point - trackPoints[index]);
+                            GameObject surprise = Instantiate(suprisePrefab, point, rotation);
                             surprise.transform.localPosition = point;
                             treeList.Add(surprise);
                         }
