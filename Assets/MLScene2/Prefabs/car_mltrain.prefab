@@ -167,7 +167,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2265351558147763688}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.429, z: 0}
+  m_LocalPosition: {x: 0, y: 0.52, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -542,7 +542,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6343973504239593181}
   - component: {fileID: 361545556476234339}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: bumper
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -576,7 +576,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 2.3313477, y: 0.91738296, z: 4.5931044}
-  m_Center: {x: -0.009132266, y: 0.7697879, z: 0.04003811}
+  m_Center: {x: 0, y: 0.7697879, z: 0.04003811}
 --- !u!1 &6338030860484819333
 GameObject:
   m_ObjectHideFlags: 0

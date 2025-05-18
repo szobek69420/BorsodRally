@@ -100,7 +100,6 @@ public class MLTrainController : Agent
 
     public void Dieded(float reward)
     {
-        AddReward(reward);
-        EndEpisode();
+        strategy.Dieded(reward);
     }
 }
