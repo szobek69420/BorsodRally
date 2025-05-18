@@ -31,6 +31,11 @@ public abstract class MLTrainStrategyBase : MonoBehaviour
         this.controller = controller;
     }
 
+    public MLTrainController GetController()
+    {
+        return this.controller;
+    }
+
     //fixed update is used for obtaining sensor values
     public void FixedUpdate() {
         distances = Raycast();
@@ -44,6 +49,11 @@ public abstract class MLTrainStrategyBase : MonoBehaviour
     public virtual void OnOnTriggerEnter(Collider other) { }
     public virtual void OnEpisodeBegin() { }
     public abstract void CollectObservations(VectorSensor sensor);
+    public virtual void Dieded(float reward)
+    {
+        controller.AddReward(reward);
+        controller.EndEpisode();
+    }
 
 
     //functions for sensor values ------------------------------------------------------------------
@@ -80,6 +90,9 @@ public abstract class MLTrainStrategyBase : MonoBehaviour
                     distances[i] = hit.distance/RAYCAST_MAX_DISTANCE;
                 else
                     distances[i] = 1.0f;
+
+                //draw ray
+                Debug.DrawLine(controller.raycastOrigin.position, controller.raycastOrigin.position + distances[i] * RAYCAST_MAX_DISTANCE*raycastDirection, Color.red, Time.fixedDeltaTime, false);
             }
             else//backwards direction
             {
@@ -94,11 +107,10 @@ public abstract class MLTrainStrategyBase : MonoBehaviour
                     distances[i] = hit.distance/RAYCAST_MAX_DISTANCE_BACKWARDS;
                 else
                     distances[i] = 1.0f;
+
+                //draw ray
+                Debug.DrawLine(controller.raycastOrigin.position, controller.raycastOrigin.position + distances[i] * RAYCAST_MAX_DISTANCE_BACKWARDS * raycastDirection, Color.red, Time.fixedDeltaTime, false);
             }
-
-
-            //draw ray
-            Debug.DrawLine(controller.raycastOrigin.position, controller.raycastOrigin.position + distances[i] * raycastDirection, Color.red, Time.fixedDeltaTime);
         }
 
 
@@ -158,7 +170,7 @@ public abstract class MLTrainStrategyBase : MonoBehaviour
             normalizedAngles[i] = normalizedAngle;
 
             //draw the direction to the track point
-            Debug.DrawLine(controller.raycastOrigin.position, controller.track.gameObject.transform.position + controller.track.TrackPoints[upcomingTrackPoints[i]], Color.green, Time.fixedDeltaTime);
+            Debug.DrawLine(controller.raycastOrigin.position, controller.track.gameObject.transform.position + controller.track.TrackPoints[upcomingTrackPoints[i]], Color.green, Time.fixedDeltaTime, false);
         }
 
         return normalizedAngles;
