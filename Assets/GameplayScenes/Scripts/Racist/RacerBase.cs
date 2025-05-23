@@ -7,7 +7,6 @@ using UnityEngine;
 public abstract class RacerBase : MonoBehaviour
 {
     [SerializeField] protected IngameCarComponents carComponents;
-    [SerializeField] private bool shouldAutomaticallyUnflip = false;
     [SerializeField] private Transform centerOfMass;
 
     protected GameManagerBase gameManager;
@@ -17,6 +16,8 @@ public abstract class RacerBase : MonoBehaviour
     void Start()
     {
         GetManagers();
+
+        //set the center of mass
         if (carComponents.rb != null)
         {
             Vector3 localPos = carComponents.rb.gameObject.transform.InverseTransformPoint(centerOfMass.position);

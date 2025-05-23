@@ -230,15 +230,15 @@ public class MLController : Agent
         Vector3 rayDirection = transform.forward;
         rayDirection.y = 0.0f;
         Vector3 raycastHit = Vector3.zero;
-        MLTrainStrategyBase[] others = transform.parent.GetComponentsInChildren<MLTrainStrategyBase>();
+        MLController[] others = transform.parent.GetComponentsInChildren<MLController>();
 
-        foreach (MLTrainStrategyBase other in others)
+        foreach (MLController other in others)
         {
             if (other.GetHashCode() == this.GetHashCode())
                 continue;
 
             Vector3 rayOrigin = raycastOrigin.transform.position;
-            rayOrigin.y = other.GetController().raycastOrigin.transform.position.y;
+            rayOrigin.y = other.raycastOrigin.transform.position.y;
 
             RaycastHit[] hits = Physics.RaycastAll(rayOrigin, rayDirection, 30.0f, LayerMask.GetMask("Car"));
 

@@ -52,9 +52,12 @@ public class GameManagerSingleplayer : GameManagerBase
                 Vector3 spawnPosition = startLine.position + 3 * i * startLine.right + 5 * j * startLine.forward + 2.0f * startLine.up;
                 GameObject racer = null;
                 if(i==-1&&j==-1)
-                    racer = GameObject.Instantiate(carPrefab_player, spawnPosition, startLine.rotation);
+                    racer = GameObject.Instantiate(carPrefab_player, transform);
                 else
-                    racer = GameObject.Instantiate(carPrefab_ai, spawnPosition, startLine.rotation);
+                    racer = GameObject.Instantiate(carPrefab_ai, transform);
+
+                racer.transform.position = spawnPosition;
+                racer.transform.rotation = startLine.rotation;
 
                 players.Add(racer);
             }
