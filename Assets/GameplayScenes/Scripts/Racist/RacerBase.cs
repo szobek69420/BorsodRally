@@ -8,6 +8,7 @@ public abstract class RacerBase : MonoBehaviour
 {
     [SerializeField] protected IngameCarComponents carComponents;
     [SerializeField] private bool shouldAutomaticallyUnflip = false;
+    [SerializeField] private Transform centerOfMass;
 
     protected GameManagerBase gameManager;
     protected RacetrackGenerator track;
@@ -16,6 +17,11 @@ public abstract class RacerBase : MonoBehaviour
     void Start()
     {
         GetManagers();
+        if (carComponents.rb != null)
+        {
+            Vector3 localPos = carComponents.rb.gameObject.transform.InverseTransformPoint(centerOfMass.position);
+            carComponents.rb.centerOfMass = localPos;
+        }
     }
 
     // Update is called once per frame

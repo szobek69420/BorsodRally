@@ -142,7 +142,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   _longitudinalStiffness: 3
-  _lateralStiffness: 3.2
+  _lateralStiffness: 3.1
 --- !u!1 &2265351558147763688
 GameObject:
   m_ObjectHideFlags: 0
@@ -280,7 +280,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   _longitudinalStiffness: 3
-  _lateralStiffness: 3.2
+  _lateralStiffness: 3.1
 --- !u!1 &3085248945955838356
 GameObject:
   m_ObjectHideFlags: 0
@@ -391,7 +391,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   _longitudinalStiffness: 3
-  _lateralStiffness: 3.1
+  _lateralStiffness: 3
 --- !u!1 &5155602789126739306
 GameObject:
   m_ObjectHideFlags: 0
@@ -467,7 +467,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   _longitudinalStiffness: 3
-  _lateralStiffness: 3.1
+  _lateralStiffness: 3
 --- !u!1 &5465098986215849178
 GameObject:
   m_ObjectHideFlags: 0
@@ -677,8 +677,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 716fcd230bd606149aa563cb6a8347a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  carComponents: {fileID: 0}
+  carComponents: {fileID: 1635948340117884926}
   shouldAutomaticallyUnflip: 0
+  centerOfMass: {fileID: 3895418082649868836}
   agent: {fileID: 7664613324904347095}
   carController: {fileID: 8006221429379302038}
 --- !u!114 &9157635448985457421
