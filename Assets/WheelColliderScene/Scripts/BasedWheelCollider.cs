@@ -103,7 +103,7 @@ public class BasedWheelCollider : MonoBehaviour
 	private Rigidbody rb=null;
 
 	private Vector3 wheelForcePosition;
-	private Vector3 wheelPosition;
+	private Vector3 wheelLocalPosition;
 	private Vector3 wheelVelocity;
 	private Vector3 wheelForward;
 	private Vector3 wheelRight;
@@ -179,7 +179,8 @@ public class BasedWheelCollider : MonoBehaviour
 
 		if (rigidbody.gameObject.transform.up.y > 0.15f)//is the car upside down?
 		{
-			wheelPosition = transform.position + (SuspensionTarget + currentSuspensionDistance) * Vector3.down;
+			Vector3 wheelPosition = transform.position + (SuspensionTarget + currentSuspensionDistance) * Vector3.down;
+			wheelLocalPosition=transform.InverseTransformPoint(wheelPosition);
 
 			float wheelRotY = Mathf.Atan2(transform.forward.x, transform.forward.z);
 			wheelRotY += Mathf.Deg2Rad * SteerAngle;
@@ -190,9 +191,10 @@ public class BasedWheelCollider : MonoBehaviour
 		}
 		else
 		{
-			wheelPosition = transform.position - (SuspensionTarget + currentSuspensionDistance) * transform.up;
+			Vector3 wheelPosition = transform.position - (SuspensionTarget + currentSuspensionDistance) * transform.up;
+            wheelLocalPosition = transform.InverseTransformPoint(wheelPosition);
 
-			float steerAngleInRads = Mathf.Deg2Rad * SteerAngle;
+            float steerAngleInRads = Mathf.Deg2Rad * SteerAngle;
 			wheelForward = Mathf.Sin(steerAngleInRads) * transform.right + Mathf.Cos(steerAngleInRads) * transform.forward;
 			wheelRight = Mathf.Sin(steerAngleInRads + 0.5f * Mathf.PI) * transform.right + Mathf.Cos(steerAngleInRads + 0.5f * Mathf.PI) * transform.forward;
 			wheelUp = transform.up;
@@ -337,10 +339,10 @@ public class BasedWheelCollider : MonoBehaviour
 		Gizmos.color = Color.red;
 		for (int i = 0; i < 16; i++)
 		{
-			Vector3 startPosition = wheelPosition +
+			Vector3 startPosition = transform.TransformPoint(wheelLocalPosition) +
 				WheelRadius * Mathf.Sin(0.125f * i * Mathf.PI) * wheelForward +
 				WheelRadius * Mathf.Cos(0.125f * i * Mathf.PI) * wheelUp;
-			Vector3 endPosition = wheelPosition +
+			Vector3 endPosition = transform.TransformPoint(wheelLocalPosition) +
 				WheelRadius * Mathf.Sin(0.125f * (i + 1) * Mathf.PI) * wheelForward +
 				WheelRadius * Mathf.Cos(0.125f * (i + 1) * Mathf.PI) * wheelUp;
 
@@ -355,7 +357,7 @@ public class BasedWheelCollider : MonoBehaviour
 	public void GetWorldPose(out Vector3 position, out Quaternion rotation)
 	{
 		//get position
-		position = wheelPosition;
+		position = transform.TransformPoint(wheelLocalPosition);
 
 		//get rotation
 		Vector3 rotatedWheelForward = Mathf.Cos(currentWheelRotation) * wheelForward - Mathf.Sin(currentWheelRotation) * wheelUp;
