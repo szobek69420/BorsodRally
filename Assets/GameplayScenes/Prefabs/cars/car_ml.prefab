@@ -236,8 +236,8 @@ MonoBehaviour:
   _suspensionTarget: 0.2
   _maxSuspensionDistance: 0.1
   _forcePoint: 0.2
-  _springForce: 90000
-  _dampingForce: 4000
+  _springForce: 70000
+  _dampingForce: 2000
   FrictionCoefficient:
     serializedVersion: 2
     m_Curve:
@@ -263,7 +263,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   _longitudinalStiffness: 3
-  _lateralStiffness: 3.1
+  _lateralStiffness: 4.2
 --- !u!1 &2712953342097351108
 GameObject:
   m_ObjectHideFlags: 0
@@ -343,8 +343,8 @@ MonoBehaviour:
   _suspensionTarget: 0.2
   _maxSuspensionDistance: 0.1
   _forcePoint: 0.2
-  _springForce: 90000
-  _dampingForce: 4000
+  _springForce: 70000
+  _dampingForce: 2000
   FrictionCoefficient:
     serializedVersion: 2
     m_Curve:
@@ -370,7 +370,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   _longitudinalStiffness: 3
-  _lateralStiffness: 3.1
+  _lateralStiffness: 4.2
 --- !u!1 &2771857180076208428
 GameObject:
   m_ObjectHideFlags: 0
@@ -450,8 +450,8 @@ MonoBehaviour:
   _suspensionTarget: 0.2
   _maxSuspensionDistance: 0.1
   _forcePoint: 0.2
-  _springForce: 90000
-  _dampingForce: 4000
+  _springForce: 70000
+  _dampingForce: 2000
   FrictionCoefficient:
     serializedVersion: 2
     m_Curve:
@@ -477,7 +477,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   _longitudinalStiffness: 3
-  _lateralStiffness: 3
+  _lateralStiffness: 4
 --- !u!1 &2869029645552052789
 GameObject:
   m_ObjectHideFlags: 0
@@ -655,8 +655,8 @@ MonoBehaviour:
   _suspensionTarget: 0.2
   _maxSuspensionDistance: 0.1
   _forcePoint: 0.2
-  _springForce: 90000
-  _dampingForce: 4000
+  _springForce: 70000
+  _dampingForce: 2000
   FrictionCoefficient:
     serializedVersion: 2
     m_Curve:
@@ -682,7 +682,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   _longitudinalStiffness: 3
-  _lateralStiffness: 3
+  _lateralStiffness: 4
 --- !u!1 &6345365913061462552
 GameObject:
   m_ObjectHideFlags: 0
@@ -779,6 +779,8 @@ GameObject:
   - component: {fileID: 4585289435506931901}
   - component: {fileID: 7149542251704865751}
   - component: {fileID: 4145880251528507734}
+  - component: {fileID: 1887080546188254924}
+  - component: {fileID: 3868677104005526177}
   m_Layer: 0
   m_Name: car_ml
   m_TagString: Untagged
@@ -954,7 +956,7 @@ CapsuleCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   m_Radius: 0.35
-  m_Height: 4.18
+  m_Height: 3.5
   m_Direction: 2
   m_Center: {x: -0.75, y: 0.55, z: 0.04}
 --- !u!136 &7149542251704865751
@@ -968,7 +970,7 @@ CapsuleCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   m_Radius: 0.35
-  m_Height: 4.18
+  m_Height: 3.5
   m_Direction: 2
   m_Center: {x: 0, y: 0.55, z: 0.04}
 --- !u!136 &4145880251528507734
@@ -982,9 +984,35 @@ CapsuleCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   m_Radius: 0.35
-  m_Height: 4.18
+  m_Height: 3.5
   m_Direction: 2
   m_Center: {x: 0.75, y: 0.55, z: 0.04}
+--- !u!65 &1887080546188254924
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6554113695750834724}
+  m_Material: {fileID: 13400000, guid: 8c89143e0809947429d95c72e1c44d45, type: 2}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.84, y: 0.4, z: 0.41}
+  m_Center: {x: 0, y: 0.55, z: 2.04}
+--- !u!65 &3868677104005526177
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6554113695750834724}
+  m_Material: {fileID: 13400000, guid: 8c89143e0809947429d95c72e1c44d45, type: 2}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.84, y: 0.4, z: 0.41}
+  m_Center: {x: 0, y: 0.55, z: -2}
 --- !u!1 &8754646557991008546
 GameObject:
   m_ObjectHideFlags: 0

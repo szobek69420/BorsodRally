@@ -115,8 +115,8 @@ MonoBehaviour:
   _suspensionTarget: 0.1
   _maxSuspensionDistance: 0.1
   _forcePoint: 0.2
-  _springForce: 90000
-  _dampingForce: 4000
+  _springForce: 70000
+  _dampingForce: 2000
   FrictionCoefficient:
     serializedVersion: 2
     m_Curve:
@@ -142,7 +142,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   _longitudinalStiffness: 3
-  _lateralStiffness: 3.1
+  _lateralStiffness: 4.2
 --- !u!1 &2265351558147763688
 GameObject:
   m_ObjectHideFlags: 0
@@ -253,8 +253,8 @@ MonoBehaviour:
   _suspensionTarget: 0.1
   _maxSuspensionDistance: 0.1
   _forcePoint: 0.2
-  _springForce: 90000
-  _dampingForce: 4000
+  _springForce: 70000
+  _dampingForce: 2000
   FrictionCoefficient:
     serializedVersion: 2
     m_Curve:
@@ -280,7 +280,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   _longitudinalStiffness: 3
-  _lateralStiffness: 3.1
+  _lateralStiffness: 4.2
 --- !u!1 &3085248945955838356
 GameObject:
   m_ObjectHideFlags: 0
@@ -364,8 +364,8 @@ MonoBehaviour:
   _suspensionTarget: 0.1
   _maxSuspensionDistance: 0.1
   _forcePoint: 0.2
-  _springForce: 90000
-  _dampingForce: 4000
+  _springForce: 70000
+  _dampingForce: 2000
   FrictionCoefficient:
     serializedVersion: 2
     m_Curve:
@@ -391,7 +391,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   _longitudinalStiffness: 3
-  _lateralStiffness: 3
+  _lateralStiffness: 4
 --- !u!1 &5155602789126739306
 GameObject:
   m_ObjectHideFlags: 0
@@ -440,8 +440,8 @@ MonoBehaviour:
   _suspensionTarget: 0.1
   _maxSuspensionDistance: 0.1
   _forcePoint: 0.2
-  _springForce: 90000
-  _dampingForce: 4000
+  _springForce: 70000
+  _dampingForce: 2000
   FrictionCoefficient:
     serializedVersion: 2
     m_Curve:
@@ -467,7 +467,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   _longitudinalStiffness: 3
-  _lateralStiffness: 3
+  _lateralStiffness: 4
 --- !u!1 &5465098986215849178
 GameObject:
   m_ObjectHideFlags: 0
@@ -678,7 +678,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   carComponents: {fileID: 1635948340117884926}
-  shouldAutomaticallyUnflip: 0
   centerOfMass: {fileID: 3895418082649868836}
   agent: {fileID: 7664613324904347095}
   carController: {fileID: 8006221429379302038}
@@ -849,8 +848,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1.85, y: 0.27951443, z: 3.2271326}
-  m_Center: {x: 0, y: 1.1416185, z: -0.123318315}
+  m_Size: {x: 1.24, y: 0.27951443, z: 2.69}
+  m_Center: {x: 0, y: 1.19, z: -0.123318315}
 --- !u!114 &5669242261804178355
 MonoBehaviour:
   m_ObjectHideFlags: 0

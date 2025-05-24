@@ -599,7 +599,7 @@ MonoBehaviour:
   trackLength: 10
   trackWidth: 15
   curviness: 4
-  elevation: 2
+  elevation: 5
   trackMaterial: {fileID: 2100000, guid: 094d6b0ee2449f24ab3437c44e904d6b, type: 2}
 --- !u!4 &485540535
 Transform:
