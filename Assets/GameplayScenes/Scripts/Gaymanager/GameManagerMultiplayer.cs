@@ -76,7 +76,13 @@ public class GameManagerMultiplayer : GameManagerBase
         ShowLobbyScreen();
     }
 
-	public override void OnDestroy()
+    public override void OnNetworkDespawn()
+    {
+		if (!IsHost)
+            SceneManager.LoadScene("MenuScene");
+    }
+
+    public override void OnDestroy()
 	{
 		if (!IsOwner)
 			return;
@@ -183,8 +189,10 @@ public class GameManagerMultiplayer : GameManagerBase
 	
 	protected override void StartCountdown()
 	{
-		if(IsHost)
+		if(IsOwner)
 		{
+            ui.button_startGame.onClick.RemoveAllListeners();//so that it doesn't fire twice
+
             StartCountdownClientRpc();
 			SpawnCars();
         }
@@ -368,10 +376,13 @@ public class GameManagerMultiplayer : GameManagerBase
 
             Vector3 spawnPosition = startLine.position + 3 * x * startLine.right + 5 * y * startLine.forward + 2.0f * startLine.up;
             GameObject racer = null;
-            if (joinedPlayers[i].id==processId)
-                racer = GameObject.Instantiate(carPrefab_playerHost, spawnPosition, startLine.rotation);
+            if (joinedPlayers[i].id == processId)
+                racer = GameObject.Instantiate(carPrefab_playerHost, transform);
             else
-                racer = GameObject.Instantiate(carPrefab_opponentHost, spawnPosition, startLine.rotation);
+                racer = GameObject.Instantiate(carPrefab_opponentHost, transform);
+
+			racer.transform.position = spawnPosition;
+			racer.transform.rotation = startLine.rotation;
 			racer.GetComponent<RacerId>().id=joinedPlayers[i].id;
 
             players.Add(racer);
