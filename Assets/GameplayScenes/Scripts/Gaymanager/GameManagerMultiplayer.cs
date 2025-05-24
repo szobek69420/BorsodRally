@@ -331,6 +331,19 @@ public class GameManagerMultiplayer : GameManagerBase
 	[ClientRpc(RequireOwnership = false)]
 	private void StartRaceClientRpc()
 	{
+		if(IsHost)//make the cars movable
+		{
+            foreach(GameObject player in players)
+			{
+                Rigidbody rb = player.GetComponent<Rigidbody>();
+                if (rb == null)
+                    rb = player.GetComponentInChildren<Rigidbody>();
+
+                if (rb != null)
+                    rb.isKinematic = false;
+            }
+        }
+
         State = GameManagerBase.GameState.RACE;
 
 		ui.canvas_countdown.enabled = false;
@@ -381,10 +394,24 @@ public class GameManagerMultiplayer : GameManagerBase
             else
                 racer = GameObject.Instantiate(carPrefab_opponentHost, transform);
 
-			racer.transform.position = spawnPosition;
+            //get the actual spawn position
+            RaycastHit hit;
+            if (Physics.Raycast(spawnPosition, Vector3.down, out hit, 20.0f, LayerMask.GetMask("Track")))
+                spawnPosition = hit.point + 0.15f * Vector3.up;
+
+            racer.transform.position = spawnPosition;
 			racer.transform.rotation = startLine.rotation;
 			racer.GetComponent<RacerId>().id=joinedPlayers[i].id;
 
+            //set the racers to kinematic
+            Rigidbody rb = racer.GetComponent<Rigidbody>();
+            if (rb == null)
+                rb = racer.GetComponentInChildren<Rigidbody>();
+
+            if (rb != null)
+                rb.isKinematic = true;
+
+			//register player
             players.Add(racer);
         }
 
