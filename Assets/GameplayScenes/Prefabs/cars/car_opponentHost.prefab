@@ -202,8 +202,8 @@ MonoBehaviour:
   _suspensionTarget: 0.1
   _maxSuspensionDistance: 0.1
   _forcePoint: 0.2
-  _springForce: 90000
-  _dampingForce: 4000
+  _springForce: 70000
+  _dampingForce: 2000
   FrictionCoefficient:
     serializedVersion: 2
     m_Curve:
@@ -229,7 +229,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   _longitudinalStiffness: 3
-  _lateralStiffness: 3
+  _lateralStiffness: 4
 --- !u!1 &4359634896081152095
 GameObject:
   m_ObjectHideFlags: 0
@@ -324,6 +324,8 @@ GameObject:
   - component: {fileID: 7192380828839556126}
   - component: {fileID: 9193956709216284172}
   - component: {fileID: -274985981317564843}
+  - component: {fileID: 8783994668622347180}
+  - component: {fileID: 8332170961464639626}
   m_Layer: 0
   m_Name: car_opponentHost
   m_TagString: Untagged
@@ -447,7 +449,7 @@ CapsuleCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   m_Radius: 0.35
-  m_Height: 4.18
+  m_Height: 3.5
   m_Direction: 2
   m_Center: {x: -0.75, y: 0.55, z: 0.04}
 --- !u!136 &9193956709216284172
@@ -461,7 +463,7 @@ CapsuleCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   m_Radius: 0.35
-  m_Height: 4.18
+  m_Height: 3.5
   m_Direction: 2
   m_Center: {x: 0, y: 0.55, z: 0.04}
 --- !u!136 &-274985981317564843
@@ -475,9 +477,35 @@ CapsuleCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   m_Radius: 0.35
-  m_Height: 4.18
+  m_Height: 3.5
   m_Direction: 2
   m_Center: {x: 0.75, y: 0.55, z: 0.04}
+--- !u!65 &8783994668622347180
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4502244846214754403}
+  m_Material: {fileID: 13400000, guid: 8c89143e0809947429d95c72e1c44d45, type: 2}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.84, y: 0.4, z: 0.41}
+  m_Center: {x: 0, y: 0.55, z: 2.04}
+--- !u!65 &8332170961464639626
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4502244846214754403}
+  m_Material: {fileID: 13400000, guid: 8c89143e0809947429d95c72e1c44d45, type: 2}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.84, y: 0.4, z: 0.41}
+  m_Center: {x: 0, y: 0.55, z: -2}
 --- !u!1 &4695447689957809027
 GameObject:
   m_ObjectHideFlags: 0
@@ -557,8 +585,8 @@ MonoBehaviour:
   _suspensionTarget: 0.1
   _maxSuspensionDistance: 0.1
   _forcePoint: 0.2
-  _springForce: 90000
-  _dampingForce: 4000
+  _springForce: 70000
+  _dampingForce: 2000
   FrictionCoefficient:
     serializedVersion: 2
     m_Curve:
@@ -584,7 +612,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   _longitudinalStiffness: 3
-  _lateralStiffness: 3.1
+  _lateralStiffness: 4.2
 --- !u!1 &4825696131637316459
 GameObject:
   m_ObjectHideFlags: 0
@@ -664,8 +692,8 @@ MonoBehaviour:
   _suspensionTarget: 0.1
   _maxSuspensionDistance: 0.1
   _forcePoint: 0.2
-  _springForce: 90000
-  _dampingForce: 4000
+  _springForce: 70000
+  _dampingForce: 2000
   FrictionCoefficient:
     serializedVersion: 2
     m_Curve:
@@ -691,7 +719,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   _longitudinalStiffness: 3
-  _lateralStiffness: 3
+  _lateralStiffness: 4
 --- !u!1 &4854628851659509874
 GameObject:
   m_ObjectHideFlags: 0
@@ -935,8 +963,8 @@ MonoBehaviour:
   _suspensionTarget: 0.1
   _maxSuspensionDistance: 0.1
   _forcePoint: 0.2
-  _springForce: 90000
-  _dampingForce: 4000
+  _springForce: 70000
+  _dampingForce: 2000
   FrictionCoefficient:
     serializedVersion: 2
     m_Curve:
@@ -962,7 +990,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   _longitudinalStiffness: 3
-  _lateralStiffness: 3.1
+  _lateralStiffness: 4.2
 --- !u!1001 &4604179418995869131
 PrefabInstance:
   m_ObjectHideFlags: 0
