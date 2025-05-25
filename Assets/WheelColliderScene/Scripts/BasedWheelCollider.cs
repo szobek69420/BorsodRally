@@ -328,15 +328,19 @@ public class BasedWheelCollider : MonoBehaviour
 		Gizmos.DrawLine(transform.position, transform.position - SuspensionTarget * wheelUp);
 
 		//draw the offset part
-		Gizmos.color = Color.blue;
-		Gizmos.DrawLine(
-			transform.position - SuspensionTarget * wheelUp,
-			transform.position - (SuspensionTarget + currentSuspensionDistance) * wheelUp
-			);
+		if(currentSuspensionDistance>0.0f)
+            Gizmos.color = Color.blue;
+        else
+            Gizmos.color = Color.yellow;
+
+        Gizmos.DrawLine(
+                transform.position - SuspensionTarget * wheelUp,
+                transform.position - (SuspensionTarget + currentSuspensionDistance) * wheelUp
+                );
 
 
-		//draw the wheel
-		Gizmos.color = Color.red;
+        //draw the wheel
+        Gizmos.color = Color.red;
 		for (int i = 0; i < 16; i++)
 		{
 			Vector3 startPosition = transform.TransformPoint(wheelLocalPosition) +

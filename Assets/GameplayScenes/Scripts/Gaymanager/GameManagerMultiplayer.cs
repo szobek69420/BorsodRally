@@ -402,6 +402,9 @@ public class GameManagerMultiplayer : GameManagerBase
             racer.transform.position = spawnPosition;
 			racer.transform.rotation = startLine.rotation;
 			racer.GetComponent<RacerId>().id=joinedPlayers[i].id;
+			RacerName rn;
+			if (racer.TryGetComponent<RacerName>(out rn))
+				rn.Name = joinedPlayers[i].name.ToString();
 
             //set the racers to kinematic
             Rigidbody rb = racer.GetComponent<Rigidbody>();
@@ -427,6 +430,7 @@ public class GameManagerMultiplayer : GameManagerBase
 		{
 			CarOrientation co = players[i].GetComponent<IngameCarComponents>().GetOrientation();
 			co.id = joinedPlayers[i].id; //set the player id
+			co.name = joinedPlayers[i].name;
 			co.networkTime = networkManager.ServerTime.TimeAsFloat; //timestamp it
 			orientations.Add(co);
 		}
@@ -486,6 +490,9 @@ public class GameManagerMultiplayer : GameManagerBase
 					racist = Instantiate(carPrefab_opponentClient);
 
 				racist.GetComponent<RacerId>().id = cos[i].id;//set id
+				RacerName rn;
+				if (racist.TryGetComponent<RacerName>(out rn))
+					rn.Name = cos[i].name.ToString();
 				racist.GetComponent<IngameCarComponents>().SetOrientation(cos[i]);//set orientation
 				racist.GetComponent<IngameCarComponents>().AddOrientationToBuffer(cos[i]);//set orientation
 
@@ -560,6 +567,7 @@ public class GameManagerMultiplayer : GameManagerBase
 				try
 				{
 					localEP = new IPEndPoint(hostAddress, port);
+					Debug.Log("sugus: "+localEP.ToString());
 					client.Client.Bind(localEP);
 					break;
 				}
@@ -567,12 +575,11 @@ public class GameManagerMultiplayer : GameManagerBase
 				{
 					port++;
 				}
-
-				try { client.Close(); } catch { }
 			}
 
             client.Client.EnableBroadcast = true;
             client.Client.ReceiveTimeout = RECEIVE_TIMEOUT;
+			Debug.Log(client.Client.LocalEndPoint.ToString());
 
             while (true)
 			{
