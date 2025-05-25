@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 2100000, guid: bbe9494f815f3c340956427c884b72a0, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -806,6 +806,42 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4518024745493798419, guid: ea0f83b71a2c4d74fb3a5cead67af3f7, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -1.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4518024745493798428, guid: ea0f83b71a2c4d74fb3a5cead67af3f7, type: 3}
+      propertyPath: _forcePoint
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4518024745493798428, guid: ea0f83b71a2c4d74fb3a5cead67af3f7, type: 3}
+      propertyPath: _springForce
+      value: 50000
+      objectReference: {fileID: 0}
+    - target: {fileID: 4518024745807570849, guid: ea0f83b71a2c4d74fb3a5cead67af3f7, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 1.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4518024745807570850, guid: ea0f83b71a2c4d74fb3a5cead67af3f7, type: 3}
+      propertyPath: _forcePoint
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4518024745807570850, guid: ea0f83b71a2c4d74fb3a5cead67af3f7, type: 3}
+      propertyPath: _springForce
+      value: 50000
+      objectReference: {fileID: 0}
+    - target: {fileID: 4518024746306823036, guid: ea0f83b71a2c4d74fb3a5cead67af3f7, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -1.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4518024746306823037, guid: ea0f83b71a2c4d74fb3a5cead67af3f7, type: 3}
+      propertyPath: _forcePoint
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4518024746306823037, guid: ea0f83b71a2c4d74fb3a5cead67af3f7, type: 3}
+      propertyPath: _springForce
+      value: 50000
+      objectReference: {fileID: 0}
     - target: {fileID: 4518024746726927417, guid: ea0f83b71a2c4d74fb3a5cead67af3f7, type: 3}
       propertyPath: m_Name
       value: cat
@@ -862,5 +898,29 @@ PrefabInstance:
       propertyPath: speedo
       value: 
       objectReference: {fileID: 109111126}
+    - target: {fileID: 4518024746726927428, guid: ea0f83b71a2c4d74fb3a5cead67af3f7, type: 3}
+      propertyPath: cameraOffset.x
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4518024746726927428, guid: ea0f83b71a2c4d74fb3a5cead67af3f7, type: 3}
+      propertyPath: cameraOffset.y
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4518024746726927428, guid: ea0f83b71a2c4d74fb3a5cead67af3f7, type: 3}
+      propertyPath: cameraOffset.z
+      value: -8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4518024747111750804, guid: ea0f83b71a2c4d74fb3a5cead67af3f7, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 1.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4518024747111750805, guid: ea0f83b71a2c4d74fb3a5cead67af3f7, type: 3}
+      propertyPath: _forcePoint
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4518024747111750805, guid: ea0f83b71a2c4d74fb3a5cead67af3f7, type: 3}
+      propertyPath: _springForce
+      value: 50000
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ea0f83b71a2c4d74fb3a5cead67af3f7, type: 3}

@@ -21,7 +21,7 @@ public class IngameCarComponents : MonoBehaviour
     //sets the ownerId to 0
     public CarOrientation GetOrientation()
     {
-        return new CarOrientation(0, car, wheelFl, wheelFr, wheelRl, wheelRr, rb.velocity, rb.angularVelocity, 0.0f);
+        return new CarOrientation(0, "", car, wheelFl, wheelFr, wheelRl, wheelRr, rb.velocity, rb.angularVelocity, 0.0f);
     }
 
     public void SetOrientation(CarOrientation co)
@@ -48,6 +48,7 @@ public class IngameCarComponents : MonoBehaviour
     public void InterpolateOrientation(float serverTime, float delay)
     {
         float time = serverTime - delay;
+
         CarOrientation o1, o2;
         o1= new CarOrientation();//the constructor calls are here to make intellisense shut up
         o2= new CarOrientation();
@@ -105,6 +106,7 @@ public class IngameCarComponents : MonoBehaviour
     public Vector3 InterpolateVelocity(float serverTime, float delay)
     {
         float time = serverTime - delay;
+
 
         //get the car orientations
         if (interpolationBuffer.Count < 2)

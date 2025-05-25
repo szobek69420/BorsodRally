@@ -13,13 +13,14 @@ public class RacerPlayerMultiplayerHost : RacerBase
 
     protected override void RacerUpdate()
     {
+        UpdateCameraPosition();
+
         if (gameManager?.State != GameManagerBase.GameState.RACE)
             return;
 
         ApplyBrakes();
         ApplyGas();
         ApplySteering();
-        UpdateCameraPosition();
     }
 
     protected override void RacerFixedUpdate()

@@ -8,6 +8,7 @@ public struct CarOrientation : INetworkSerializable
     public const int CAR_NOT_USED = int.MaxValue;
 
     public int id;
+    public Unity.Collections.FixedString32Bytes name;
 
     //car orientation
     public float carPosX, carPosY, carPosZ;
@@ -36,6 +37,7 @@ public struct CarOrientation : INetworkSerializable
     public CarOrientation(int placeHolder)//use this if the car is not in use
     {
         id = CAR_NOT_USED;
+        name = "";
 
         carPosX = 0; carPosY = 0; carPosZ = 0;
         carRotX = 0; carRotY = 0; carRotZ = 0;
@@ -58,9 +60,10 @@ public struct CarOrientation : INetworkSerializable
         networkTime = 0;
     }
 
-    public CarOrientation(int ownerId, Transform car, Transform wheelFl, Transform wheelFr, Transform wheelRl, Transform wheelRr, Vector3 velocity, Vector3 angularVelocity, float networkTime)
+    public CarOrientation(int ownerId, string name, Transform car, Transform wheelFl, Transform wheelFr, Transform wheelRl, Transform wheelRr, Vector3 velocity, Vector3 angularVelocity, float networkTime)
     {
         id = ownerId;
+        this.name = name;
 
         //car
         carPosX = car.position.x;
@@ -123,7 +126,7 @@ public struct CarOrientation : INetworkSerializable
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
         serializer.SerializeValue(ref id);
-
+        serializer.SerializeValue(ref name);
 
         serializer.SerializeValue(ref carPosX);
         serializer.SerializeValue(ref carPosY);

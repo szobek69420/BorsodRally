@@ -507,12 +507,6 @@ public class GamemodeMenuController : MenuController
                 {
                     port++;
                 }
-
-                try
-                {
-                    client.Close();
-                }
-                catch (Exception e) { }
             }
             client.Client.ReceiveTimeout = 100;
             client.Client.EnableBroadcast = true;
