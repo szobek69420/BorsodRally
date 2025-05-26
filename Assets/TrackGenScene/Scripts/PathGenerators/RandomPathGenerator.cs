@@ -90,7 +90,6 @@ public class RandomPathGenerator : PathGeneratorBase
         float o4 = (v4.x - v3.x) * (v2.y - v3.y) - (v4.y - v3.y) * (v2.x - v3.x);
 
         float tolerance = 0.0001f;
-
         if (o1 * o2 < -tolerance && o3 * o4 < -tolerance)
         {
             return true;

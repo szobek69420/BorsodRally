@@ -82,7 +82,11 @@ MonoBehaviour:
   trackCenter: {fileID: 459604254884217974}
   sectorSize: 64
   sectorResolution: 16
+  lightPrefab: {fileID: 0}
+  treePrefab: {fileID: 0}
+  spectatorPrefab: {fileID: 0}
   instantiatedSectors: []
+  environmentParts: []
 --- !u!1 &459604254884217972
 GameObject:
   m_ObjectHideFlags: 0
