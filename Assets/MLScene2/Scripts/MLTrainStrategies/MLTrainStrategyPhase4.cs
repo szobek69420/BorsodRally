@@ -1,8 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Burst.CompilerServices;
+using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
 
+//the cars need to have a collider (preferably the bumper as it is the largest) of layer "Car" for the perception to work properly
+//the car assumes that other cars are on the same level of the hierarchy
 public class MLTrainStrategyPhase4 : MLTrainStrategyBase
 {
     private static object synchronizer=new object();
@@ -21,17 +25,23 @@ public class MLTrainStrategyPhase4 : MLTrainStrategyBase
         }
     }
 
-    private bool isAgentWaiting = false;//is the agent waiting for a new episode?
+    private bool isAgentWaiting = true;//is the agent waiting for a new episode?
 
+
+    private float otherCarDistance = 1.0f;
 
     protected override void OnFixedUpdate()
     {
-        //check if the car is falling
         if (Mathf.Abs(controller.rb.velocity.y) > 10.0f)
         {
-            EndEpisode(-2000.0f);
+            Dieded(-2000.0f);
         }
 
+        //gaycast
+        otherCarDistance = CarRaycast();
+
+
+        //check if the ai should be active or restarted
         lock (synchronizer)
         {
             if (agentsInGame == 0)
@@ -42,9 +52,8 @@ public class MLTrainStrategyPhase4 : MLTrainStrategyBase
             if (restartImpending)
             {
                 controller.EndEpisode();
-                if(agentsInGame == AgentCount)
-                    restartImpending=false;
-                Debug.Log("restart " + GetHashCode());
+                if (agentsInGame == AgentCount)
+                    restartImpending = false;
             }
         }
     }
@@ -57,15 +66,23 @@ public class MLTrainStrategyPhase4 : MLTrainStrategyBase
         {
             prevAgentsInGame = agentsInGame;
 
-            if(agentsInGame == 0)
+            if(isAgentWaiting) //i need to check this, because EndEpisode can be called on the max step count and then agentCount shouldn't be incremented
             {
-                //reset the track
-                controller.track.RandomizeParameters();
-                controller.track.ResetGen();
-            }
+                if (agentsInGame == 0)//if one of the agents didn't die through OnEndEpisode, the track will not be regenerated, but that's not a problem
+                {
+                    //reset the track
+                    controller.track.RandomizeParameters();
+                    controller.track.ResetGen();
+                }
 
-            isAgentWaiting = false;
-            agentsInGame++;
+                isAgentWaiting = false;
+                agentsInGame++;
+            }
+            else
+            {
+                if (agentsInGame < AgentCount)
+                    restartImpending = true;
+            }
         }
 
         lastProgress = 0.0f;
@@ -89,6 +106,9 @@ public class MLTrainStrategyPhase4 : MLTrainStrategyBase
         controller.rb.angularVelocity = Vector3.zero;
 
         controller.rb.isKinematic = false;
+
+        //activate decision requester
+        GetComponent<DecisionRequester>().enabled = true;
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -118,8 +138,8 @@ public class MLTrainStrategyPhase4 : MLTrainStrategyBase
             //tilt
             sensor.AddObservation(tilt);
 
-            //distance from next car is 1
-            sensor.AddObservation(1.0f);
+            //distance from next car
+            sensor.AddObservation(otherCarDistance);
 
             //reward the progress with discounting
             float currentProgress = controller.track.CalculateProgress(controller.rb.position);
@@ -143,6 +163,7 @@ public class MLTrainStrategyPhase4 : MLTrainStrategyBase
 
             sensor.AddObservation(0.0f);
             sensor.AddObservation(0.0f);
+            sensor.AddObservation(1.0f);
         }
     }
 
@@ -150,22 +171,79 @@ public class MLTrainStrategyPhase4 : MLTrainStrategyBase
     {
         if (other.gameObject.layer == 7)
         {
-            EndEpisode(0.0f);
+            Dieded(0.0f);
         }
         else if (other.gameObject.CompareTag("FinishLine"))
-            EndEpisode(2000.0f);
+            Dieded(2000.0f);
     }
 
-    private void EndEpisode(float reward)
+    public override void Dieded(float reward)
     {
         lock (synchronizer)
         {
+            if (isAgentWaiting)
+                return;
+
             isAgentWaiting = true;
             agentsInGame--;
 
             controller.AddReward(reward);
-
+            controller.rb.velocity = Vector3.zero; //so that it won't be stuck at falling
             controller.rb.isKinematic = true;
+
+            GetComponent<DecisionRequester>().enabled = false;
         }
+    }
+
+    //casts a ray forward and returns the normalized distance if another car has been hit, else returns 1
+    private float CarRaycast()
+    {
+        Vector3 rayDirection = transform.forward;
+        rayDirection.y = 0.0f;
+        Vector3 raycastHit = Vector3.zero;
+        MLTrainStrategyBase[] others = transform.parent.GetComponentsInChildren<MLTrainStrategyBase>();
+
+        foreach (MLTrainStrategyBase other in others)
+        {
+            if (other.GetHashCode() == this.GetHashCode())
+                continue;
+
+            Vector3 rayOrigin = controller.raycastOrigin.transform.position;
+            rayOrigin.y = other.GetController().raycastOrigin.transform.position.y;
+
+            RaycastHit[] hits = Physics.RaycastAll(rayOrigin, rayDirection, 30.0f, LayerMask.GetMask("Car"));
+
+            for(int i = 0; i < hits.Length;i++)
+            {
+                if (hits[i].collider.attachedRigidbody == controller.rb)//the collider is part of the gaycaster car
+                    continue;
+
+                float prevDistance = Mathf.Sqrt(Mathf.Pow(raycastHit.x - controller.raycastOrigin.transform.position.x, 2.0f) + Mathf.Pow(raycastHit.z - controller.raycastOrigin.transform.position.z, 2.0f));
+                if (raycastHit != Vector3.zero && hits[i].distance > prevDistance)
+                    continue;
+
+                raycastHit = hits[i].point;
+
+                break;
+            }
+        }
+
+        //draw ray
+        if (raycastHit != Vector3.zero)
+        { 
+            Debug.DrawLine(controller.raycastOrigin.transform.position, raycastHit, new Color(0.0f, 1.0f, 1.0f), Time.fixedDeltaTime, false);
+        }
+
+        return raycastHit==Vector3.zero?
+            1.0f:
+            Mathf.Clamp(
+                Mathf.Sqrt(
+                    Mathf.Pow(raycastHit.x - controller.raycastOrigin.transform.position.x, 2.0f) 
+                    + Mathf.Pow(raycastHit.z - controller.raycastOrigin.transform.position.z, 2.0f)
+                    ) 
+                / 30.0f,
+                0.0f,
+                1.0f
+                );
     }
 }

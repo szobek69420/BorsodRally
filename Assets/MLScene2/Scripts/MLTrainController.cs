@@ -88,19 +88,17 @@ public class MLTrainController : Agent
         }
     }
 
-    /*public override void Heuristic(in ActionBuffers actionsOut)
+    public override void Heuristic(in ActionBuffers actionsOut)
     {
         ActionSegment<float> continuous = actionsOut.ContinuousActions;
         continuous[0] = Input.GetAxisRaw("Horizontal");
-        continuous[1] = Input.GetAxisRaw("Vertical");
 
         ActionSegment<int> discrete = actionsOut.DiscreteActions;
-        discrete[0] = Input.GetKey(KeyCode.Space) ? 3 : 0;
-    }*/
+        discrete[0] = Input.GetKey(KeyCode.W) ? 1 : 0;
+    }
 
     public void Dieded(float reward)
     {
-        AddReward(reward);
-        EndEpisode();
+        strategy.Dieded(reward);
     }
 }

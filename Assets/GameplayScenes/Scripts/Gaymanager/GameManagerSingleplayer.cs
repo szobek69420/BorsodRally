@@ -52,10 +52,27 @@ public class GameManagerSingleplayer : GameManagerBase
                 Vector3 spawnPosition = startLine.position + 3 * i * startLine.right + 5 * j * startLine.forward + 2.0f * startLine.up;
                 GameObject racer = null;
                 if(i==-1&&j==-1)
-                    racer = GameObject.Instantiate(carPrefab_player, spawnPosition, startLine.rotation);
+                    racer = GameObject.Instantiate(carPrefab_player, transform);
                 else
-                    racer = GameObject.Instantiate(carPrefab_ai, spawnPosition, startLine.rotation);
+                    racer = GameObject.Instantiate(carPrefab_ai, transform);
 
+                //get the actual spawn position
+                RaycastHit hit;
+                if(Physics.Raycast(spawnPosition, Vector3.down, out hit, 20.0f, LayerMask.GetMask("Track")))
+                    spawnPosition = hit.point + 0.15f * Vector3.up;
+
+                racer.transform.position = spawnPosition;
+                racer.transform.rotation = startLine.rotation;
+
+                //set the racer to kinematic
+                Rigidbody rb =racer.GetComponent<Rigidbody>();
+                if (rb == null)
+                    rb = racer.GetComponentInChildren<Rigidbody>();
+
+                if(rb!=null)
+                    rb.isKinematic = true;
+
+                //register the racer
                 players.Add(racer);
             }
         }
@@ -93,6 +110,17 @@ public class GameManagerSingleplayer : GameManagerBase
     protected override void StartRace()
     {
         State = GameManagerBase.GameState.RACE;
+
+        //set the racers to non kinematic
+        foreach(GameObject player in players)
+        {
+            Rigidbody rb = player.GetComponent<Rigidbody>();
+            if (rb == null)
+                rb = player.GetComponentInChildren<Rigidbody>();
+
+            if (rb != null)
+                rb.isKinematic = false;
+        }
 
         canvas_countdown.enabled = false;
         canvas_ingame.enabled = true;

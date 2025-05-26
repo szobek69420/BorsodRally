@@ -8,7 +8,7 @@ using UnityEngine;
 //this struct contains the basic info of a player
 public struct PlayerInfo : INetworkSerializable, IEquatable<PlayerInfo>
 {
-    public FixedString128Bytes name;
+    public FixedString32Bytes name;
     public int id;//it is the process id
 
     public PlayerInfo(string name, int id)

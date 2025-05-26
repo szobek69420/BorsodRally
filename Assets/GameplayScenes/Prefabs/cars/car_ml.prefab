@@ -93,7 +93,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1170440920303863042}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.964, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -111,8 +111,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1.4, y: 0.46, z: 3.33}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 1.24, y: 0.27951443, z: 2.69}
+  m_Center: {x: 0, y: 1.19, z: -0.123318315}
 --- !u!114 &4191310653708474000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -236,8 +236,8 @@ MonoBehaviour:
   _suspensionTarget: 0.2
   _maxSuspensionDistance: 0.1
   _forcePoint: 0.2
-  _springForce: 90000
-  _dampingForce: 4000
+  _springForce: 70000
+  _dampingForce: 2000
   FrictionCoefficient:
     serializedVersion: 2
     m_Curve:
@@ -263,7 +263,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   _longitudinalStiffness: 3
-  _lateralStiffness: 3
+  _lateralStiffness: 4.2
 --- !u!1 &2712953342097351108
 GameObject:
   m_ObjectHideFlags: 0
@@ -343,8 +343,8 @@ MonoBehaviour:
   _suspensionTarget: 0.2
   _maxSuspensionDistance: 0.1
   _forcePoint: 0.2
-  _springForce: 90000
-  _dampingForce: 4000
+  _springForce: 70000
+  _dampingForce: 2000
   FrictionCoefficient:
     serializedVersion: 2
     m_Curve:
@@ -370,7 +370,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   _longitudinalStiffness: 3
-  _lateralStiffness: 3
+  _lateralStiffness: 4.2
 --- !u!1 &2771857180076208428
 GameObject:
   m_ObjectHideFlags: 0
@@ -450,8 +450,8 @@ MonoBehaviour:
   _suspensionTarget: 0.2
   _maxSuspensionDistance: 0.1
   _forcePoint: 0.2
-  _springForce: 90000
-  _dampingForce: 4000
+  _springForce: 70000
+  _dampingForce: 2000
   FrictionCoefficient:
     serializedVersion: 2
     m_Curve:
@@ -477,7 +477,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   _longitudinalStiffness: 3
-  _lateralStiffness: 2.9
+  _lateralStiffness: 4
 --- !u!1 &2869029645552052789
 GameObject:
   m_ObjectHideFlags: 0
@@ -537,7 +537,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3447747917290464195}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.55, z: -0.469}
+  m_LocalPosition: {x: 0, y: 0.432, z: -0.074}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -655,8 +655,8 @@ MonoBehaviour:
   _suspensionTarget: 0.2
   _maxSuspensionDistance: 0.1
   _forcePoint: 0.2
-  _springForce: 90000
-  _dampingForce: 4000
+  _springForce: 70000
+  _dampingForce: 2000
   FrictionCoefficient:
     serializedVersion: 2
     m_Curve:
@@ -682,7 +682,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   _longitudinalStiffness: 3
-  _lateralStiffness: 2.9
+  _lateralStiffness: 4
 --- !u!1 &6345365913061462552
 GameObject:
   m_ObjectHideFlags: 0
@@ -692,8 +692,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6128137509338191228}
-  - component: {fileID: 578045245154556354}
-  m_Layer: 0
+  - component: {fileID: 5123060294612037105}
+  m_Layer: 8
   m_Name: bumper
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -715,7 +715,7 @@ Transform:
   m_Father: {fileID: 5049087133934904464}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &578045245154556354
+--- !u!65 &5123060294612037105
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -724,10 +724,10 @@ BoxCollider:
   m_GameObject: {fileID: 6345365913061462552}
   m_Material: {fileID: 0}
   m_IsTrigger: 1
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 2.41, y: 0.6388298, z: 4.5931044}
-  m_Center: {x: 0, y: 0.63051134, z: 0.04003811}
+  m_Size: {x: 2.3313477, y: 0.91738296, z: 4.5931044}
+  m_Center: {x: 0, y: 0.7697879, z: 0.04003811}
 --- !u!1 &6440072374780790243
 GameObject:
   m_ObjectHideFlags: 0
@@ -775,8 +775,12 @@ GameObject:
   - component: {fileID: 7487635127786262499}
   - component: {fileID: 6655382325284881207}
   - component: {fileID: 812749518628623832}
-  - component: {fileID: 5039730933579989313}
   - component: {fileID: 5294437552977755394}
+  - component: {fileID: 4585289435506931901}
+  - component: {fileID: 7149542251704865751}
+  - component: {fileID: 4145880251528507734}
+  - component: {fileID: 1887080546188254924}
+  - component: {fileID: 3868677104005526177}
   m_Layer: 0
   m_Name: car_ml
   m_TagString: Untagged
@@ -859,6 +863,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   carComponents: {fileID: 8336625436087361407}
+  centerOfMass: {fileID: 4255506689544157573}
   agent: {fileID: 6655382325284881207}
   carController: {fileID: 7068990234384363831}
 --- !u!114 &7487635127786262499
@@ -874,16 +879,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 8
+    VectorObservationSize: 11
     NumStackedVectorObservations: 1
     m_ActionSpec:
-      m_NumContinuousActions: 2
-      BranchSizes: 06000000
+      m_NumContinuousActions: 1
+      BranchSizes: 02000000
     VectorActionSize: 
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 65c1e63df39e1674b904f53e13f2dcd2, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: ceb792b0c679d794fa7a59671b29e79a, type: 3}
   m_InferenceDevice: 0
   m_BehaviorType: 2
   m_BehaviorName: My Behavior
@@ -924,19 +929,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DecisionPeriod: 5
   TakeActionsBetweenDecisions: 1
---- !u!65 &5039730933579989313
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6554113695750834724}
-  m_Material: {fileID: 13400000, guid: 5beda977c6fdbb64691cd77b0a00eb8b, type: 2}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 2.22, y: 0.7247224, z: 4.2886252}
-  m_Center: {x: 0, y: 0.5260323, z: 0.016673803}
 --- !u!54 &5294437552977755394
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -953,6 +945,74 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 1
+--- !u!136 &4585289435506931901
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6554113695750834724}
+  m_Material: {fileID: 13400000, guid: 8c89143e0809947429d95c72e1c44d45, type: 2}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.35
+  m_Height: 3.5
+  m_Direction: 2
+  m_Center: {x: -0.75, y: 0.55, z: 0.04}
+--- !u!136 &7149542251704865751
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6554113695750834724}
+  m_Material: {fileID: 13400000, guid: 8c89143e0809947429d95c72e1c44d45, type: 2}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.35
+  m_Height: 3.5
+  m_Direction: 2
+  m_Center: {x: 0, y: 0.55, z: 0.04}
+--- !u!136 &4145880251528507734
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6554113695750834724}
+  m_Material: {fileID: 13400000, guid: 8c89143e0809947429d95c72e1c44d45, type: 2}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.35
+  m_Height: 3.5
+  m_Direction: 2
+  m_Center: {x: 0.75, y: 0.55, z: 0.04}
+--- !u!65 &1887080546188254924
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6554113695750834724}
+  m_Material: {fileID: 13400000, guid: 8c89143e0809947429d95c72e1c44d45, type: 2}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.84, y: 0.4, z: 0.41}
+  m_Center: {x: 0, y: 0.55, z: 2.04}
+--- !u!65 &3868677104005526177
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6554113695750834724}
+  m_Material: {fileID: 13400000, guid: 8c89143e0809947429d95c72e1c44d45, type: 2}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.84, y: 0.4, z: 0.41}
+  m_Center: {x: 0, y: 0.55, z: -2}
 --- !u!1 &8754646557991008546
 GameObject:
   m_ObjectHideFlags: 0

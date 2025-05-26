@@ -76,7 +76,13 @@ public class GameManagerMultiplayer : GameManagerBase
         ShowLobbyScreen();
     }
 
-	public override void OnDestroy()
+    public override void OnNetworkDespawn()
+    {
+		if (!IsHost)
+            SceneManager.LoadScene("MenuScene");
+    }
+
+    public override void OnDestroy()
 	{
 		if (!IsOwner)
 			return;
@@ -183,8 +189,10 @@ public class GameManagerMultiplayer : GameManagerBase
 	
 	protected override void StartCountdown()
 	{
-		if(IsHost)
+		if(IsOwner)
 		{
+            ui.button_startGame.onClick.RemoveAllListeners();//so that it doesn't fire twice
+
             StartCountdownClientRpc();
 			SpawnCars();
         }
@@ -323,6 +331,19 @@ public class GameManagerMultiplayer : GameManagerBase
 	[ClientRpc(RequireOwnership = false)]
 	private void StartRaceClientRpc()
 	{
+		if(IsHost)//make the cars movable
+		{
+            foreach(GameObject player in players)
+			{
+                Rigidbody rb = player.GetComponent<Rigidbody>();
+                if (rb == null)
+                    rb = player.GetComponentInChildren<Rigidbody>();
+
+                if (rb != null)
+                    rb.isKinematic = false;
+            }
+        }
+
         State = GameManagerBase.GameState.RACE;
 
 		ui.canvas_countdown.enabled = false;
@@ -368,12 +389,32 @@ public class GameManagerMultiplayer : GameManagerBase
 
             Vector3 spawnPosition = startLine.position + 3 * x * startLine.right + 5 * y * startLine.forward + 2.0f * startLine.up;
             GameObject racer = null;
-            if (joinedPlayers[i].id==processId)
-                racer = GameObject.Instantiate(carPrefab_playerHost, spawnPosition, startLine.rotation);
+            if (joinedPlayers[i].id == processId)
+                racer = GameObject.Instantiate(carPrefab_playerHost, transform);
             else
-                racer = GameObject.Instantiate(carPrefab_opponentHost, spawnPosition, startLine.rotation);
-			racer.GetComponent<RacerId>().id=joinedPlayers[i].id;
+                racer = GameObject.Instantiate(carPrefab_opponentHost, transform);
 
+            //get the actual spawn position
+            RaycastHit hit;
+            if (Physics.Raycast(spawnPosition, Vector3.down, out hit, 20.0f, LayerMask.GetMask("Track")))
+                spawnPosition = hit.point + 0.15f * Vector3.up;
+
+            racer.transform.position = spawnPosition;
+			racer.transform.rotation = startLine.rotation;
+			racer.GetComponent<RacerId>().id=joinedPlayers[i].id;
+			RacerName rn;
+			if (racer.TryGetComponent<RacerName>(out rn))
+				rn.Name = joinedPlayers[i].name.ToString();
+
+            //set the racers to kinematic
+            Rigidbody rb = racer.GetComponent<Rigidbody>();
+            if (rb == null)
+                rb = racer.GetComponentInChildren<Rigidbody>();
+
+            if (rb != null)
+                rb.isKinematic = true;
+
+			//register player
             players.Add(racer);
         }
 
@@ -389,6 +430,7 @@ public class GameManagerMultiplayer : GameManagerBase
 		{
 			CarOrientation co = players[i].GetComponent<IngameCarComponents>().GetOrientation();
 			co.id = joinedPlayers[i].id; //set the player id
+			co.name = joinedPlayers[i].name;
 			co.networkTime = networkManager.ServerTime.TimeAsFloat; //timestamp it
 			orientations.Add(co);
 		}
@@ -448,6 +490,9 @@ public class GameManagerMultiplayer : GameManagerBase
 					racist = Instantiate(carPrefab_opponentClient);
 
 				racist.GetComponent<RacerId>().id = cos[i].id;//set id
+				RacerName rn;
+				if (racist.TryGetComponent<RacerName>(out rn))
+					rn.Name = cos[i].name.ToString();
 				racist.GetComponent<IngameCarComponents>().SetOrientation(cos[i]);//set orientation
 				racist.GetComponent<IngameCarComponents>().AddOrientationToBuffer(cos[i]);//set orientation
 
@@ -522,6 +567,7 @@ public class GameManagerMultiplayer : GameManagerBase
 				try
 				{
 					localEP = new IPEndPoint(hostAddress, port);
+					Debug.Log("sugus: "+localEP.ToString());
 					client.Client.Bind(localEP);
 					break;
 				}
@@ -529,12 +575,11 @@ public class GameManagerMultiplayer : GameManagerBase
 				{
 					port++;
 				}
-
-				try { client.Close(); } catch { }
 			}
 
             client.Client.EnableBroadcast = true;
             client.Client.ReceiveTimeout = RECEIVE_TIMEOUT;
+			Debug.Log(client.Client.LocalEndPoint.ToString());
 
             while (true)
 			{
