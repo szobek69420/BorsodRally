@@ -72,13 +72,13 @@ public class RandomPathGenerator : PathGeneratorBase
 
                 while (Vector3.Distance(point1, point2) < (pointDistance * 2f))
                 {
-                    Debug.Log(Vector3.SignedAngle(trackPoints[i] - trackPoints[i - 1], trackPoints[j] - trackPoints[i - 1], Vector3.down));
-                    Debug.Log(trackPoints[i] - trackPoints[i - 1]);
-                    Debug.Log(trackPoints[j] - trackPoints[i - 1]);
+                    //Debug.Log(Vector3.SignedAngle(trackPoints[i] - trackPoints[i - 1], trackPoints[j] - trackPoints[i - 1], Vector3.down));
+                    //Debug.Log(trackPoints[i] - trackPoints[i - 1]);
+                    //Debug.Log(trackPoints[j] - trackPoints[i - 1]);
                     Debug.DrawLine(trackPoints[i], trackPoints[i - 1], Color.red, 10000);
                     Debug.DrawLine(trackPoints[j], trackPoints[i - 1], Color.red, 10000);
-                    Debug.Log(rotFromStart);    
-                    Debug.Log(currentRotation);
+                    //Debug.Log(rotFromStart);    
+                    //Debug.Log(currentRotation);
 
                     nextDir = Quaternion.Euler(0f, -currentRotation, 0f) * nextDir;
 

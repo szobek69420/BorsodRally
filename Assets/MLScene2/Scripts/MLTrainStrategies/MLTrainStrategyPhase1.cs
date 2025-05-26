@@ -19,7 +19,7 @@ public class MLTrainStrategyPhase1 : MLTrainStrategyBase
     public override void OnEpisodeBegin()
     {
         //reset the track
-        controller.track.RandomizeParameters();
+        controller.track.RandomizeParameters(5.0f, 10.0f);
         controller.track.ResetGen();
 
         lastProgress = 0.0f;
