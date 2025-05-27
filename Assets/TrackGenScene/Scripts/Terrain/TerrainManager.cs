@@ -1,7 +1,4 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Drawing;
 using UnityEngine;
 
 public class TerrainManager : MonoBehaviour
@@ -11,12 +8,11 @@ public class TerrainManager : MonoBehaviour
     public int sectorSize = 64;
     public int sectorResolution = 16;
 
-    public GameObject lightPrefab;
-    public GameObject treePrefab;
-    public GameObject spectatorPrefab;
-
+    public List<PrefabConfig> prefabConfigs;
     public List<GameObject> instantiatedSectors = new List<GameObject>();
     public List<GameObject> environmentParts = new List<GameObject>();
+
+    private TerrainPopulatorBase terrainPopulator;
 
     public void GenerateTerrain(int seed, float trackWidth, List<Vector3> trackPoints)
     {
@@ -42,7 +38,7 @@ public class TerrainManager : MonoBehaviour
                 Vector2 coords = new Vector2(x, z);
                 float distance = 10000;
 
-                for (int i = 0; i < trackPoints.Count; i++) 
+                for (int i = 0; i < trackPoints.Count; i++)
                 {
                     Vector2 point1 = new Vector2(trackPoints[i].x, trackPoints[i].z);
                     Vector2 point2 = new Vector2(coords.x + (step / 2), coords.y + (step / 2));
@@ -58,43 +54,23 @@ public class TerrainManager : MonoBehaviour
 
                     instantiatedSectors.Add(sectorObj);
                     sectorObj.transform.SetParent(transform);
-                    sectorObj.transform.localPosition = Vector3.zero; //so that multiple terrains can be generated at the same time
+                    sectorObj.transform.localPosition = Vector3.zero;
                 }
             }
         }
-        PopulateTerrain(trackWidth, trackPoints);
+        terrainPopulator = new VoronoiTerrainPopulator(instantiatedSectors, sectorSize, seed);
+        terrainPopulator.PopulateTerrain(trackWidth, trackPoints,prefabConfigs, environmentParts);
     }
 
     public void DeleteTerrain()
     {
-        foreach(GameObject gayobject in instantiatedSectors)
+        foreach (GameObject gayobject in instantiatedSectors)
             Destroy(gayobject);
 
         instantiatedSectors.Clear();
-    }
+        foreach (GameObject envPart in environmentParts)
+            Destroy(envPart);
 
-    private void PopulateTerrain(float trackWidth, List<Vector3> trackPoints)
-    {
-        for(int i = 1; i < trackPoints.Count; i++)
-        {
-            if (i % 80 == 0)
-            {
-                Vector3 point1 = trackPoints[i];
-                Vector3 dir = trackPoints[i] - trackPoints[i - 15];
-                dir = Quaternion.Euler(0f, 90f, 0f) * Vector3.ClampMagnitude(dir, trackWidth / 1.5f);
-
-                point1 -= dir;
-                point1.y -= 1;
-                Quaternion rotation = Quaternion.LookRotation(point1 - trackPoints[i]);
-                GameObject lightL = Instantiate(lightPrefab, point1, rotation);
-                environmentParts.Add(lightL);
-                
-                point1 += 2 * dir;
-                //point1.y -= 1;
-                rotation = Quaternion.LookRotation(point1 - trackPoints[i]);
-                GameObject lightR = Instantiate(lightPrefab, point1, rotation);
-                environmentParts.Add(lightR);    
-            }
-        }
+        environmentParts.Clear();
     }
 }

@@ -20,6 +20,7 @@ public class RacetrackGenerator : MonoBehaviour
     public float curviness = 4f;                                       // Scale for the curviness
     public float elevation = 5f;                                       // Scale for the elevation Y-axis 
     public Material trackMaterial;                                     // Material to apply to the track surface
+    public GameObject lightPrefab;
 
     private int trackSectors = 20;
     private List<Vector3> trackPoints = new List<Vector3>();           // List to hold track control points
@@ -74,10 +75,10 @@ public class RacetrackGenerator : MonoBehaviour
         terrain = GameObject.Find("TerrainManager").GetComponent<TerrainManager>();
 
         trackPoints.Clear();
-        trackPoints = controlPointGenerator.GenerateTrackPoints(seed, trackLength, curviness, elevation);
-
         trackParts.Clear();
         trackWalls.Clear();
+
+        trackPoints = controlPointGenerator.GenerateTrackPoints(seed, trackLength, curviness, elevation);
 
         for(int i = 0; i < trackSectors; i++)
         {
@@ -109,6 +110,8 @@ public class RacetrackGenerator : MonoBehaviour
         CreateRacetrackMesh();                                  //Create the mesh for the track surface    
         trackWidth -= 2;
         CreateMLGuideMesh();                                    //Create mesh for track walls 
+
+        AddLamps();
 
         if(generateEnvironment)
             terrain.GenerateTerrain(seed, trackWidth, trackPoints);                   //Terrain generating
@@ -142,8 +145,6 @@ public class RacetrackGenerator : MonoBehaviour
         
     public void ResetGen()
     {
-        //UnityEngine.Debug.Log("Reset");
-
         foreach(GameObject go in trackParts)
             Destroy(go);
         foreach (GameObject go in trackWalls)
@@ -380,6 +381,28 @@ public class RacetrackGenerator : MonoBehaviour
             meshF.RecalculateBounds();
             trackWalls[index].GetComponent<MeshFilter>().mesh = meshF;
             trackWalls[index++].GetComponent<MeshCollider>().sharedMesh = meshF;
+        }
+    }
+
+    private void AddLamps()
+    {
+        for (int i = 1; i < trackPoints.Count; i++)
+        {
+            if (i % 80 == 0 && trackPoints.Count - 15 > i)
+            {
+                Vector3 point1 = trackPoints[i];
+                Vector3 dir = trackPoints[i + 15] - trackPoints[i - 15];
+                dir = Quaternion.Euler(0f, 90f, 0f) * Vector3.ClampMagnitude(dir, trackWidth / 1.5f);
+
+                point1 -= dir;
+                point1.y -= 1;
+                Quaternion rotation = Quaternion.LookRotation(point1 - trackPoints[i]);
+                GameObject lightL = Instantiate(lightPrefab, point1, rotation);
+
+                point1 += 2 * dir;
+                rotation = Quaternion.LookRotation(point1 - trackPoints[i]);
+                GameObject lightR = Instantiate(lightPrefab, point1, rotation);
+            }
         }
     }
 

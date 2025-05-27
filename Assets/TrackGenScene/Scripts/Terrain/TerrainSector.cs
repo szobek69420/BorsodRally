@@ -1,116 +1,54 @@
-using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 public class TerrainSector : MonoBehaviour
 {
     public Vector2 sectorCoords;
-    public GameObject treePrefab;
-    public GameObject suprisePrefab;
-    private List<GameObject> treeList = new List<GameObject>();
-    [SerializeField] private float treeProbability = 0.01f;
-    [SerializeField] private float supriseProbability = 0.001f;
-    [SerializeField] private float heightMultiplier = 50f;
+    public int sectorSize;
+    public int resolution;
+    public float heightMultiplier = 10f;
+    private HeightMapGeneratorBase heightMapGenerator;
 
-    public void GenerateHeightmap(float trackWidth, List<Vector3> trackPoints, int sectorSize, int resolution, int seed)
+    public void GenerateHeightmap(float trackWidth, List<Vector3> trackPoints, int sectSize, int res, int seed)
     {
-        Mesh mesh = new Mesh();
+        sectorSize = sectSize;
+        resolution = res;
+        
+        heightMapGenerator = new PerlinHeightMapGenerator();
 
-        Vector3[] vertices = new Vector3[(resolution) * (resolution)];
-        int[] triangles = new int[(resolution) * (resolution) * 6];
-        Vector2[] uvs = new Vector2[vertices.Length];
-
-        for (int y = 0; y < resolution; y++)
-        {
-            for (int x = 0; x < resolution; x++)
-            {
-                int i = x + y * (resolution);
-
-                float worldX = sectorCoords.x + ((float)x * sectorSize / resolution);
-                float worldZ = sectorCoords.y + ((float)y * sectorSize / resolution);
-                Vector3 point = new Vector3(worldX, 0, worldZ);
-                float distanceFromTrack = 10000;
-                float dis = 0;
-                int index = 0;
-
-                for (int j = 0; j < trackPoints.Count; j++) 
-                {
-                    Vector3 point2 = trackPoints[j];
-                    point2.y = 0;
-                    dis = Vector3.Distance(point, point2);
-
-                    if (distanceFromTrack > dis) { distanceFromTrack = dis; index = j; }
-                }
-
-                float noise = Mathf.PerlinNoise((worldX * 0.1f) + seed, (worldZ * 0.1f) + seed);
-                float falloff = EvaluateFalloffFromTrack(distanceFromTrack);
-                point.y = noise * heightMultiplier * falloff;
-
-                if (distanceFromTrack < trackWidth * 3)
-                {
-                    float targetHeight = trackPoints[index].y - 1f;
-                    float t = Mathf.InverseLerp(trackWidth * 3f, trackWidth / 2, distanceFromTrack);
-
-                    if (distanceFromTrack < trackWidth * 1.1f)
-                    {
-                        point.y = targetHeight;
-                    }
-                    else
-                    {
-                        point.y = Mathf.Lerp(noise * heightMultiplier * falloff, targetHeight, t);
-                        if (Random.Range(0.0f, 1.0f) < treeProbability)
-                        {
-                            GameObject tree = Instantiate(treePrefab, transform);
-                            tree.transform.localPosition = point;
-                            treeList.Add(tree);
-                        }
-                        else if(Random.Range(0.0f, 1.0f) < supriseProbability)
-                        {
-                            Quaternion rotation = Quaternion.LookRotation(point - trackPoints[index]);
-                            GameObject surprise = Instantiate(suprisePrefab, point, rotation);
-                            surprise.transform.localPosition = point;
-                            treeList.Add(surprise);
-                        }
-                    }
-                }
-
-                vertices[i] = point;
-                uvs[i] = new Vector2((float)x / (resolution - 1), (float)y / (resolution - 1));
-            }
-        }
-
-        int tri = 0;
-        for (int y = 0; y < resolution - 1; y++)
-        {
-            for (int x = 0; x < resolution - 1; x++)
-            {
-                int i = x + y * (resolution);
-
-                triangles[tri++] = i;
-                triangles[tri++] = i + resolution;
-                triangles[tri++] = i + 1;
-
-                triangles[tri++] = i + 1;
-                triangles[tri++] = i + resolution;
-                triangles[tri++] = i + resolution + 1;
-            }
-        }
-
-        mesh.vertices = vertices;
-        mesh.triangles = triangles;
-        mesh.uv = uvs;
-        mesh.RecalculateNormals();
-
-        GetComponent<MeshFilter>().mesh = mesh;
+        GetComponent<MeshFilter>().mesh = heightMapGenerator.GenerateHeightMap(trackWidth, sectorCoords, trackPoints, heightMultiplier, sectorSize, resolution, seed);
     }
 
-    float EvaluateFalloffFromTrack(float distance)
+    public float GetHeightAt(float x, float z)
     {
-        float maxDist = 100f; 
-        float t = Mathf.Clamp01(distance / maxDist);
-        return Mathf.SmoothStep(0.2f, 1f, t);
+        float localX = x / sectorSize * (resolution - 1);
+        float localZ = z / sectorSize * (resolution - 1);
+        int x0 = Mathf.FloorToInt(localX);
+        int z0 = Mathf.FloorToInt(localZ);
+        float fracX = localX - x0;
+        float fracZ = localZ - z0;
+
+        x0 = Mathf.Clamp(x0, 0, resolution - 2);
+        z0 = Mathf.Clamp(z0, 0, resolution - 2);
+        int x1 = x0 + 1;
+        int z1 = z0 + 1;
+
+        // Get heights from mesh
+        Mesh mesh = GetComponent<MeshFilter>().mesh;
+        Vector3[] vertices = mesh.vertices;
+        int i00 = x0 + z0 * resolution;
+        int i10 = x1 + z0 * resolution;
+        int i01 = x0 + z1 * resolution;
+        int i11 = x1 + z1 * resolution;
+
+        float h00 = vertices[i00].y;
+        float h10 = vertices[i10].y;
+        float h01 = vertices[i01].y;
+        float h11 = vertices[i11].y;
+
+        float h0 = Mathf.Lerp(h00, h10, fracX);
+        float h1 = Mathf.Lerp(h01, h11, fracX);
+        return Mathf.Lerp(h0, h1, fracZ);
     }
 }
 
