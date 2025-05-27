@@ -71,7 +71,7 @@ public class MLTrainStrategyPhase4 : MLTrainStrategyBase
                 if (agentsInGame == 0)//if one of the agents didn't die through OnEndEpisode, the track will not be regenerated, but that's not a problem
                 {
                     //reset the track
-                    controller.track.RandomizeParameters(5.0f, 10.0f);
+                    controller.track.RandomizeParameters();
                     controller.track.ResetGen();
                 }
 

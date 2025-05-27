@@ -7,6 +7,8 @@ using UnityEngine;
 
 public class MLController : Agent
 {
+    private enum INFERENCE_STATE { BRAIN, BACKUP }
+
     private static Vector3[] RAYCAST_DIRECTIONS = new Vector3[]
     {
         new Vector3(Mathf.Sin(-0.5f*Mathf.PI), 0.0f, Mathf.Cos(-0.5f*Mathf.PI)),
@@ -24,6 +26,10 @@ public class MLController : Agent
     private float tilt = 0.5f;
     private float otherCarDistance = 1.0f;
 
+    private INFERENCE_STATE currentState = INFERENCE_STATE.BRAIN;
+    private float velocityExpDecay = 0.0f;
+    private float startTime = -1.0f;
+
     private GameManagerBase gm = null;
 	private RacetrackGenerator track = null;
 	[SerializeField] private Rigidbody rb;
@@ -33,12 +39,21 @@ public class MLController : Agent
 	public float AccelInput{ get; private set; } = 0;
 	public float BrakeInput { get; private set; } = 0;
 
+    private void Start()
+    {
+        startTime = Time.time;
+    }
+
     private void FixedUpdate()
     {
         distances = Raycast();
         normalizedAngles = CalculateNormalizedAngles();
         tilt = CalculateTilt();
         otherCarDistance = CarRaycast();
+
+        velocityExpDecay = 0.9f * velocityExpDecay + 0.1f * rb.velocity.magnitude;
+        if(velocityExpDecay<1.0f&&Time.time-startTime>5.0f) //with this, it takes around 600 ms to enter backup mode after a full stop
+            StartCoroutine(BackupState());
     }
 
     public override void OnEpisodeBegin()
@@ -80,28 +95,70 @@ public class MLController : Agent
 
 	public override void OnActionReceived(ActionBuffers actions)
 	{
-        SteerInput = actions.ContinuousActions[0];
-
-        switch (actions.DiscreteActions[0])
+        switch(currentState)
         {
-            case 0:
-                if (Vector3.Dot(rb.velocity, transform.forward) > 1.0f)//going forwards
+            case INFERENCE_STATE.BRAIN:
+
+                SteerInput = actions.ContinuousActions[0];
+
+                switch (actions.DiscreteActions[0])
                 {
-                    AccelInput = 0.0f;
-                    BrakeInput = 1.0f;
+                    case 0:
+                        if (Vector3.Dot(rb.velocity, transform.forward) > 1.0f)//going forwards
+                        {
+                            AccelInput = 0.0f;
+                            BrakeInput = 1.0f;
+                        }
+                        else //going backwards
+                        {
+                            AccelInput = -1.0f;
+                            BrakeInput = 0.0f;
+                        }
+                        break;
+
+                    default:
+                        AccelInput = 1.0f;
+                        BrakeInput = 0.0f;
+                        break;
                 }
-                else //going backwards
+                break;
+
+            case INFERENCE_STATE.BACKUP:
+                if (distances[distances.Length - 1] >0.1f) //has space to reverse
                 {
                     AccelInput = -1.0f;
                     BrakeInput = 0.0f;
+                    if (normalizedAngles[0] > 0.5f)
+                        SteerInput = 1.0f;
+                    else
+                        SteerInput = -1.0f;
+                }
+                else
+                {
+                    AccelInput = 1.0f;
+                    BrakeInput = 0.0f;
+                    if (normalizedAngles[0] > 0.5f)
+                        SteerInput = -1.0f;
+                    else
+                        SteerInput = 1.0f;
                 }
                 break;
 
             default:
-                AccelInput = 1.0f;
-                BrakeInput = 0.0f;
+                AccelInput = 0.0f;
+                BrakeInput = 1.0f;
+                SteerInput = 0.0f;
                 break;
         }
+        
+    }
+
+    private IEnumerator BackupState()
+    {
+        Debug.Log("Entered backup mode");
+        currentState = INFERENCE_STATE.BACKUP;
+        yield return new WaitForSeconds(0.5f);
+        currentState = INFERENCE_STATE.BRAIN;
     }
 
     //functions for sensor values ------------------------------------------------------------------
@@ -208,10 +265,10 @@ public class MLController : Agent
             trackPointDirection.y = 0.0f;
             trackPointDirection = Vector3.Normalize(trackPointDirection);
 
-            float normalizedAngle = Mathf.Atan2(
-                    Vector3.Dot(Vector3.Cross(Vector3.up, trackPointDirection), horizontalVelocityNormalized),
-                    Vector3.Dot(trackPointDirection, horizontalVelocityNormalized)
-                    );
+            float normalizedAngle = Mathf.Acos(Vector3.Dot(trackPointDirection, horizontalVelocityNormalized));
+            if (0.0f > Vector3.Dot(Vector3.Cross(Vector3.up, trackPointDirection), horizontalVelocityNormalized))
+                normalizedAngle *= -1;
+
             normalizedAngle /= 0.5f * Mathf.PI;
             normalizedAngle = 0.5f * Mathf.Clamp(normalizedAngle, -1.0f, 1.0f) + 0.5f;
 
