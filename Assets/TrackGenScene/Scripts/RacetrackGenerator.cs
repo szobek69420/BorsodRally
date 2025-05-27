@@ -53,11 +53,14 @@ public class RacetrackGenerator : MonoBehaviour
         curviness = PlayerPrefs.GetFloat("curviness"+processId);
     }
 
+    private const float LOW_CURVINESS = 2.0f;
+    private const float MEDIUM_CURVINESS = 8.0f;
+    private const float HIGH_CURVINESS = 14.0f;
     public void RandomizeParameters()
     {
         seed = UnityEngine.Random.Range(0, 200000);
         trackLength = 80;//this should be the same for every ml episode
-        curviness = UnityEngine.Random.Range(5.0f, 10.0f);
+        curviness = MEDIUM_CURVINESS;
     }
 
     //cannot set the ip and difficulty parameters
