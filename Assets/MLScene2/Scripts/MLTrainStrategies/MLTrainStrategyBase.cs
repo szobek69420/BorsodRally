@@ -140,7 +140,7 @@ public abstract class MLTrainStrategyBase : MonoBehaviour
     float[] CalculateNormalizedAngles()
     {
         Vector3 velocityNormalized;
-        if (controller.rb.velocity.sqrMagnitude < 1.0f)
+        if (controller.rb.velocity.sqrMagnitude < 2.0f)
             velocityNormalized = transform.forward;
         else
             velocityNormalized = controller.rb.velocity.normalized;
@@ -160,10 +160,10 @@ public abstract class MLTrainStrategyBase : MonoBehaviour
             trackPointDirection.y = 0.0f;
             trackPointDirection = Vector3.Normalize(trackPointDirection);
 
-            float normalizedAngle = Mathf.Atan2(
-                    Vector3.Dot(Vector3.Cross(Vector3.up, trackPointDirection), horizontalVelocityNormalized),
-                    Vector3.Dot(trackPointDirection, horizontalVelocityNormalized)
-                    );
+            float normalizedAngle = Mathf.Acos(Vector3.Dot(trackPointDirection, horizontalVelocityNormalized));
+            if (0.0f > Vector3.Dot(Vector3.Cross(Vector3.up, trackPointDirection), horizontalVelocityNormalized))
+                normalizedAngle *= -1;
+
             normalizedAngle /= 0.5f * Mathf.PI;
             normalizedAngle = 0.5f * Mathf.Clamp(normalizedAngle, -1.0f, 1.0f) + 0.5f;
 
