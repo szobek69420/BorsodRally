@@ -7,4 +7,6 @@ public class PrefabConfig : ScriptableObject
     public float minDistanceTrack = 0f;
     public float maxDistanceTrack = 100f;
     public float chance = 0.01f;
+    public float bonusVariable = 0f;
+    public bool rotate = false;
 }

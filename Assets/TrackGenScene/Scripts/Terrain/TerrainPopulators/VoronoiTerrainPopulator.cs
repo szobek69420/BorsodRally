@@ -11,10 +11,7 @@ public class VoronoiTerrainPopulator : TerrainPopulatorBase
     {   
         // Voronoi parameters
         int seedPointCount = 100; // Number of Voronoi seed points
-        int maxSpectatorsPerCell = 3; // Max spectators per Voronoi cell
-        float treeDensity = 0.1f; // Base tree density per cell
 
-        // Calculate terrain bounds
         float minX = float.MaxValue, maxX = float.MinValue, minZ = float.MaxValue, maxZ = float.MinValue;
         foreach (GameObject sectorObj in instantiatedSectors)
         {
@@ -80,41 +77,33 @@ public class VoronoiTerrainPopulator : TerrainPopulatorBase
                             if (trackDistance > prefab.minDistanceTrack && trackDistance < prefab.maxDistanceTrack
                                 && Random.value < prefab.chance)
                             {
-                                Quaternion rotation = Quaternion.LookRotation(position - closestTrackPoint, Vector3.up);
-                                GameObject envPart = Instantiate(prefab.prefab, position, rotation);
-                                envPart.transform.parent = GameObject.Find("TerrainManager").transform;
-                                environmentParts.Add(envPart);
-                            }
-                        }
-                        /*if (trackDistance < spectatorMaxDistance && Random.value < 0.1f)
-                        {
-                            int spectatorCount = Random.Range(1, maxSpectatorsPerCell + 1);
-                            for (int j = 0; j < spectatorCount; j++)
-                            {
-                                Vector3 spectatorPos = position + new Vector3(
-                                    Random.Range(-2f, 2f),
-                                    0,
-                                    Random.Range(-2f, 2f)
-                                );
-                                spectatorPos.y = GetTerrainHeight(spectatorPos.x, spectatorPos.z);
-
-                                if (IsPositionValid(spectatorPos, trackPoints, trackWidth))
+                                int countPerSector = Random.Range(1, (int)prefab.bonusVariable + 1);
+                                for (int j = 0; j < countPerSector; j++)
                                 {
-                                    Quaternion rotation = Quaternion.LookRotation(spectatorPos - closestTrackPoint);
-                                    GameObject spectator = Instantiate(prefabs[0].prefab, spectatorPos, rotation);
-                                    environmentParts.Add(spectator);
+                                    Vector3 pos = position + new Vector3(
+                                        Random.Range(-2f, 2f),
+                                        0,
+                                        Random.Range(-2f, 2f)
+                                    );
+                                    pos.y = GetTerrainHeight(pos.x, pos.z);
+
+                                    if (prefab.rotate)
+                                    {
+                                        Quaternion rotation = Quaternion.LookRotation(position - closestTrackPoint, Vector3.up);
+                                        GameObject envPart = Instantiate(prefab.prefab, position, rotation);
+                                        envPart.transform.parent = GameObject.Find("TerrainManager").transform;
+                                        environmentParts.Add(envPart);
+                                    }
+                                    else
+                                    {
+                                        GameObject envPart = Instantiate(prefab.prefab, position, Quaternion.identity);
+                                        envPart.transform.parent = GameObject.Find("TerrainManager").transform;
+                                        environmentParts.Add(envPart);
+                                    }
                                 }
+                                break;
                             }
                         }
-                        else if (trackDistance > treeMinDistance && trackDistance < treeMaxDistance)
-                        {
-                            float density = treeDensity * Mathf.PerlinNoise(worldX * 0.05f, worldZ * 0.05f);
-                            if (Random.value < density)
-                            {
-                                GameObject tree = Instantiate(prefabs[1].prefab, position, Quaternion.identity);
-                                environmentParts.Add(tree);
-                            }
-                        }*/
                     }
                 }
             }

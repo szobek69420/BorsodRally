@@ -26,8 +26,7 @@ public class RandomPathGenerator : PathGeneratorBase
             trackPoints[1] = trackPoints[1].normalized * pointDistance;
 
             for (int i = 2; i < length; i++)
-            {
-                // Generate the directions 
+            { 
                 currentRotation = Random.Range(-diffBetweenDir, diffBetweenDir);
                 currentElevation = Random.Range(-elevation, elevation);
 

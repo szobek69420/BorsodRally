@@ -14,7 +14,8 @@ public class TerrainSector : MonoBehaviour
         sectorSize = sectSize;
         resolution = res;
         
-        heightMapGenerator = new PerlinHeightMapGenerator();
+        //heightMapGenerator = new PerlinHeightMapGenerator();
+        heightMapGenerator = new DiamondSquareHeightMapGenerator();
 
         GetComponent<MeshFilter>().mesh = heightMapGenerator.GenerateHeightMap(trackWidth, sectorCoords, trackPoints, heightMultiplier, sectorSize, resolution, seed);
     }

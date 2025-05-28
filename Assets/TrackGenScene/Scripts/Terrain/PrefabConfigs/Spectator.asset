@@ -15,4 +15,6 @@ MonoBehaviour:
   prefab: {fileID: 8191331969191084402, guid: b5ab66fc966c0e043a974313fd4af28c, type: 3}
   minDistanceTrack: 0
   maxDistanceTrack: 20
-  chance: 0.01
+  chance: 0.05
+  bonusVariable: 5
+  rotate: 1

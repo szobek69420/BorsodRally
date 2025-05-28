@@ -16,3 +16,5 @@ MonoBehaviour:
   minDistanceTrack: 5
   maxDistanceTrack: 100
   chance: 0.01
+  bonusVariable: 3
+  rotate: 0

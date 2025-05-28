@@ -44,10 +44,18 @@ public class SimpleTerrainPopulator : TerrainPopulatorBase
                             if (trackDistance > prefab.minDistanceTrack && trackDistance < prefab.maxDistanceTrack
                                 && Random.value < prefab.chance)
                             {
-                                Quaternion rotation = Quaternion.LookRotation(position - closestTrackPoint, Vector3.up);
-                                GameObject envPart = Instantiate(prefab.prefab, position, rotation);
-                                envPart.transform.parent = transform;
-                                environmentParts.Add(envPart);
+                                if (prefab.rotate)
+                                {
+                                    Quaternion rotation = Quaternion.LookRotation(position - closestTrackPoint, Vector3.up);
+                                    GameObject envPart = Instantiate(prefab.prefab, position, rotation);
+                                    envPart.transform.parent = GameObject.Find("TerrainManager").transform;
+                                    environmentParts.Add(envPart);
+                                }
+                                else { 
+                                    GameObject envPart = Instantiate(prefab.prefab, position, Quaternion.identity);
+                                    envPart.transform.parent = GameObject.Find("TerrainManager").transform;
+                                    environmentParts.Add(envPart);
+                                }
                             }
                         }
                     }

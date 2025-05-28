@@ -11,7 +11,6 @@ public class DiamondSquareHeightMapGenerator : HeightMapGeneratorBase
         int[] triangles = new int[resolution * resolution * 6];
         Vector2[] uvs = new Vector2[vertices.Length];
 
-        // Generate diamond-square density map
         float[,] densityMap = GenerateDiamondSquare(resolution, seed, 0.5f, 0.3f);
 
         for (int y = 0; y < resolution; y++)
@@ -26,7 +25,6 @@ public class DiamondSquareHeightMapGenerator : HeightMapGeneratorBase
                 float distanceFromTrack = 10000;
                 int index = 0;
 
-                // Find closest track point
                 for (int j = 0; j < trackPoints.Count; j++)
                 {
                     Vector3 point2 = trackPoints[j];
@@ -39,22 +37,21 @@ public class DiamondSquareHeightMapGenerator : HeightMapGeneratorBase
                     }
                 }
 
-                // Terrain height
                 float noise = Mathf.PerlinNoise((worldX * 0.1f) + seed, (worldZ * 0.1f) + seed);
                 float falloff = EvaluateFalloffFromTrack(distanceFromTrack);
-                point.y = noise * heightMultiplier * falloff;
+                point.y = noise * heightMultiplier * 1.3f * falloff;
 
                 if (distanceFromTrack < trackWidth * 3)
                 {
                     float targetHeight = trackPoints[index].y - 1f;
-                    float t = Mathf.InverseLerp(trackWidth * 3f, trackWidth / 2, distanceFromTrack);
+                    float t = Mathf.InverseLerp(trackWidth * 4, trackWidth * 1.1f, distanceFromTrack);
                     if (distanceFromTrack < trackWidth * 1.1f)
                     {
                         point.y = targetHeight;
                     }
                     else
                     {
-                        point.y = Mathf.Lerp(noise * heightMultiplier * falloff, targetHeight, t);
+                        point.y = Mathf.Lerp(point.y, targetHeight, t);
                     }
                 }
 
@@ -63,7 +60,6 @@ public class DiamondSquareHeightMapGenerator : HeightMapGeneratorBase
             }
         }
 
-        // Generate triangles
         int tri = 0;
         for (int y = 0; y < resolution - 1; y++)
         {
@@ -88,7 +84,6 @@ public class DiamondSquareHeightMapGenerator : HeightMapGeneratorBase
 
     private float EvaluateFalloffFromTrack(float distance)
     {
-        // Implement your falloff logic (e.g., exponential or linear)
         return Mathf.Clamp01(1f - (distance / 100f));
     }
 
@@ -97,7 +92,6 @@ public class DiamondSquareHeightMapGenerator : HeightMapGeneratorBase
         float[,] map = new float[size, size];
         Random.InitState(seed);
 
-        // Initialize corners
         map[0, 0] = Random.value * initialVariance;
         map[0, size - 1] = Random.value * initialVariance;
         map[size - 1, 0] = Random.value * initialVariance;
@@ -110,7 +104,6 @@ public class DiamondSquareHeightMapGenerator : HeightMapGeneratorBase
         {
             int halfStep = step / 2;
 
-            // Diamond step
             for (int x = halfStep; x < size; x += step)
             {
                 for (int y = halfStep; y < size; y += step)
@@ -125,7 +118,6 @@ public class DiamondSquareHeightMapGenerator : HeightMapGeneratorBase
                 }
             }
 
-            // Square step
             for (int x = 0; x < size; x += halfStep)
             {
                 for (int y = (x + halfStep) % step; y < size; y += step)
@@ -144,7 +136,6 @@ public class DiamondSquareHeightMapGenerator : HeightMapGeneratorBase
             step /= 2;
         }
 
-        // Normalize to [0, 1]
         float min = float.MaxValue, max = float.MinValue;
         for (int x = 0; x < size; x++)
             for (int y = 0; y < size; y++)

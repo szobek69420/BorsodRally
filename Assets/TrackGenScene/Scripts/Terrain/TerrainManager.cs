@@ -58,7 +58,8 @@ public class TerrainManager : MonoBehaviour
                 }
             }
         }
-        terrainPopulator = new VoronoiTerrainPopulator(instantiatedSectors, sectorSize, seed);
+        //terrainPopulator = new VoronoiTerrainPopulator(instantiatedSectors, sectorSize, seed);
+        terrainPopulator = new SimpleTerrainPopulator(instantiatedSectors, sectorSize, seed);
         terrainPopulator.PopulateTerrain(trackWidth, trackPoints,prefabConfigs, environmentParts);
     }
 
